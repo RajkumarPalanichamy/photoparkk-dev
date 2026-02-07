@@ -1,3 +1,6 @@
+// Import polyfill first to fix Node.js v21+ compatibility issues
+import "./polyfill.js";
+
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
