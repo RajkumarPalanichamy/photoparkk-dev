@@ -1,9 +1,9 @@
-
 "use client";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { Upload, X, Image, Eye, Sparkles, CheckCircle2 } from "lucide-react";
+import Cropper from "react-easy-crop";
+import { Upload, X, RotateCw, ZoomIn, ArrowRight, AlertTriangle } from "lucide-react";
 import LoadingBar from "../LoadingBar";
 import { toast } from "react-toastify";
 
@@ -11,17 +11,47 @@ const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 const MAX_UPLOAD_SIZE_MB = 10;
 
 const GenericCustomize = ({ type, shape }) => {
-    // type: "acrylic", "canvas", "backlight"
-    // shape: "portrait", "landscape", "square", "love", "hexagon", "round"
-    const [photoData, setPhotoData] = useState(null);
-    const [isDragging, setIsDragging] = useState(false);
-    const fileInputRef = useRef(null);
     const router = useRouter();
+    const fileInputRef = useRef(null);
+
+    // State
+    const [photoData, setPhotoData] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
+    const [isDragging, setIsDragging] = useState(false);
 
+    // Crop State
+    const [crop, setCrop] = useState({ x: 0, y: 0 });
+    const [zoom, setZoom] = useState(1);
+    const [rotation, setRotation] = useState(0);
+    const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+    const [lowResWarning, setLowResWarning] = useState(false);
+
+    // Labels
     const shapeTitle = shape.charAt(0).toUpperCase() + shape.slice(1);
-    const typeTitle = type.charAt(0).toUpperCase() + type.slice(1);
+
+    // Initialize from existing session if available
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const storedData = sessionStorage.getItem(`${type}_custom_data`);
+            if (storedData) {
+                try {
+                    const parsed = JSON.parse(storedData);
+                    if (parsed.photoData) {
+                        setPhotoData(parsed.photoData);
+                        if (parsed.configuration?.crop) {
+                            const c = parsed.configuration.crop;
+                            setCrop(c.crop || { x: 0, y: 0 });
+                            setZoom(c.zoom || 1);
+                            setRotation(c.rotation || 0);
+                        }
+                    }
+                } catch (e) {
+                    // ignore error
+                }
+            }
+        }
+    }, [type]);
 
     const handleFileUpload = async (file) => {
         if (!file.type.match("image.*")) {
@@ -30,12 +60,7 @@ const GenericCustomize = ({ type, shape }) => {
         }
 
         if (file.size > MAX_UPLOAD_SIZE_BYTES) {
-            toast.error(
-                `File size should be less than ${MAX_UPLOAD_SIZE_MB}MB. Your file is ${(
-                    file.size /
-                    (1024 * 1024)
-                ).toFixed(1)}MB.`
-            );
+            toast.error(`File too large. Max size is ${MAX_UPLOAD_SIZE_MB}MB.`);
             return;
         }
 
@@ -43,306 +68,273 @@ const GenericCustomize = ({ type, shape }) => {
         setUploadProgress(0);
         const formData = new FormData();
         formData.append("image", file);
+
         try {
             const res = await axios.post("/api/upload-image", formData, {
                 headers: { "Content-Type": "multipart/form-data" },
                 onUploadProgress: (progressEvent) => {
-                    const percentCompleted = Math.round(
-                        (progressEvent.loaded * 100) / progressEvent.total
-                    );
-                    setUploadProgress(percentCompleted);
+                    const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    setUploadProgress(percent);
                 },
             });
 
             const imageUrl = res.data.imageUrl;
+
+            const img = new Image();
+            img.onload = () => {
+                if (img.width < 1000 || img.height < 1000) {
+                    setLowResWarning(true);
+                    toast.warn("Low resolution image detected. Print quality might be affected.");
+                } else {
+                    setLowResWarning(false);
+                }
+            };
+            img.src = imageUrl;
+
             setPhotoData({
                 url: imageUrl,
                 name: file.name,
                 size: file.size,
                 type: file.type,
+                width: img.width,
+                height: img.height
             });
-            toast.success("Image uploaded successfully!");
+            toast.success("Image uploaded!");
         } catch (error) {
-            console.error("Upload failed:", error);
-            toast.error("Image upload failed. Please try again.");
+            console.error(error);
+            toast.error("Upload failed.");
         } finally {
             setIsUploading(false);
-            setUploadProgress(0);
         }
     };
 
-    const handleChange = (e) => {
-        if (e.target.files.length > 0) {
-            handleFileUpload(e.target.files[0]);
-        }
-    };
+    const onCropComplete = useCallback((navigatedArea, croppedAreaPixels) => {
+        setCroppedAreaPixels(croppedAreaPixels);
+    }, []);
 
-    const handleDrop = (e) => {
-        e.preventDefault();
-        setIsDragging(false);
-        if (e.dataTransfer.files.length > 0) {
-            handleFileUpload(e.dataTransfer.files[0]);
-        }
-    };
-
-    const handleDragOver = (e) => {
-        e.preventDefault();
-        setIsDragging(true);
-    };
-
-    const handleDragLeave = (e) => {
-        e.preventDefault();
-        setIsDragging(false);
-    };
-
-    const handleReplaceClick = () => {
-        fileInputRef.current.click();
-    };
-
-    const handleRemovePhoto = () => {
-        setPhotoData(null);
-    };
-
-    const handlePreviewClick = () => {
+    const handleContinue = () => {
         if (!photoData) {
-            toast.error("Please upload a photo first.");
+            toast.error("Please upload an image first.");
             return;
         }
-        // Store data for the order page
-        sessionStorage.setItem(`${type}_custom_data`, JSON.stringify({
+
+        // Save temporary state
+        let existingDetails = {};
+        if (typeof window !== "undefined") {
+            const stored = sessionStorage.getItem(`${type}_custom_data`);
+            if (stored) existingDetails = JSON.parse(stored);
+        }
+
+        const orderData = {
+            ...existingDetails,
+            type,
             shape,
-            photoData
-        }));
-        router.push(`/shop/${type}/${shape.toLowerCase()}/order`);
+            photoData,
+            configuration: {
+                ...(existingDetails.configuration || {}),
+                crop: { crop, zoom, rotation, croppedAreaPixels }
+            }
+        };
+
+        sessionStorage.setItem(`${type}_custom_data`, JSON.stringify(orderData));
+        router.push(`/shop/${type}/${shape.toLowerCase()}/size`);
     };
 
-    const formatFileSize = (bytes) => {
-        if (bytes < 1024) return bytes + " bytes";
-        else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
-        else return (bytes / 1048576).toFixed(1) + " MB";
+    const getAspectRatio = () => {
+        switch (shape) {
+            case "portrait": return 3 / 4;
+            case "landscape": return 4 / 3;
+            case "square":
+            case "round":
+            case "hexagon":
+            case "love": return 1;
+            default: return 1;
+        }
     };
 
-    // Helper to render the shape preview
-    const renderShapePreview = () => {
-        const s = shape.toLowerCase();
-
-        if (!photoData) {
-            return (
-                <div className={`relative bg-white rounded-2xl overflow-hidden shadow-2xl border-8 border-neutral-secondary flex flex-col items-center justify-center text-neutral-400 ${getAspectRatioClass(s)}`}>
-                    <div className="p-4 bg-neutral-200 rounded-full mb-4">
-                        <Image className="w-12 h-12" />
-                    </div>
-                    <p className="text-lg font-medium mb-2">
-                        No image selected
-                    </p>
-                    <p className="text-sm text-center px-4">
-                        Upload a photo to see your {type} {shapeTitle} preview
-                    </p>
-                </div>
-            );
-        }
-
-        if (s === 'love') {
-            return (
-                <div className="heart-frame-container">
-                    <div className="heart-border"></div>
-                    <div className="heart-frame">
-                        <img src={photoData.url} alt="Love Preview" />
-                    </div>
-                </div>
-            );
-        }
-
-        let containerClass = "relative w-full overflow-hidden shadow-2xl border-8 border-neutral-secondary bg-white";
-        let imgClass = "w-full h-full object-cover";
-
-        if (s === 'portrait') containerClass += " mask-portrait";
-        else if (s === 'landscape') containerClass += " mask-landscape";
-        else if (s === 'square') containerClass += " mask-square aspect-square";
-        else if (s === 'hexagon') containerClass += " mask-hexagon aspect-square";
-        else if (s === 'round') containerClass += " rounded-full aspect-square";
-
-        // Backlight effect
-        if (type === 'backlight') {
-            containerClass += " shadow-[0_0_30px_rgba(255,223,0,0.6)] border-4 border-yellow-500/50";
-        }
-
-        return (
-            <div className={containerClass}>
-                <img src={photoData.url} alt={`${shapeTitle} Preview`} className={imgClass} />
-            </div>
-        );
+    const getCropShapeProps = () => {
+        if (shape === 'round') return { cropShape: 'round' };
+        return { cropShape: 'rect' };
     };
 
-    const getAspectRatioClass = (s) => {
-        if (s === 'portrait') return 'aspect-[3/4]';
-        if (s === 'landscape') return 'aspect-[4/3]';
-        return 'aspect-square';
-    }
+    const getCropAreaStyle = () => {
+        if (shape === 'love') {
+            return { clipPath: 'url(#love-clip)' };
+        }
+        if (shape === 'hexagon') {
+            return { clipPath: 'url(#hexagon-clip)' };
+        }
+        return {};
+    };
 
     return (
-        <div className="bg-neutral-50 pt-[120px] pb-8 px-4 font-[Poppins]">
-            <div className="max-w-7xl mx-auto">
-                {/* Header Section */}
+        <div className="bg-neutral-50 min-h-screen pt-[100px] pb-12 font-[Poppins]">
+            <div className="max-w-5xl mx-auto px-4 lg:px-8">
+
+                {/* Header */}
                 <div className="text-center mb-8">
-                    <div className="inline-flex items-center gap-2 bg-primary text-white px-6 py-2 rounded-full mb-4">
-                        <Sparkles className="w-5 h-5" />
-                        <span className="font-semibold">{typeTitle} {shapeTitle} Frame</span>
-                    </div>
-                    <h1 className="text-4xl md:text-5xl font-bold text-secondary mb-3">
-                        Customize Your {typeTitle} {shapeTitle}
-                    </h1>
-                    <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
-                        Upload your favorite photo and see it come to life in a beautiful {typeTitle.toLowerCase()} frame
-                    </p>
+                    <span className="text-sm font-medium text-neutral-400 uppercase tracking-widest mb-2 block">Step 1 of 2</span>
+                    <h1 className="text-3xl font-bold text-secondary">Customize Your {shapeTitle} Frame</h1>
+                    <p className="text-neutral-500 mt-2">Upload and adjust your photo to fit the frame perfectly.</p>
                 </div>
 
-                <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleChange}
-                    accept="image/*"
-                    className="hidden"
-                />
+                <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-neutral-100 p-8">
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                    {/* Upload Section */}
-                    <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-neutral-200 order-2 lg:order-1">
-                        <div className="bg-primary px-6 py-4">
-                            <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                                <Image className="w-6 h-6" />
-                                Upload Your Photo
-                            </h2>
-                        </div>
-                        {/* Same Upload UI as AcrylicCustomize */}
-                        <div className="p-6">
-                            {!photoData ? (
-                                <div
-                                    onDragOver={handleDragOver}
-                                    onDragLeave={handleDragLeave}
-                                    onDrop={handleDrop}
-                                    className={`border-2 border-dashed rounded-xl p-12 text-center transition-all duration-300 ${isDragging
-                                            ? "border-primary bg-primary-light scale-[1.02]"
-                                            : "border-neutral-300 hover:border-primary hover:bg-neutral-50"
-                                        }`}
+                    {/* Editor Container */}
+                    <div className="relative w-full aspect-square md:aspect-[16/9] lg:aspect-[2/1] min-h-[500px] bg-neutral-100 rounded-2xl overflow-hidden border-2 border-dashed border-neutral-200">
+                        {!photoData ? (
+                            <div
+                                className={`absolute inset-0 flex flex-col items-center justify-center transition-all ${isDragging ? 'bg-primary/5 border-primary' : ''}`}
+                                onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                                onDragLeave={() => setIsDragging(false)}
+                                onDrop={(e) => {
+                                    e.preventDefault();
+                                    setIsDragging(false);
+                                    if (e.dataTransfer.files[0]) handleFileUpload(e.dataTransfer.files[0]);
+                                }}
+                            >
+                                <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg mb-6 ring-8 ring-neutral-50">
+                                    <Upload className="w-10 h-10 text-primary" />
+                                </div>
+                                <h3 className="text-2xl font-bold text-secondary mb-2">Upload Photo</h3>
+                                <p className="text-neutral-400 mb-8 text-center max-w-sm">Drag & drop your image here, or browse files. We accept JPG, PNG & WebP.</p>
+                                <button
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="px-10 py-4 bg-secondary text-white rounded-xl font-semibold hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
                                 >
-                                    <div className="flex flex-col items-center justify-center space-y-6">
-                                        <div
-                                            className={`p-4 rounded-full transition-all ${isDragging
-                                                    ? "bg-primary-light scale-110"
-                                                    : "bg-neutral-100"
-                                                }`}
-                                        >
-                                            <Image
-                                                className={`w-12 h-12 transition-colors ${isDragging ? "text-primary" : "text-neutral-500"
-                                                    }`}
+                                    Browse Files
+                                </button>
+                                <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => e.target.files[0] && handleFileUpload(e.target.files[0])} />
+                            </div>
+                        ) : (
+                            <div className="relative w-full h-full bg-neutral-900">
+                                <Cropper
+                                    image={photoData.url}
+                                    crop={crop}
+                                    zoom={zoom}
+                                    rotation={rotation}
+                                    aspect={getAspectRatio()}
+                                    onCropChange={setCrop}
+                                    onCropComplete={onCropComplete}
+                                    onZoomChange={setZoom}
+                                    onRotationChange={setRotation}
+                                    {...getCropShapeProps()}
+                                    classes={{ containerClassName: "w-full h-full" }}
+                                    style={{
+                                        containerStyle: {},
+                                        mediaStyle: {},
+                                        // Ensure the internal crop area allows our child to be visible and doesn't obscure it
+                                        cropAreaStyle: (shape === 'hexagon' || shape === 'love') ? { color: 'rgba(0, 0, 0, 0.5)', overflow: 'visible' } : {}
+                                    }}
+                                    // Explicitly hide grid for custom shapes
+                                    showGrid={!(shape === 'love' || shape === 'hexagon' || shape === 'round')}
+                                >
+                                    {/* INVERTED MASK */}
+                                    {shape === 'hexagon' && (
+                                        <div className="absolute inset-0 w-full h-full pointer-events-none" style={{ color: 'rgba(0, 0, 0, 0.5)' }}>
+                                            <svg viewBox="0 0 100 100" className="w-full h-full" preserveAspectRatio="none" style={{ display: 'block' }}>
+                                                <path
+                                                    d="M0 0 H100 V100 H0 Z M50 2 L98 26.5 V73.5 L50 98 L2 73.5 V26.5 Z"
+                                                    fill="currentColor"
+                                                    fillRule="evenodd"
+                                                />
+                                            </svg>
+                                        </div>
+                                    )}
+                                    {shape === 'love' && (
+                                        <div className="absolute inset-0 w-full h-full pointer-events-none" style={{ color: 'rgba(0, 0, 0, 0.5)' }}>
+                                            <svg viewBox="0 0 100 100" className="w-full h-full" preserveAspectRatio="none" style={{ display: 'block' }}>
+                                                <path
+                                                    d="M0 0 H100 V100 H0 Z M50 90 C50 90 90 65 90 40 C90 20 75 10 60 10 C50 10 45 20 45 20 C45 20 40 10 30 10 C15 10 0 20 0 40 C0 65 40 90 40 90 L50 90"
+                                                    fill="currentColor"
+                                                    fillRule="evenodd"
+                                                    transform="translate(5,0) scale(0.9)"
+                                                />
+                                            </svg>
+                                        </div>
+                                    )}
+                                </Cropper>
+
+
+
+                                {lowResWarning && (
+                                    <div className="absolute top-6 left-6 bg-white/90 backdrop-blur text-error px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 z-20 shadow-xl border border-error/20 animate-pulse">
+                                        <AlertTriangle className="w-5 h-5" />
+                                        Low Resolution Image
+                                    </div>
+                                )}
+
+                                {/* Controls Overlay */}
+                                <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-white/95 backdrop-blur-xl p-4 rounded-2xl shadow-2xl border border-white/20 z-20 flex flex-col sm:flex-row items-center gap-6 sm:gap-8 w-[90%] sm:w-auto max-w-xl">
+                                    <div className="flex items-center gap-4 w-full sm:w-48">
+                                        <ZoomIn className="w-5 h-5 text-neutral-400" />
+                                        <div className="flex-1">
+                                            <input
+                                                type="range"
+                                                min={1}
+                                                max={3}
+                                                step={0.1}
+                                                value={zoom}
+                                                onChange={(e) => setZoom(Number(e.target.value))}
+                                                className="w-full h-1.5 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-primary"
                                             />
                                         </div>
-                                        <div>
-                                            <p className="text-lg font-semibold text-neutral-700 mb-2">
-                                                Drag and drop your photo here
-                                            </p>
-                                            <p className="text-sm text-neutral-500 mb-4">or</p>
-                                            <button
-                                                onClick={handleReplaceClick}
-                                                disabled={isUploading}
-                                                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-hover transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
-                                            >
-                                                <Upload className="w-5 h-5" />
-                                                Browse Files
-                                            </button>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-xs text-neutral-500">
-                                            <CheckCircle2 className="w-4 h-4" />
-                                            <span>PNG, JPG, GIF up to 10MB</span>
+                                    </div>
+                                    <div className="flex items-center gap-4 w-full sm:w-48">
+                                        <RotateCw className="w-5 h-5 text-neutral-400" />
+                                        <div className="flex-1">
+                                            <input
+                                                type="range"
+                                                min={0}
+                                                max={360}
+                                                step={1}
+                                                value={rotation}
+                                                onChange={(e) => setRotation(Number(e.target.value))}
+                                                className="w-full h-1.5 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-primary"
+                                            />
                                         </div>
                                     </div>
-                                </div>
-                            ) : (
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between p-4 bg-neutral-50 rounded-xl border border-neutral-200">
-                                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                                            <div className="p-2 bg-success-light rounded-lg flex-shrink-0">
-                                                <CheckCircle2 className="w-5 h-5 text-success" />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="font-semibold text-secondary truncate">
-                                                    {photoData.name}
-                                                </p>
-                                                <p className="text-sm text-neutral-500">
-                                                    {formatFileSize(photoData.size)}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <button
-                                            onClick={handleRemovePhoto}
-                                            className="p-2 rounded-lg text-neutral-400 hover:text-error hover:bg-error-light transition-colors flex-shrink-0 ml-2"
-                                        >
-                                            <X className="w-5 h-5" />
-                                        </button>
-                                    </div>
-
-                                    <div className="relative w-full aspect-square bg-white rounded-xl overflow-hidden border-2 border-neutral-200 shadow-inner">
-                                        <img
-                                            src={photoData.url}
-                                            alt="Uploaded preview"
-                                            className="w-full h-full object-contain"
-                                        />
-                                    </div>
-
-                                    <button
-                                        onClick={handleReplaceClick}
-                                        disabled={isUploading}
-                                        className="w-full py-3 px-4 bg-secondary text-white rounded-lg hover:bg-secondary transition-all duration-300 font-medium flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
-                                    >
-                                        <Upload className="w-5 h-5" />
-                                        Replace Photo
+                                    <button onClick={() => { setZoom(1); setRotation(0); }} className="text-sm font-semibold text-primary hover:text-primary-dark whitespace-nowrap px-2">
+                                        Reset
                                     </button>
                                 </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Footer Actions */}
+                    <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-neutral-100 pt-8">
+                        <div>
+                            {photoData && (
+                                <button
+                                    onClick={() => setPhotoData(null)}
+                                    className="text-neutral-400 hover:text-error transition-colors text-sm font-medium flex items-center gap-2"
+                                >
+                                    <X className="w-4 h-4" /> Remove Photo
+                                </button>
+                            )}
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto text-center">
+                            {!photoData && <p className="text-neutral-400 text-sm py-3 px-4">Upload a photo to continue</p>}
+                            {photoData && (
+                                <button
+                                    onClick={handleContinue}
+                                    className="px-10 py-4 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/30 hover:shadow-xl hover:-translate-y-1 transition-all flex items-center gap-3 w-full sm:w-auto"
+                                >
+                                    Save & Continue <ArrowRight className="w-5 h-5" />
+                                </button>
                             )}
                         </div>
                     </div>
 
-                    {/* Preview Section */}
-                    <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-neutral-200 order-1 lg:order-2">
-                        <div className="bg-primary px-6 py-4">
-                            <div className="flex items-center justify-between">
-                                <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                                    <Eye className="w-6 h-6" />
-                                    Live Preview
-                                </h2>
-                                <button
-                                    onClick={handlePreviewClick}
-                                    disabled={!photoData}
-                                    className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${photoData
-                                            ? "bg-white text-primary hover:bg-neutral-50 shadow-lg hover:shadow-xl transform hover:scale-105"
-                                            : "bg-white/20 text-white/50 cursor-not-allowed"
-                                        }`}
-                                >
-                                    Proceed to Order
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className={`p-8 flex items-center justify-center bg-gray-100 min-h-[400px] ${type === 'backlight' ? 'bg-neutral-900' : ''}`}>
-                            <div className="relative w-full max-w-sm">
-                                {renderShapePreview()}
-                                {photoData && (
-                                    <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 bg-white px-4 py-2 rounded-full shadow-lg border border-neutral-200 z-10 w-max">
-                                        <span className="text-sm font-medium text-neutral-700">
-                                            {shapeTitle} Frame
-                                        </span>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
+
             {isUploading && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-xl w-80">
-                        <p className="mb-2 font-semibold">Uploading...</p>
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm">
+                    <div className="bg-white p-8 rounded-2xl w-96 shadow-2xl text-center">
+                        <h4 className="text-xl font-bold text-secondary mb-2">Uploading...</h4>
+                        <p className="text-sm text-neutral-500 mb-6">Optimizing your image for high-definition print.</p>
                         <LoadingBar progress={uploadProgress} />
                     </div>
                 </div>
