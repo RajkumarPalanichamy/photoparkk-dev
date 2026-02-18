@@ -3,7 +3,7 @@ import React, { useRef, useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import Cropper from "react-easy-crop";
-import { Upload, X, RotateCw, ZoomIn, ArrowRight, AlertTriangle } from "lucide-react";
+import { Upload, X, RotateCw, ZoomIn, ArrowRight, AlertTriangle, Sparkles, Image } from "lucide-react";
 import LoadingBar from "../LoadingBar";
 import { toast } from "react-toastify";
 import axiosInstance from "../../utils/axiosInstance";
@@ -15,17 +15,10 @@ const GenericCustomize = ({ type, shape }) => {
     // type: "acrylic", "canvas", "backlight"
     // shape: "portrait", "landscape", "square", "love", "hexagon", "round"
     const [photoData, setPhotoData] = useState(null);
-    const [isDragging, setIsDragging] = useState(false);
-    const [productConfig, setProductConfig] = useState(null);
-    const fileInputRef = useRef(null);
-    const router = useRouter();
-    const fileInputRef = useRef(null);
-
-    // State
-    const [photoData, setPhotoData] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [isDragging, setIsDragging] = useState(false);
+    const [productConfig, setProductConfig] = useState(null);
 
     // Crop State
     const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -34,7 +27,11 @@ const GenericCustomize = ({ type, shape }) => {
     const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
     const [lowResWarning, setLowResWarning] = useState(false);
 
+    const fileInputRef = useRef(null);
+    const router = useRouter();
+
     // Labels
+    const typeTitle = type.charAt(0).toUpperCase() + type.slice(1);
     const shapeTitle = shape.charAt(0).toUpperCase() + shape.slice(1);
 
     // Initialize from existing session if available
@@ -109,17 +106,17 @@ const GenericCustomize = ({ type, shape }) => {
                 } else {
                     setLowResWarning(false);
                 }
+                setPhotoData({
+                    url: imageUrl,
+                    name: file.name,
+                    size: file.size,
+                    type: file.type,
+                    width: img.width,
+                    height: img.height
+                });
             };
             img.src = imageUrl;
 
-            setPhotoData({
-                url: imageUrl,
-                name: file.name,
-                size: file.size,
-                type: file.type,
-                width: img.width,
-                height: img.height
-            });
             toast.success("Image uploaded!");
         } catch (error) {
             console.error(error);
@@ -127,6 +124,41 @@ const GenericCustomize = ({ type, shape }) => {
         } finally {
             setIsUploading(false);
         }
+    };
+
+    const handleChange = (e) => {
+        if (e.target.files && e.target.files[0]) {
+            handleFileUpload(e.target.files[0]);
+        }
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e) => {
+        e.preventDefault();
+        setIsDragging(false);
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        setIsDragging(false);
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            handleFileUpload(e.dataTransfer.files[0]);
+        }
+    };
+
+    const handleReplaceClick = () => {
+        fileInputRef.current.click();
+    };
+
+    const handlePreviewClick = () => {
+        setPhotoData(null);
+        setCrop({ x: 0, y: 0 });
+        setZoom(1);
+        setRotation(0);
     };
 
     const onCropComplete = useCallback((navigatedArea, croppedAreaPixels) => {
@@ -219,18 +251,30 @@ const GenericCustomize = ({ type, shape }) => {
                     <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-neutral-200 order-2 lg:order-1">
                         <div className="bg-primary px-6 py-4">
                             <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                                <Image className="w-6 h-6" />
+                                <Upload className="w-6 h-6" />
                                 Upload Your Photo
                             </h2>
                         </div>
-                        {/* Same Upload UI as AcrylicCustomize */}
-                        <div className="p-6">
+
+                        <div className="p-6 relative min-h-[400px]">
+                            {/* SVG Definitions for Clip Paths */}
+                            <svg width="0" height="0" className="absolute">
+                                <defs>
+                                    <clipPath id="love-clip" clipPathUnits="objectBoundingBox">
+                                        <path d="M0.5,0.9 C0.5,0.9 0.9,0.65 0.9,0.4 C0.9,0.2 0.75,0.1 0.6,0.1 C0.5,0.1 0.45,0.2 0.45,0.2 C0.45,0.2 0.4,0.1 0.3,0.1 C0.15,0.1 0,0.2 0,0.4 C0,0.65 0.4,0.9 0.4,0.9 L0.5,0.9" transform="translate(0.05,0) scale(0.9)" />
+                                    </clipPath>
+                                    <clipPath id="hexagon-clip" clipPathUnits="objectBoundingBox">
+                                        <path d="M0.5 0 L0.933 0.25 V0.75 L0.5 1 L0.067 0.75 V0.25 L0.5 0Z" />
+                                    </clipPath>
+                                </defs>
+                            </svg>
+
                             {!photoData ? (
                                 <div
                                     onDragOver={handleDragOver}
                                     onDragLeave={handleDragLeave}
                                     onDrop={handleDrop}
-                                    className={`border-2 border-dashed rounded-xl p-12 text-center transition-all duration-300 ${isDragging
+                                    className={`border-2 border-dashed rounded-xl p-12 text-center transition-all duration-300 h-full flex flex-col justify-center ${isDragging
                                         ? "border-primary bg-primary-light scale-[1.02]"
                                         : "border-neutral-300 hover:border-primary hover:bg-neutral-50"
                                         }`}
@@ -242,7 +286,7 @@ const GenericCustomize = ({ type, shape }) => {
                                                 : "bg-neutral-100"
                                                 }`}
                                         >
-                                            <Image
+                                            <Upload
                                                 className={`w-12 h-12 transition-colors ${isDragging ? "text-primary" : "text-neutral-500"
                                                     }`}
                                             />
@@ -261,70 +305,82 @@ const GenericCustomize = ({ type, shape }) => {
                                                 Browse Files
                                             </button>
                                         </div>
-                                    )}
-                                    {shape === 'love' && (
-                                        <div className="absolute inset-0 w-full h-full pointer-events-none" style={{ color: 'rgba(0, 0, 0, 0.5)' }}>
-                                            <svg viewBox="0 0 100 100" className="w-full h-full" preserveAspectRatio="none" style={{ display: 'block' }}>
-                                                <path
-                                                    d="M0 0 H100 V100 H0 Z M50 90 C50 90 90 65 90 40 C90 20 75 10 60 10 C50 10 45 20 45 20 C45 20 40 10 30 10 C15 10 0 20 0 40 C0 65 40 90 40 90 L50 90"
-                                                    fill="currentColor"
-                                                    fillRule="evenodd"
-                                                    transform="translate(5,0) scale(0.9)"
-                                                />
-                                            </svg>
-                                        </div>
-                                    )}
-                                </Cropper>
-
-
-
-                                {lowResWarning && (
-                                    <div className="absolute top-6 left-6 bg-white/90 backdrop-blur text-error px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 z-20 shadow-xl border border-error/20 animate-pulse">
-                                        <AlertTriangle className="w-5 h-5" />
-                                        Low Resolution Image
                                     </div>
-                                )}
-
-                                {/* Controls Overlay */}
-                                <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-white/95 backdrop-blur-xl p-4 rounded-2xl shadow-2xl border border-white/20 z-20 flex flex-col sm:flex-row items-center gap-6 sm:gap-8 w-[90%] sm:w-auto max-w-xl">
-                                    <div className="flex items-center gap-4 w-full sm:w-48">
-                                        <ZoomIn className="w-5 h-5 text-neutral-400" />
-                                        <div className="flex-1">
-                                            <input
-                                                type="range"
-                                                min={1}
-                                                max={3}
-                                                step={0.1}
-                                                value={zoom}
-                                                onChange={(e) => setZoom(Number(e.target.value))}
-                                                className="w-full h-1.5 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-primary"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-4 w-full sm:w-48">
-                                        <RotateCw className="w-5 h-5 text-neutral-400" />
-                                        <div className="flex-1">
-                                            <input
-                                                type="range"
-                                                min={0}
-                                                max={360}
-                                                step={1}
-                                                value={rotation}
-                                                onChange={(e) => setRotation(Number(e.target.value))}
-                                                className="w-full h-1.5 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-primary"
-                                            />
-                                        </div>
-                                    </div>
-                                    <button onClick={() => { setZoom(1); setRotation(0); }} className="text-sm font-semibold text-primary hover:text-primary-dark whitespace-nowrap px-2">
-                                        Reset
-                                    </button>
                                 </div>
-                            </div>
-                        )}
+                            ) : (
+                                <div className="relative h-[400px] w-full bg-neutral-900 rounded-lg overflow-hidden">
+                                    <Cropper
+                                        image={photoData.url}
+                                        crop={crop}
+                                        zoom={zoom}
+                                        rotation={rotation}
+                                        aspect={getAspectRatio()}
+                                        onCropChange={setCrop}
+                                        onCropComplete={onCropComplete}
+                                        onZoomChange={setZoom}
+                                        onRotationChange={setRotation}
+                                        {...getCropShapeProps()}
+                                        style={{
+                                            containerStyle: { background: '#1a1a1a' },
+                                            cropAreaStyle: getCropAreaStyle(),
+                                        }}
+                                    />
+
+                                    {/* Overlay for specific shapes if needed to visualize border better */}
+                                    {shape === 'love' && (
+                                        <div className="absolute inset-0 w-full h-full pointer-events-none text-black/50">
+                                            {/* Optional: Add an SVG overlay if clip-path isn't enough context */}
+                                        </div>
+                                    )}
+
+                                    {lowResWarning && (
+                                        <div className="absolute top-6 left-6 bg-white/90 backdrop-blur text-error px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 z-20 shadow-xl border border-error/20 animate-pulse">
+                                            <AlertTriangle className="w-5 h-5" />
+                                            Low Resolution Image
+                                        </div>
+                                    )}
+
+                                    {/* Controls Overlay */}
+                                    <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-white/95 backdrop-blur-xl p-4 rounded-2xl shadow-2xl border border-white/20 z-20 flex flex-col sm:flex-row items-center gap-6 sm:gap-8 w-[90%] sm:w-auto max-w-xl">
+                                        <div className="flex items-center gap-4 w-full sm:w-48">
+                                            <ZoomIn className="w-5 h-5 text-neutral-400" />
+                                            <div className="flex-1">
+                                                <input
+                                                    type="range"
+                                                    min={1}
+                                                    max={3}
+                                                    step={0.1}
+                                                    value={zoom}
+                                                    onChange={(e) => setZoom(Number(e.target.value))}
+                                                    className="w-full h-1.5 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-primary"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-4 w-full sm:w-48">
+                                            <RotateCw className="w-5 h-5 text-neutral-400" />
+                                            <div className="flex-1">
+                                                <input
+                                                    type="range"
+                                                    min={0}
+                                                    max={360}
+                                                    step={1}
+                                                    value={rotation}
+                                                    onChange={(e) => setRotation(Number(e.target.value))}
+                                                    className="w-full h-1.5 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-primary"
+                                                />
+                                            </div>
+                                        </div>
+                                        <button onClick={() => { setZoom(1); setRotation(0); }} className="text-sm font-semibold text-primary hover:text-primary-dark whitespace-nowrap px-2">
+                                            Reset
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Footer Actions */}
-                    <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-neutral-100 pt-8">
+                    <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-neutral-100 pt-8 lg:col-span-2 order-3">
                         <div>
                             {photoData && (
                                 <button
