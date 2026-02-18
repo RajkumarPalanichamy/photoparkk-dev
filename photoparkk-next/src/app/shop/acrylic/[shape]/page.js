@@ -1,19 +1,16 @@
-
 "use client";
-import React from 'react';
-import { useParams } from 'next/navigation';
-import GenericCustomize from '../../../../Components/Shop/GenericCustomize';
+import { useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 
-// Valid shapes
-const shapes = ["portrait", "landscape", "square", "love", "hexagon", "round"];
-
-export default function CustomizePage() {
+export default function ShapeRedirect() {
+    const router = useRouter();
     const params = useParams();
-    const shape = params.shape;
 
-    if (!shapes.includes(shape)) {
-        return <div>Shape not found</div>;
-    }
+    useEffect(() => {
+        if (params?.shape) {
+            router.replace(`/shop/acrylic/${params.shape}/edit`);
+        }
+    }, [params, router]);
 
-    return <GenericCustomize type="acrylic" shape={shape} />;
+    return null; // Or a loading spinner
 }
