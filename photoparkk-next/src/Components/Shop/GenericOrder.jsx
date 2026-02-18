@@ -11,6 +11,9 @@ import {
     Box,
     CheckCircle2,
     Loader2,
+    Crop,
+    Layers,
+    Scissors
 } from "lucide-react";
 import axiosInstance from "../../utils/axiosInstance";
 import { toast } from "react-toastify";
@@ -33,10 +36,7 @@ const COMMON_HIGHLIGHTS = [
 
 const GenericOrder = ({ type, shape }) => {
     const router = useRouter();
-    const [photoData, setPhotoData] = useState(null);
-    const [productConfig, setProductConfig] = useState(null);
-    const [selectedSize, setSelectedSize] = useState(null);
-    const [selectedThickness, setSelectedThickness] = useState("3mm");
+    const [orderData, setOrderData] = useState(null);
     const [quantity, setQuantity] = useState(1);
     const [userId, setUserId] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -92,8 +92,8 @@ const GenericOrder = ({ type, shape }) => {
     }, [type, shape, router]);
 
     const handleAddToCart = async () => {
-        if (!selectedSize || quantity < 1) {
-            toast.error("Please complete all selections.");
+        if (!orderData || quantity < 1) {
+            toast.error("Invalid order data.");
             return;
         }
 
@@ -105,17 +105,26 @@ const GenericOrder = ({ type, shape }) => {
 
         setLoading(true);
         try {
+            const config = orderData.configuration;
+
             const cartData = {
                 userId,
-                productType: `${type.charAt(0).toUpperCase() + type.slice(1)}Customizedata`,
-                title: productConfig?.title || `${typeTitle} Frame`,
-                image: photoData?.url,
-                size: selectedSize.label,
-                thickness: type === 'acrylic' ? selectedThickness : undefined,
-                price: selectedSize.price,
+                productType: `${type.charAt(0).toUpperCase() + type.slice(1)}Customized`,
+                title: `${type.charAt(0).toUpperCase() + type.slice(1)} ${shape.charAt(0).toUpperCase() + shape.slice(1)} Frame`,
+                image: orderData.photoData?.url,
+                size: config.size.label,
+                thickness: type === 'acrylic' ? config.thickness.value : undefined,
+                edge: config.edge?.value, // Pass edge type if supported
+                price: config.price,
                 quantity,
-                totalAmount: selectedSize.price * quantity,
-                uploadedImageUrl: photoData?.url,
+                totalAmount: config.price * quantity,
+                uploadedImageUrl: orderData.photoData?.url,
+                customizationDetails: { // Store technical details for production
+                    crop: config.crop,
+                    edge: config.edge,
+                    thickness: config.thickness,
+                    originalName: orderData.photoData?.name
+                }
             };
 
             await axiosInstance.post("/cart", cartData);
@@ -129,122 +138,84 @@ const GenericOrder = ({ type, shape }) => {
         }
     };
 
-    if (!photoData || !productConfig) return <div className="min-h-screen flex text-center items-center justify-center"><Loader2 className="animate-spin" /> Loading...</div>;
+    if (!orderData) return <div className="min-h-screen flex text-center items-center justify-center gap-2"><Loader2 className="animate-spin" /> Loading Order Details...</div>;
 
-    const borderWidth = type === 'acrylic' ? (selectedThickness === '8mm' ? "16px" : selectedThickness === '5mm' ? "12px" : "8px") : "8px";
-    const aspectRatio = selectedSize ? (selectedSize.width / selectedSize.height) : 1;
+    const { photoData, configuration } = orderData;
+    const { size, thickness, edge, price } = configuration;
+
     const typeTitle = type.charAt(0).toUpperCase() + type.slice(1);
     const shapeTitle = shape.charAt(0).toUpperCase() + shape.slice(1);
 
-    const renderSimplePreview = () => {
-        let containerClass = "relative w-full overflow-hidden shadow-2xl transition-all duration-500 bg-white";
-        let style = {
-            borderWidth: borderWidth,
-            borderStyle: "solid",
-            borderColor: type === 'backlight' ? "#facc15" : "#1f2937",
-            padding: "4px",
+    // Simple Render Preview (Ideally would use the cropped result if we generated it, but original is fine for review)
+    const renderPreview = () => {
+        const borderStyle = {
+            borderColor: "#e5e5e5",
+            borderWidth: thickness?.value === '8mm' ? '12px' : thickness?.value === '5mm' ? '8px' : '4px',
+            boxShadow: '0 10px 30px -10px rgba(0,0,0,0.2)'
         };
 
-        const s = shape.toLowerCase();
-        if (s === 'portrait' || s === 'landscape' || s === 'square') {
-            style.aspectRatio = aspectRatio;
-            containerClass += " rounded-2xl";
-        } else if (s === 'round') {
-            style.aspectRatio = "1/1";
-            containerClass += " rounded-full";
-        } else if (s === 'hexagon') {
-            style.aspectRatio = "1/1";
-            style.clipPath = "polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0% 50%)";
-        } else if (s === 'love') {
-            return (
-                <div className="heart-frame-container scale-75">
-                    <div className="heart-border"></div>
-                    <div className="heart-frame">
-                        <img src={photoData.url} alt="Preview" className="w-full h-full object-cover" />
-                    </div>
-                </div>
-            )
-        }
-
-        if (type === 'backlight') {
-            style.boxShadow = "0 0 30px rgba(255, 223, 0, 0.6)";
-        }
+        // Simple shape masking logic for review
+        const isCircle = shape === 'round';
+        const isHex = shape === 'hexagon';
+        const isLove = shape === 'love';
 
         return (
-            <div className={containerClass} style={style}>
-                <img src={photoData.url} alt="Preview" className="w-full h-full object-cover rounded-lg" />
+            <div className={`relative w-full max-w-sm mx-auto overflow-hidden bg-white ${isCircle ? 'rounded-full scale-90' : 'rounded-lg'}`} style={borderStyle}>
+                <div className={`relative w-full aspect-square ${isHex ? 'hex-mask' : ''}`}>
+                    {/* Note: Hex/Love masks are complex in CSS, using simple fallback or img tag */}
+                    <img src={photoData.url} alt="Preview" className={`w-full h-full object-cover ${isCircle ? 'rounded-full' : ''}`} />
+                </div>
+                {/* Visual Glint */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-white/30 to-transparent pointer-events-none"></div>
             </div>
         );
     }
 
     return (
-        <div className="bg-neutral-50 pt-[120px] pb-8 px-4 font-[Poppins]">
-            <div className="max-w-7xl mx-auto">
-                <div className="text-center mb-8">
-                    <div className="inline-flex items-center gap-2 bg-primary text-white px-6 py-2 rounded-full mb-4">
-                        <Sparkles className="w-5 h-5" />
-                        <span className="font-semibold">{typeTitle} {shapeTitle} Frame</span>
+        <div className="bg-neutral-50 pt-[120px] pb-12 px-4 font-[Poppins]">
+            <div className="max-w-6xl mx-auto">
+                <div className="text-center mb-10">
+                    <div className="inline-flex items-center gap-2 bg-success/10 text-success px-4 py-1.5 rounded-full mb-4">
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span className="font-semibold text-sm">Review Your Specifications</span>
                     </div>
-                    <h1 className="text-4xl md:text-5xl font-bold text-secondary mb-3">
-                        Complete Your Order
+                    <h1 className="text-3xl md:text-4xl font-bold text-secondary">
+                        Ready to Create?
                     </h1>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* Live Frame Preview */}
-                    <div className="order-2 lg:order-1">
-                        <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-neutral-200 sticky top-24">
-                            <div className="bg-primary px-6 py-4">
-                                <h2 className="text-xl font-bold text-white flex items-center justify-center gap-2">
-                                    <Package className="w-6 h-6" />
-                                    Live Frame Preview
-                                </h2>
-                            </div>
-                            <div className={`p-8 flex items-center justify-center min-h-[400px] ${type === 'backlight' ? 'bg-neutral-900' : ''}`}>
-                                <div className="w-full max-w-md mx-auto relative flex justify-center">
-                                    {renderSimplePreview()}
-
-                                    {selectedSize && (
-                                        <>
-                                            <div className="absolute -left-4 top-1/2 transform -translate-y-1/2 text-sm font-semibold text-neutral-700 bg-white px-2 py-1 rounded shadow-md border border-neutral-200 z-10">
-                                                {selectedSize.height}"
-                                            </div>
-                                            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 text-sm font-semibold text-neutral-700 bg-white px-2 py-1 rounded shadow-md border border-neutral-200 z-10">
-                                                {selectedSize.width}"
-                                            </div>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+                    {/* Left: Preview */}
+                    <div className="md:col-span-5 bg-white rounded-2xl shadow-lg border border-neutral-100 p-6 sticky top-24">
+                        <div className="bg-neutral-50 rounded-xl p-8 mb-4 border border-neutral-100 min-h-[300px] flex items-center justify-center">
+                            {renderPreview()}
+                        </div>
+                        <div className="flex items-center justify-center gap-2 text-xs text-neutral-400">
+                            <Sparkles className="w-3 h-3" /> Preview including thickness effect
                         </div>
                     </div>
 
-                    {/* Customization */}
-                    <div className="order-1 lg:order-2">
-                        <div className="bg-white rounded-2xl shadow-xl border border-neutral-200 overflow-hidden">
-                            <div className="bg-primary px-6 py-4">
-                                <h2 className="text-xl font-bold text-white">
-                                    {productConfig.title}
+                    {/* Right: Details & Checkout */}
+                    <div className="md:col-span-7 space-y-6">
+                        <div className="bg-white rounded-2xl shadow-lg border border-neutral-100 overflow-hidden">
+                            <div className="bg-secondary px-6 py-4 flex justify-between items-center text-white">
+                                <h2 className="text-lg font-bold flex items-center gap-2">
+                                    <Package className="w-5 h-5" />
+                                    Order Summary
                                 </h2>
+                                <button onClick={() => router.back()} className="text-xs text-neutral-300 hover:text-white underline">Edit Design</button>
                             </div>
 
-                            <div className="p-6 space-y-6">
-                                {/* Price */}
-                                <div className="flex items-end gap-3">
-                                    <div className="text-4xl font-bold text-primary">
-                                        ₹{selectedSize?.price || 0}
-                                    </div>
-                                    {selectedSize?.original && (
-                                        <div className="flex flex-col mb-1">
-                                            <span className="text-lg text-neutral-400 line-through">
-                                                ₹{selectedSize.original}
-                                            </span>
-                                            <span className="text-xs font-bold text-success">
-                                                Save ₹{selectedSize.original - selectedSize.price}
-                                            </span>
+                            <div className="p-6 md:p-8 space-y-6">
+                                {/* Configuration Grid */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="flex items-start gap-3 p-4 bg-neutral-50 rounded-xl border border-neutral-100">
+                                        <div className="p-2 bg-white rounded-lg shadow-sm text-primary"><Ruler className="w-5 h-5" /></div>
+                                        <div>
+                                            <p className="text-xs text-neutral-500 font-medium uppercase tracking-wider">Size</p>
+                                            <p className="font-semibold text-secondary text-lg">{size.label}</p>
                                         </div>
-                                    )}
-                                </div>
+                                    </div>
 
                                 {/* Size Selector */}
                                 <div>
@@ -269,7 +240,6 @@ const GenericOrder = ({ type, shape }) => {
                                             </button>
                                         ))}
                                     </div>
-                                </div>
 
                                 {/* Thickness Selector */}
                                 {productConfig.thickness && Array.isArray(productConfig.thickness) && productConfig.thickness.length > 0 && (
@@ -293,81 +263,72 @@ const GenericOrder = ({ type, shape }) => {
                                             ))}
                                         </div>
                                     </div>
-                                )}
 
-                                {/* Add to Cart Button */}
-                                <div className="space-y-4 pt-4 border-t border-neutral-200">
-                                    <div className="flex items-center gap-4">
-                                        <label className="text-lg font-medium text-neutral-700">Quantity:</label>
-                                        <div className="flex items-center border-2 border-neutral-200 rounded-lg overflow-hidden">
-                                            <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="px-4 py-2 bg-neutral-100 hover:bg-neutral-200 font-bold">-</button>
-                                            <input type="number" min="1" value={quantity} readOnly className="w-16 px-2 py-2 text-center font-bold focus:outline-none" />
-                                            <button onClick={() => setQuantity(quantity + 1)} className="px-4 py-2 bg-neutral-100 hover:bg-neutral-200 font-bold">+</button>
+                                    <div className="flex items-start gap-3 p-4 bg-neutral-50 rounded-xl border border-neutral-100">
+                                        <div className="p-2 bg-white rounded-lg shadow-sm text-primary"><Crop className="w-5 h-5" /></div>
+                                        <div>
+                                            <p className="text-xs text-neutral-500 font-medium uppercase tracking-wider">Product</p>
+                                            <p className="font-semibold text-secondary text-lg">{typeTitle} {shapeTitle}</p>
                                         </div>
                                     </div>
-                                    <button
-                                        onClick={handleAddToCart}
-                                        disabled={loading || !selectedSize}
-                                        className="w-full bg-primary hover:bg-primary-hover text-white px-6 py-4 rounded-xl flex items-center justify-center gap-3 font-bold text-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
-                                    >
-                                        {loading ? (
-                                            <>
-                                                <Loader2 className="w-6 h-6 animate-spin" />
-                                                <span>Adding to Cart...</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <FaShoppingCart size={22} />
-                                                <span>Add to Cart</span>
-                                            </>
-                                        )}
-                                    </button>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4 pt-4">
-                                    <div className="flex items-center gap-2 text-neutral-600 text-sm">
-                                        <FaTruck className="text-primary" /> 4-7 Days Delivery
+                                {/* Divider */}
+                                <div className="h-px bg-neutral-100 w-full my-4"></div>
+
+                                {/* Total Price Section */}
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between text-neutral-600">
+                                        <span>Unit Price</span>
+                                        <span className="font-medium">₹{price}</span>
                                     </div>
-                                    <div className="flex items-center gap-2 text-neutral-600 text-sm">
-                                        <FaLock className="text-primary" /> Secure Payment
+
+                                    <div className="flex items-center justify-between bg-neutral-50 p-4 rounded-xl">
+                                        <div className="flex items-center gap-3">
+                                            <span className="font-semibold text-secondary">Quantity</span>
+                                            <div className="flex items-center bg-white rounded-lg border border-neutral-200">
+                                                <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="px-3 py-1 hover:bg-neutral-100 rounded-l-lg">-</button>
+                                                <span className="px-3 font-medium">{quantity}</span>
+                                                <button onClick={() => setQuantity(quantity + 1)} className="px-3 py-1 hover:bg-neutral-100 rounded-r-lg">+</button>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="block text-xs text-neutral-400">Total Amount</span>
+                                            <span className="text-2xl font-bold text-primary">₹{price * quantity}</span>
+                                        </div>
                                     </div>
                                 </div>
 
-                            </div>
-                        </div>
-
-                        {/* Highlights */}
-                        <div className="mt-8 bg-white rounded-2xl shadow-xl border border-neutral-200 overflow-hidden">
-                            <div className="bg-primary px-6 py-4">
-                                <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                                    <CheckCircle2 className="w-6 h-6" /> Product Highlights
-                                </h3>
-                            </div>
-                            <div className="p-6">
-                                <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
-                                    {COMMON_HIGHLIGHTS.map((h, i) => (
-                                        <li key={i} className="flex items-start gap-2 text-sm text-neutral-700">
-                                            <BsPatchCheckFill className="text-primary mt-1 flex-shrink-0" /> {h}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        </div>
-
-                        {/* Support section */}
-                        <div className="mt-8 bg-success-light rounded-2xl p-6 border border-success/20">
-                            <h3 className="text-xl font-bold text-success mb-2">Need Help?</h3>
-                            <p className="text-neutral-700 mb-4">Questions about sizes or custom designs? Contact our team!</p>
-                            <div className="flex flex-wrap gap-4">
-                                <button className="flex items-center gap-2 px-4 py-2 bg-success text-white rounded-lg font-semibold hover:bg-success/90 transition-colors">
-                                    <FaWhatsapp /> WhatsApp Us
+                                {/* Checkout Button */}
+                                <button
+                                    onClick={handleAddToCart}
+                                    disabled={loading}
+                                    className="w-full bg-primary hover:bg-primary-hover text-white py-4 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all flex items-center justify-center gap-3"
+                                >
+                                    {loading ? <Loader2 className="animate-spin" /> : <FaShoppingCart />}
+                                    Proceed to Checkout
                                 </button>
-                                <button className="flex items-center gap-2 px-4 py-2 bg-white text-success border border-success rounded-lg font-semibold hover:bg-success-light transition-colors">
-                                    <FaPhoneAlt /> Call Support
-                                </button>
+
+                                <div className="grid grid-cols-2 gap-4 pt-2">
+                                    <div className="flex items-center gap-2 text-neutral-500 text-xs justify-center">
+                                        <FaTruck className="text-primary" /> Free Shipping
+                                    </div>
+                                    <div className="flex items-center gap-2 text-neutral-500 text-xs justify-center">
+                                        <FaLock className="text-primary" /> Secure Transaction
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
+                        {/* Highlights Accordion or List */}
+                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-neutral-100">
+                            <h4 className="font-bold text-secondary mb-4 flex items-center gap-2"><Sparkles className="w-4 h-4 text-primary" /> Premium Features</h4>
+                            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-neutral-600">
+                                {COMMON_HIGHLIGHTS.slice(0, 6).map((h, i) => (
+                                    <li key={i} className="flex items-center gap-2"><BsPatchCheckFill className="text-success w-3 h-3" /> {h}</li>
+                                ))}
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>

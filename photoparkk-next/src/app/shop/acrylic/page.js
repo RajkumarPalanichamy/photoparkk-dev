@@ -20,32 +20,32 @@ const shapeData = [
     {
         name: "Portrait",
         icon: <UserSquare className="w-12 h-12 text-primary" />,
-        route: "/shop/acrylic/portrait",
+        route: "/shop/acrylic/portrait/edit",
     },
     {
         name: "Landscape",
         icon: <ImageIcon className="w-12 h-12 text-success" />,
-        route: "/shop/acrylic/landscape",
+        route: "/shop/acrylic/landscape/edit",
     },
     {
         name: "Square",
         icon: <Square className="w-12 h-12 text-primary" />,
-        route: "/shop/acrylic/square",
+        route: "/shop/acrylic/square/edit",
     },
     {
         name: "Love",
         icon: <Heart className="w-12 h-12 text-primary" />,
-        route: "/shop/acrylic/love",
+        route: "/shop/acrylic/love/edit",
     },
     {
         name: "Hexagon",
         icon: <Hexagon className="w-12 h-12 text-warning" />,
-        route: "/shop/acrylic/hexagon",
+        route: "/shop/acrylic/hexagon/edit",
     },
     {
         name: "Round",
         icon: <Circle className="w-12 h-12 text-error" />,
-        route: "/shop/acrylic/round",
+        route: "/shop/acrylic/round/edit",
     },
 ];
 
@@ -55,62 +55,170 @@ const AcrylicShop = () => {
     const router = useRouter();
 
     return (
-        <div className="w-full font-[Poppins] px-4 sm:px-6 md:px-12 lg:px-20 xl:px-24 pt-[100px] mb-20 bg-neutral-50 min-h-screen">
-            {/* Header */}
-            <div className="text-center font-extrabold text-2xl sm:text-3xl xl:text-4xl">
-                <h1 className="text-secondary">Acrylic Frame</h1>
-                <p className="text-lg sm:text-xl text-neutral-600 mt-3 sm:mt-5 font-medium">
-                    Customize Your Acrylic Photo Frame
-                </p>
+        <div className="w-full font-[Poppins] min-h-screen bg-[#FDFDFD]">
+            {/* Hero Section */}
+            <div className="relative w-full h-[40vh] min-h-[400px] flex items-center justify-center bg-neutral-100 overflow-hidden">
+                <Image
+                    src={AcrylicBanner}
+                    alt="Acrylic Frame Banner"
+                    fill
+                    className="object-cover opacity-90"
+                    priority
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60" />
+                <div className="relative z-10 text-center px-4 max-w-4xl mx-auto mt-10">
+                    <span className="inline-block py-1 px-3 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white text-xs sm:text-sm font-medium tracking-widest uppercase mb-4">
+                        The Premium Collection
+                    </span>
+                    <h1 className="text-4xl sm:text-5xl md:text-6xl font-semibold text-white tracking-tight leading-tight mb-4">
+                        Acrylic <span className="font-light italic">Glass</span> Frames
+                    </h1>
+                    <p className="text-lg sm:text-xl text-white/90 font-light max-w-2xl mx-auto leading-relaxed">
+                        Transform your memories into crystal-clear masterpieces. Elegance in every shape (Customized).
+                    </p>
+                </div>
+            </div>
 
-                {/* Banner */}
-                <div className="w-full mt-8 rounded-2xl overflow-hidden shadow-xl aspect-[21/9] relative">
-                    <Image
-                        src={AcrylicBanner}
-                        alt="Acrylic Frame Banner"
-                        fill
-                        className="object-cover"
-                        priority
-                    />
+            {/* Minimalist Steps */}
+            <div className="w-full border-b border-neutral-100 bg-white">
+                <div className="max-w-7xl mx-auto px-6 py-6 overflow-x-auto">
+                    <div className="flex items-center justify-center min-w-max gap-8 sm:gap-16 text-sm font-medium tracking-wide text-neutral-400">
+                        {steps.map((label, index) => (
+                            <div key={index} className={`flex items-center gap-3 ${index === 0 ? 'text-neutral-900' : ''}`}>
+                                <span className={`flex items-center justify-center w-6 h-6 rounded-full border ${index === 0 ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-300'} text-xs`}>
+                                    {index + 1}
+                                </span>
+                                <span>{label}</span>
+                                {index < steps.length - 1 && (
+                                    <div className="w-8 h-[1px] bg-neutral-200 hidden sm:block" />
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* Main Content - Shape Selection */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+                <div className="text-center mb-16">
+                    <h2 className="text-3xl font-light text-neutral-800">Choose Your Canvas</h2>
+                    <div className="h-1 w-20 bg-primary/20 mx-auto mt-4 rounded-full"></div>
                 </div>
 
-                <p className="font-bold text-xl sm:text-2xl mt-12 sm:mt-16 text-secondary">
-                    Pick the Acrylic Frame Shape For You!
-                </p>
-            </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10">
+                    {shapeData.map((shape, index) => (
+                        <div
+                            key={index}
+                            onClick={() => router.push(shape.route)}
+                            className="group relative cursor-pointer"
+                        >
+                            {/* Card Container */}
+                            <div className="relative h-80 w-full bg-white rounded-[2rem] border border-neutral-100 shadow-sm hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] transition-all duration-500 overflow-hidden flex flex-col items-center justify-center p-8 z-0">
 
-            {/* Steps */}
-            <div className="flex flex-col sm:flex-row justify-center items-center gap-6 md:gap-16 mt-12 mb-16">
-                {steps.map((label, index) => (
-                    <div key={index} className="flex flex-col items-center gap-3 group">
-                        <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center text-lg font-bold shadow-lg group-hover:scale-110 transition-transform duration-300">
-                            {index + 1}
-                        </div>
-                        <p className="text-center font-semibold text-secondary">{label}</p>
-                    </div>
-                ))}
-            </div>
+                                {/* Background Decorative Gradient */}
+                                <div className="absolute inset-0 bg-gradient-to-br from-neutral-50 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-            {/* Frame Shapes Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 sm:gap-8">
-                {shapeData.map((shape, index) => (
-                    <div
-                        key={index}
-                        onClick={() => router.push(shape.route)}
-                        className="cursor-pointer bg-white rounded-2xl p-6 flex flex-col items-center justify-center gap-4 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-neutral-100 group"
-                    >
-                        <div className="text-neutral-600 group-hover:text-primary transition-colors duration-300 transform group-hover:scale-110">
-                            {shape.icon}
+                                {/* Shape Preview */}
+                                <div className="relative z-10 w-full flex-1 flex items-center justify-center p-4 transition-transform duration-500 group-hover:scale-105">
+                                    {renderShapePreview(shape)}
+                                </div>
+
+                                {/* Label */}
+                                <div className="relative z-10 mt-6 text-center">
+                                    <h3 className="text-xl font-medium text-neutral-800 group-hover:text-primary transition-colors duration-300">
+                                        {shape.name}
+                                    </h3>
+                                    <div className="flex items-center justify-center gap-2 mt-2 opacity-0 -translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                                        <span className="text-sm font-medium text-neutral-500">Customize</span>
+                                        <ChevronRight className="w-4 h-4 text-primary" />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <button className="flex items-center justify-center gap-1 text-secondary font-semibold group-hover:text-primary transition-colors">
-                            <span>{shape.name}</span>
-                            <ChevronRight className="w-4 h-4" />
-                        </button>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
         </div>
     );
+};
+
+// Image Assets
+const PortraitImg = "/assets/frontend_assets/CanvasCustomized/Portrait.jpeg";
+const LandscapeImg = "/assets/frontend_assets/CanvasCustomized/Landscape.jpeg";
+const SquareImg = "/assets/frontend_assets/CanvasCustomized/Square.jpeg";
+
+// Helper to render the shape preview visually instead of using icons
+const renderShapePreview = (shape) => {
+    // Premium Glass Effect & Shadow
+    const glassOverlay = (
+        <div className="absolute inset-0 bg-gradient-to-tr from-white/40 via-white/10 to-transparent pointer-events-none z-20" />
+    );
+
+    const baseClass = "relative transition-all duration-500 group-hover:scale-105 shadow-xl group-hover:shadow-2xl";
+
+    // Scale images slightly to fill shapes perfectly without showing potential borders
+    const imgClass = "object-cover scale-110 group-hover:scale-125 transition-transform duration-700";
+
+    switch (shape.name) {
+        case "Portrait":
+            return (
+                <div className={`${baseClass} w-32 h-44 rounded-sm overflow-hidden`}>
+                    <Image src={PortraitImg} alt="Portrait" fill className={imgClass} />
+                    {glassOverlay}
+                </div>
+            );
+        case "Landscape":
+            return (
+                <div className={`${baseClass} w-44 h-32 rounded-sm overflow-hidden`}>
+                    <Image src={LandscapeImg} alt="Landscape" fill className={imgClass} />
+                    {glassOverlay}
+                </div>
+            );
+        case "Square":
+            return (
+                <div className={`${baseClass} w-36 h-36 rounded-sm overflow-hidden`}>
+                    <Image src={SquareImg} alt="Square" fill className={imgClass} />
+                    {glassOverlay}
+                </div>
+            );
+        case "Round":
+            return (
+                <div className={`${baseClass} w-36 h-36 rounded-full overflow-hidden border-2 border-white/50`}>
+                    <Image src={SquareImg} alt="Round" fill className={imgClass} />
+                    {glassOverlay}
+                </div>
+            );
+        case "Hexagon":
+            return (
+                <div className="w-40 h-40 flex items-center justify-center filter drop-shadow-xl group-hover:drop-shadow-2xl transition-all duration-300">
+                    <div className="relative w-full h-full transition-transform duration-500 group-hover:scale-105"
+                        style={{ clipPath: "polygon(25% 6.7%, 75% 6.7%, 100% 50%, 75% 93.3%, 25% 93.3%, 0% 50%)" }}>
+                        <Image src={SquareImg} alt="Hexagon" fill className={imgClass} />
+                        {glassOverlay}
+                    </div>
+                </div>
+            );
+        case "Love":
+            return (
+                <div className="w-40 h-40 relative filter drop-shadow-xl group-hover:drop-shadow-2xl transition-all duration-300">
+                    <svg viewBox="0 0 512 512" className="w-full h-full transform transition-transform duration-500 group-hover:scale-105">
+                        <defs>
+                            <clipPath id="heartClip">
+                                <path d="M256 448l-30.16-27.42C118.7 325 48 261 48 182.5 48 118.5 98.49 67.97 162.5 67.97c36.19 0 70.9 16.88 93.5 43.68 22.6-26.8 57.31-43.68 93.5-43.68 64 0 114.5 50.53 114.5 114.53 0 78.5-70.7 142.5-177.84 238.08L256 448z" />
+                            </clipPath>
+                        </defs>
+                        <foreignObject x="0" y="0" width="512" height="512" clipPath="url(#heartClip)">
+                            <div className="w-full h-full bg-neutral-100 relative">
+                                <Image src={SquareImg} alt="Love" fill className={`${imgClass} scale-150`} />
+                                <div className="absolute inset-0 bg-gradient-to-tr from-white/30 via-transparent to-transparent pointer-events-none" />
+                            </div>
+                        </foreignObject>
+                    </svg>
+                </div>
+            );
+        default:
+            return <div className={`${baseClass} w-32 h-32 rounded-lg`} />;
+    }
 };
 
 export default AcrylicShop;
