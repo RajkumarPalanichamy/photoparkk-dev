@@ -18,6 +18,9 @@ import {
 import axiosInstance from "../../utils/axiosInstance";
 import { toast } from "react-toastify";
 
+// Combined Configuration for all types and shapes
+const PRODUCT_CONFIGS = {}; // Now fetched from API
+
 const COMMON_HIGHLIGHTS = [
     "High-Quality Finish & Durable Material",
     "Perfect for Home Decor & Gifting",
@@ -39,27 +42,53 @@ const GenericOrder = ({ type, shape }) => {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (typeof window !== "undefined") {
-            const storedData = sessionStorage.getItem(`${type}_custom_data`);
-            if (storedData) {
-                const parsed = JSON.parse(storedData);
-                setOrderData(parsed);
-            } else {
-                toast.error("No customization data found. Please start from the editor.");
-                router.push(`/shop/${type}/${shape}`);
-                return;
-            }
+        const init = async () => {
+            if (typeof window !== "undefined") {
+                const storedData = sessionStorage.getItem(`${type}_custom_data`);
+                if (storedData) {
+                    const parsed = JSON.parse(storedData);
+                    setPhotoData(parsed.photoData);
+                } else {
+                    toast.error("No customization data found. Please upload an image first.");
+                    router.push(`/shop/${type}/${shape}`);
+                    return;
+                }
 
-            const storedUser = localStorage.getItem("user");
-            if (storedUser) {
-                try {
-                    const parsedUser = JSON.parse(storedUser);
-                    setUserId(parsedUser._id || parsedUser.id);
-                } catch (err) {
-                    console.error("Failed to parse user:", err);
+                const storedUser = localStorage.getItem("user");
+                if (storedUser) {
+                    try {
+                        const parsedUser = JSON.parse(storedUser);
+                        setUserId(parsedUser._id || parsedUser.id);
+                    } catch (err) {
+                        console.error("Failed to parse user:", err);
+                    }
                 }
             }
-        }
+
+            // Fetch product detail from API
+            try {
+                const res = await axiosInstance.get(`frames/${type}?shape=${shape}`);
+                if (res.data && res.data.length > 0) {
+                    const product = res.data[0];
+                    setProductConfig(product);
+                    if (product.sizes && product.sizes.length > 0) {
+                        setSelectedSize(product.sizes[0]);
+                    }
+                    if (product.thickness && Array.isArray(product.thickness) && product.thickness.length > 0) {
+                        setSelectedThickness(product.thickness[0]);
+                    } else if (typeof product.thickness === 'string') {
+                        setSelectedThickness(product.thickness);
+                    }
+                } else {
+                    toast.error("Product configuration not found.");
+                }
+            } catch (err) {
+                console.error("Failed to fetch product config:", err);
+                toast.error("Failed to load product details.");
+            }
+        };
+
+        init();
     }, [type, shape, router]);
 
     const handleAddToCart = async () => {
@@ -188,19 +217,50 @@ const GenericOrder = ({ type, shape }) => {
                                         </div>
                                     </div>
 
-                                    <div className="flex items-start gap-3 p-4 bg-neutral-50 rounded-xl border border-neutral-100">
-                                        <div className="p-2 bg-white rounded-lg shadow-sm text-primary"><Layers className="w-5 h-5" /></div>
-                                        <div>
-                                            <p className="text-xs text-neutral-500 font-medium uppercase tracking-wider">Thickness</p>
-                                            <p className="font-semibold text-secondary text-lg">{thickness.label}</p>
-                                        </div>
+                                {/* Size Selector */}
+                                <div>
+                                    <label className="block text-lg font-semibold text-secondary mb-3 flex items-center gap-2">
+                                        <Ruler className="w-5 h-5 text-primary" />
+                                        Select Size
+                                    </label>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                        {productConfig.sizes.map((sizeObj, i) => (
+                                            <button
+                                                key={i}
+                                                onClick={() => setSelectedSize(sizeObj)}
+                                                className={`px-4 py-3 rounded-xl border-2 text-sm font-medium transition-all duration-200 ${selectedSize?.label === sizeObj.label
+                                                    ? "bg-primary text-white border-primary shadow-lg scale-105"
+                                                    : "bg-white text-secondary border-neutral-300 hover:border-primary hover:shadow-md"
+                                                    }`}
+                                            >
+                                                <div className="font-bold">{sizeObj.label}</div>
+                                                <div className="text-xs mt-1 opacity-80">
+                                                    ₹{sizeObj.price}
+                                                </div>
+                                            </button>
+                                        ))}
                                     </div>
 
-                                    <div className="flex items-start gap-3 p-4 bg-neutral-50 rounded-xl border border-neutral-100">
-                                        <div className="p-2 bg-white rounded-lg shadow-sm text-primary"><Scissors className="w-5 h-5" /></div>
-                                        <div>
-                                            <p className="text-xs text-neutral-500 font-medium uppercase tracking-wider">Edge Finish</p>
-                                            <p className="font-semibold text-secondary text-lg">{edge.label}</p>
+                                {/* Thickness Selector */}
+                                {productConfig.thickness && Array.isArray(productConfig.thickness) && productConfig.thickness.length > 0 && (
+                                    <div>
+                                        <label className="block text-lg font-semibold text-secondary mb-3 flex items-center gap-2">
+                                            <Box className="w-5 h-5 text-primary" />
+                                            Select Thickness
+                                        </label>
+                                        <div className="grid grid-cols-3 gap-3">
+                                            {productConfig.thickness.map((thick, i) => (
+                                                <button
+                                                    key={i}
+                                                    onClick={() => setSelectedThickness(thick)}
+                                                    className={`px-4 py-3 rounded-xl border-2 text-sm font-medium transition-all duration-200 ${selectedThickness === thick
+                                                        ? "bg-primary text-white border-primary shadow-lg scale-105"
+                                                        : "bg-white text-secondary border-neutral-300 hover:border-primary hover:shadow-md"
+                                                        }`}
+                                                >
+                                                    {thick}
+                                                </button>
+                                            ))}
                                         </div>
                                     </div>
 

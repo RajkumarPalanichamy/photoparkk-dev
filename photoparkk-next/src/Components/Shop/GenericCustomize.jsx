@@ -6,11 +6,18 @@ import Cropper from "react-easy-crop";
 import { Upload, X, RotateCw, ZoomIn, ArrowRight, AlertTriangle } from "lucide-react";
 import LoadingBar from "../LoadingBar";
 import { toast } from "react-toastify";
+import axiosInstance from "../../utils/axiosInstance";
 
 const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 const MAX_UPLOAD_SIZE_MB = 10;
 
 const GenericCustomize = ({ type, shape }) => {
+    // type: "acrylic", "canvas", "backlight"
+    // shape: "portrait", "landscape", "square", "love", "hexagon", "round"
+    const [photoData, setPhotoData] = useState(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [productConfig, setProductConfig] = useState(null);
+    const fileInputRef = useRef(null);
     const router = useRouter();
     const fileInputRef = useRef(null);
 
@@ -52,6 +59,20 @@ const GenericCustomize = ({ type, shape }) => {
             }
         }
     }, [type]);
+
+    React.useEffect(() => {
+        const fetchConfig = async () => {
+            try {
+                const res = await axiosInstance.get(`frames/${type}?shape=${shape}`);
+                if (res.data && res.data.length > 0) {
+                    setProductConfig(res.data[0]);
+                }
+            } catch (err) {
+                console.error("Failed to fetch config", err);
+            }
+        };
+        fetchConfig();
+    }, [type, shape]);
 
     const handleFileUpload = async (file) => {
         if (!file.type.match("image.*")) {
@@ -173,72 +194,72 @@ const GenericCustomize = ({ type, shape }) => {
 
                 {/* Header */}
                 <div className="text-center mb-8">
-                    <span className="text-sm font-medium text-neutral-400 uppercase tracking-widest mb-2 block">Step 1 of 2</span>
-                    <h1 className="text-3xl font-bold text-secondary">Customize Your {shapeTitle} Frame</h1>
-                    <p className="text-neutral-500 mt-2">Upload and adjust your photo to fit the frame perfectly.</p>
+                    <div className="inline-flex items-center gap-2 bg-primary text-white px-6 py-2 rounded-full mb-4">
+                        <Sparkles className="w-5 h-5" />
+                        <span className="font-semibold">{productConfig?.title || `${typeTitle} ${shapeTitle} Frame`}</span>
+                    </div>
+                    <h1 className="text-4xl md:text-5xl font-bold text-secondary mb-3">
+                        {productConfig ? `Customize ${productConfig.title}` : `Customize Your ${typeTitle} ${shapeTitle}`}
+                    </h1>
+                    <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
+                        {productConfig?.content || `Upload your favorite photo and see it come to life in a beautiful ${typeTitle.toLowerCase()} frame`}
+                    </p>
                 </div>
 
-                <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-neutral-100 p-8">
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleChange}
+                    accept="image/*"
+                    className="hidden"
+                />
 
-                    {/* Editor Container */}
-                    <div className="relative w-full aspect-square md:aspect-[16/9] lg:aspect-[2/1] min-h-[500px] bg-neutral-100 rounded-2xl overflow-hidden border-2 border-dashed border-neutral-200">
-                        {!photoData ? (
-                            <div
-                                className={`absolute inset-0 flex flex-col items-center justify-center transition-all ${isDragging ? 'bg-primary/5 border-primary' : ''}`}
-                                onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-                                onDragLeave={() => setIsDragging(false)}
-                                onDrop={(e) => {
-                                    e.preventDefault();
-                                    setIsDragging(false);
-                                    if (e.dataTransfer.files[0]) handleFileUpload(e.dataTransfer.files[0]);
-                                }}
-                            >
-                                <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg mb-6 ring-8 ring-neutral-50">
-                                    <Upload className="w-10 h-10 text-primary" />
-                                </div>
-                                <h3 className="text-2xl font-bold text-secondary mb-2">Upload Photo</h3>
-                                <p className="text-neutral-400 mb-8 text-center max-w-sm">Drag & drop your image here, or browse files. We accept JPG, PNG & WebP.</p>
-                                <button
-                                    onClick={() => fileInputRef.current?.click()}
-                                    className="px-10 py-4 bg-secondary text-white rounded-xl font-semibold hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    {/* Upload Section */}
+                    <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-neutral-200 order-2 lg:order-1">
+                        <div className="bg-primary px-6 py-4">
+                            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                                <Image className="w-6 h-6" />
+                                Upload Your Photo
+                            </h2>
+                        </div>
+                        {/* Same Upload UI as AcrylicCustomize */}
+                        <div className="p-6">
+                            {!photoData ? (
+                                <div
+                                    onDragOver={handleDragOver}
+                                    onDragLeave={handleDragLeave}
+                                    onDrop={handleDrop}
+                                    className={`border-2 border-dashed rounded-xl p-12 text-center transition-all duration-300 ${isDragging
+                                        ? "border-primary bg-primary-light scale-[1.02]"
+                                        : "border-neutral-300 hover:border-primary hover:bg-neutral-50"
+                                        }`}
                                 >
-                                    Browse Files
-                                </button>
-                                <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={(e) => e.target.files[0] && handleFileUpload(e.target.files[0])} />
-                            </div>
-                        ) : (
-                            <div className="relative w-full h-full bg-neutral-900">
-                                <Cropper
-                                    image={photoData.url}
-                                    crop={crop}
-                                    zoom={zoom}
-                                    rotation={rotation}
-                                    aspect={getAspectRatio()}
-                                    onCropChange={setCrop}
-                                    onCropComplete={onCropComplete}
-                                    onZoomChange={setZoom}
-                                    onRotationChange={setRotation}
-                                    {...getCropShapeProps()}
-                                    classes={{ containerClassName: "w-full h-full" }}
-                                    style={{
-                                        containerStyle: {},
-                                        mediaStyle: {},
-                                        // Ensure the internal crop area allows our child to be visible and doesn't obscure it
-                                        cropAreaStyle: (shape === 'hexagon' || shape === 'love') ? { color: 'rgba(0, 0, 0, 0.5)', overflow: 'visible' } : {}
-                                    }}
-                                    // Explicitly hide grid for custom shapes
-                                    showGrid={!(shape === 'love' || shape === 'hexagon' || shape === 'round')}
-                                >
-                                    {/* INVERTED MASK */}
-                                    {shape === 'hexagon' && (
-                                        <div className="absolute inset-0 w-full h-full pointer-events-none" style={{ color: 'rgba(0, 0, 0, 0.5)' }}>
-                                            <svg viewBox="0 0 100 100" className="w-full h-full" preserveAspectRatio="none" style={{ display: 'block' }}>
-                                                <path
-                                                    d="M0 0 H100 V100 H0 Z M50 2 L98 26.5 V73.5 L50 98 L2 73.5 V26.5 Z"
-                                                    fill="currentColor"
-                                                    fillRule="evenodd"
-                                                />
-                                            </svg>
+                                    <div className="flex flex-col items-center justify-center space-y-6">
+                                        <div
+                                            className={`p-4 rounded-full transition-all ${isDragging
+                                                ? "bg-primary-light scale-110"
+                                                : "bg-neutral-100"
+                                                }`}
+                                        >
+                                            <Image
+                                                className={`w-12 h-12 transition-colors ${isDragging ? "text-primary" : "text-neutral-500"
+                                                    }`}
+                                            />
+                                        </div>
+                                        <div>
+                                            <p className="text-lg font-semibold text-neutral-700 mb-2">
+                                                Drag and drop your photo here
+                                            </p>
+                                            <p className="text-sm text-neutral-500 mb-4">or</p>
+                                            <button
+                                                onClick={handleReplaceClick}
+                                                disabled={isUploading}
+                                                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-hover transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
+                                            >
+                                                <Upload className="w-5 h-5" />
+                                                Browse Files
+                                            </button>
                                         </div>
                                     )}
                                     {shape === 'love' && (
@@ -307,8 +328,12 @@ const GenericCustomize = ({ type, shape }) => {
                         <div>
                             {photoData && (
                                 <button
-                                    onClick={() => setPhotoData(null)}
-                                    className="text-neutral-400 hover:text-error transition-colors text-sm font-medium flex items-center gap-2"
+                                    onClick={handlePreviewClick}
+                                    disabled={!photoData}
+                                    className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${photoData
+                                        ? "bg-white text-primary hover:bg-neutral-50 shadow-lg hover:shadow-xl transform hover:scale-105"
+                                        : "bg-white/20 text-white/50 cursor-not-allowed"
+                                        }`}
                                 >
                                     <X className="w-4 h-4" /> Remove Photo
                                 </button>
