@@ -1,8 +1,10 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Sparkles, CheckCircle2, Ruler, Layers, Scissors, ShoppingCart, Loader2, ArrowLeft, Package, Truck, Lock } from "lucide-react";
+import { Sparkles, CheckCircle2, Ruler, Layers, Scissors, ShoppingCart, Loader2, ArrowLeft, Package, Truck, Lock, Frame, SlidersHorizontal } from "lucide-react";
+import { HexColorPicker } from "react-colorful";
 import { toast } from "react-toastify";
+import * as htmlToImage from 'html-to-image';
 import axiosInstance from "../../utils/axiosInstance";
 
 // Configuration Constants
@@ -44,14 +46,22 @@ const EDGE_OPTIONS = [
     { label: "Beveled Edge", price: 350, value: "bevel" },
 ];
 
+const FRAME_ICONS = [
+    { label: "No Frame", value: "none", icon: <Frame className="w-5 h-5 text-neutral-400" /> },
+    { label: "Custom Frame", value: "custom", icon: <Frame className="w-5 h-5 text-primary" /> },
+];
+
 const GenericSizeSelector = ({ type, shape }) => {
     const router = useRouter();
 
     // State
     const [editorData, setEditorData] = useState(null);
+    const [frameConfig, setFrameConfig] = useState(null);
     const [selectedSize, setSelectedSize] = useState(null);
     const [selectedThickness, setSelectedThickness] = useState(THICKNESS_OPTIONS[0]);
     const [selectedEdge, setSelectedEdge] = useState(EDGE_OPTIONS[0]);
+    const [frameType, setFrameType] = useState('none'); // 'none' or 'custom'
+    const [selectedColor, setSelectedColor] = useState("#000000");
     const [quantity, setQuantity] = useState(1);
     const [totalPrice, setTotalPrice] = useState(0);
     const [loading, setLoading] = useState(false);
@@ -61,9 +71,31 @@ const GenericSizeSelector = ({ type, shape }) => {
     const shapeTitle = shape.charAt(0).toUpperCase() + shape.slice(1);
     const typeTitle = type.charAt(0).toUpperCase() + type.slice(1);
     const shapeKey = ["portrait", "landscape", "square"].includes(shape) ? shape : "default";
-    const availableSizes = SIZES[shapeKey] || SIZES.default;
 
-    // Load Data
+    // Dynamic Sizes from DB or Fallback
+    const availableSizes = frameConfig?.sizes || SIZES[shapeKey] || SIZES.default;
+
+    // Fetch Frame Config from DB
+    useEffect(() => {
+        const fetchConfig = async () => {
+            try {
+                const res = await axiosInstance.get(`frames/${type}?shape=${shape}`);
+                if (res.data && res.data.length > 0) {
+                    const dbConfig = res.data[0];
+                    setFrameConfig(dbConfig);
+                    // If we have sizes from DB, select the first one by default if nothing selected yet
+                    if (dbConfig.sizes && dbConfig.sizes.length > 0 && !selectedSize) {
+                        setSelectedSize(dbConfig.sizes[0]);
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch frame config", err);
+            }
+        };
+        fetchConfig();
+    }, [type, shape]);
+
+    // Load Session Data
     useEffect(() => {
         if (typeof window !== "undefined") {
             const storedData = sessionStorage.getItem(`${type}_custom_data`);
@@ -73,11 +105,17 @@ const GenericSizeSelector = ({ type, shape }) => {
                     if (parsed.photoData) {
                         setEditorData(parsed);
                         // Restore previous selection if available
-                        if (parsed.configuration?.size) setSelectedSize(parsed.configuration.size);
-                        else if (availableSizes.length > 0) setSelectedSize(availableSizes[0]);
+                        if (parsed.configuration?.size) {
+                            setSelectedSize(parsed.configuration.size);
+                        } else if (!selectedSize && availableSizes.length > 0) {
+                            // If not set by DB fetch yet, set default
+                            setSelectedSize(availableSizes[0]);
+                        }
 
                         if (parsed.configuration?.thickness) setSelectedThickness(parsed.configuration.thickness);
                         if (parsed.configuration?.edge) setSelectedEdge(parsed.configuration.edge);
+                        if (parsed.configuration?.frameType) setFrameType(parsed.configuration.frameType);
+                        if (parsed.configuration?.frameColor) setSelectedColor(parsed.configuration.frameColor);
                     } else {
                         // No photo data
                         router.push(`/shop/${type}/${shape}/edit`);
@@ -93,7 +131,8 @@ const GenericSizeSelector = ({ type, shape }) => {
             if (storedUser) {
                 try {
                     const parsedUser = JSON.parse(storedUser);
-                    setUserId(parsedUser._id || parsedUser.id);
+                    // Prioritize 'id' (UUID) over '_id' (Mongo) to satisfy Postgres UUID constraint
+                    setUserId(parsedUser.id || parsedUser._id);
                 } catch (err) {
                     console.error("Failed to parse user:", err);
                 }
@@ -107,10 +146,39 @@ const GenericSizeSelector = ({ type, shape }) => {
         const base = selectedSize.price;
         const thickness = selectedThickness.price;
         const edge = selectedEdge.price;
+        // Frame is free
         setTotalPrice((base + thickness + edge) * quantity);
     }, [selectedSize, selectedThickness, selectedEdge, quantity]);
 
+
+
     const [croppedImageUrl, setCroppedImageUrl] = useState(null);
+    const previewRef = useRef(null);
+
+    // Capture the styled wall preview using html-to-image (better for modern CSS)
+    const generateWallPreview = async () => {
+        if (!previewRef.current) return null;
+        try {
+            // Using html-to-image as html2canvas fails with modern CSS (oklab)
+            const blob = await htmlToImage.toBlob(previewRef.current, {
+                quality: 0.95,
+                pixelRatio: 2,
+                backgroundColor: '#f5f5f5', // Match the container background
+                filter: (node) => {
+                    // Filter out ignored elements (like badge and ruler)
+                    if (node.hasAttribute && node.hasAttribute('data-html2canvas-ignore')) {
+                        return false;
+                    }
+                    return true;
+                }
+            });
+            return blob;
+        } catch (err) {
+            console.error("Failed to generate wall preview", err);
+            // toast.error("Could not generate full preview.");
+            return null;
+        }
+    };
 
     // Optimized utility to crop image for preview
     const getCroppedImg = useCallback(async (imageSrc, pixelCrop, rotation = 0) => {
@@ -175,8 +243,6 @@ const GenericSizeSelector = ({ type, shape }) => {
 
         if (!userId) {
             toast.error("Please log in to add items to cart.");
-            // Optionally redirect to login, but maybe save state first?
-            // For now just error toast.
             return;
         }
 
@@ -185,26 +251,73 @@ const GenericSizeSelector = ({ type, shape }) => {
             // Prepare Cart Data
             const { photoData, configuration: prevConfig } = editorData;
 
-            // Note: In a real app, you might want to upload the 'croppedImageUrl' blob to S3 here
-            // or send the crop coordinates to the backend to generate the final print file.
-            // For now, we will send the original URL + crop details.
+            if (!frameConfig?.id) {
+                toast.error("Product configuration missing. Please refresh.");
+                return;
+            }
+
+            // Map type to exact database enum values (Note: Inconsistent casing in DB)
+            const PRODUCT_TYPE_MAP = {
+                'acrylic': 'AcrylicCustomizedata',
+                'canvas': 'Canvascustomizedata',
+                'backlight': 'Backlightcustomizedata'
+            };
+            const dbProductType = PRODUCT_TYPE_MAP[type.toLowerCase()] || `${typeTitle}Customizedata`;
+
+            // 1. Generate Wall Preview Blob
+            let blobToUpload = await generateWallPreview();
+
+            // 2. Fallback to cropped image if wall preview fails
+            if (!blobToUpload && croppedImageUrl) {
+                console.warn("Wall preview generation failed, falling back to crop.");
+                // toast.warn("Optimizing preview..."); // Optional: Don't alarm user too much
+                blobToUpload = await fetch(croppedImageUrl).then(r => r.blob());
+            }
+
+            let finalImageUrl = photoData?.url;
+
+            // 3. Upload the blob (Wall Preview or Crop)
+            if (blobToUpload) {
+                try {
+                    // Use a unique name
+                    const filename = `preview-${Date.now()}-${blobToUpload === await generateWallPreview() ? 'wall' : 'crop'}.png`;
+                    const file = new File([blobToUpload], filename, { type: blobToUpload.type });
+                    const formData = new FormData();
+                    formData.append("image", file);
+
+                    const uploadRes = await axiosInstance.post("/upload-image", formData, {
+                        headers: { "Content-Type": "multipart/form-data" }
+                    });
+
+                    if (uploadRes.data?.imageUrl) {
+                        finalImageUrl = uploadRes.data.imageUrl;
+                    }
+                } catch (uploadErr) {
+                    console.error("Failed to upload preview image", uploadErr);
+                }
+            }
 
             const cartData = {
                 userId,
-                productType: `${typeTitle}Customized`,
+                productId: frameConfig.id,
+                productType: dbProductType,
                 title: `${typeTitle} ${shapeTitle} Frame`,
-                image: croppedImageUrl || photoData?.url, // Use cropped preview for cart thumbnail if possible, though backend might expect a real URL
+                image: finalImageUrl,
                 size: selectedSize.label,
                 thickness: selectedThickness.value,
                 edge: selectedEdge.value,
+                frameType,
+                frameColor: frameType === 'custom' ? selectedColor : null,
                 price: totalPrice / quantity, // Unit price
                 quantity,
                 totalAmount: totalPrice,
                 uploadedImageUrl: photoData?.url,
                 customizationDetails: {
-                    crop: prevConfig?.crop, // The crop data from step 1
+                    crop: prevConfig?.crop,
                     thickness: selectedThickness,
                     edge: selectedEdge,
+                    frameType,
+                    frameColor: selectedColor,
                     originalName: photoData?.name
                 }
             };
@@ -231,26 +344,30 @@ const GenericSizeSelector = ({ type, shape }) => {
     const isHexagon = shape === 'hexagon';
 
     // Determine visual style for preview based on user selection
+    const hasFrame = frameType === 'custom';
     const previewStyle = {
-        borderWidth: selectedThickness.value === '8mm' ? '12px' : selectedThickness.value === '5mm' ? '8px' : '4px',
-        borderColor: selectedEdge.value === 'polished' ? '#e5e5e5' : '#fff',
-        boxShadow: selectedThickness.value === '8mm' ? '0 20px 40px rgba(0,0,0,0.3)' : '0 10px 20px rgba(0,0,0,0.15)',
-        transform: selectedEdge.value === 'bevel' ? 'perspective(1000px) rotateX(2deg)' : 'none',
+        // If frame is selected, add border width.
+        borderWidth: hasFrame ? '12px' : (selectedThickness.value === '8mm' ? '2px' : '0px'),
+        borderColor: hasFrame ? selectedColor : 'transparent',
+        borderStyle: 'solid',
+        boxShadow: hasFrame
+            ? `0 10px 30px rgba(0,0,0,0.3)`
+            : (selectedThickness.value === '8mm' ? '0 20px 40px rgba(0,0,0,0.3)' : '0 10px 20px rgba(0,0,0,0.15)'),
+        transform: selectedEdge.value === 'bevel' && !hasFrame ? 'perspective(1000px) rotateX(2deg)' : 'none',
         clipPath: isLove ? 'url(#love-clip-preview)' : isHexagon ? 'url(#hexagon-clip-preview)' : 'none',
-        // For custom shapes, we might want to hide the border or make it follow the shape. 
-        // Standard CSS border follows border-radius but NOT clip-path. 
-        // So for Love/Hexagon, the rectangular border would be cut off by clip-path invisibly, or visible if clip-path is larger? No, clip-path hides everything outside.
-        // So standard border will disappear for non-rectangular shapes unless we use SVG stroke? 
-        // Actually, let's keep it simple. The clip-path cuts everything. The border is on the div. So the border will be cut to the shape? 
-        // No, clip-path is applied AFTER border. So the border will be visible only inside the shape. Effectively, you lose the border thickness on the outside edge.
-        // This is a known CSS limitation. For a perfect border on custom shape, we need an SVG overlay or drop-shadow filter.
-        // For now, let's trust the clip, and maybe add a filter: drop-shadow instead of box-shadow.
     };
 
     if (isLove || isHexagon) {
         // Switch to drop-shadow since box-shadow is clipped
         previewStyle.boxShadow = 'none';
-        previewStyle.filter = 'drop-shadow(0 10px 10px rgba(0,0,0,0.2))';
+
+        if (hasFrame) {
+            // Colored frame glow + Realistic wall shadow
+            previewStyle.filter = `drop-shadow(0 0 10px ${selectedColor}) drop-shadow(0 20px 30px rgba(0,0,0,0.5))`;
+        } else {
+            // Frameless acrylic shadow (Deep + Soft)
+            previewStyle.filter = 'drop-shadow(0 15px 35px rgba(0,0,0,0.4))';
+        }
         // And remove border since it looks weird when clipped
         previewStyle.borderWidth = '0px';
     }
@@ -287,79 +404,93 @@ const GenericSizeSelector = ({ type, shape }) => {
 
                     {/* Left: Enhanced Preview */}
                     <div className="lg:col-span-7 sticky top-24">
-                        {/* Wall Preview Container */}
-                        <div className="relative h-[600px] w-full rounded-3xl overflow-hidden bg-neutral-100 flex items-center justify-center shadow-inner border border-neutral-200 group perspective-mid">
+                        {/* Wall Preview Container - Validated for html2canvas (Inline Styles) */}
+                        <div
+                            ref={previewRef}
+                            style={{
+                                position: 'relative',
+                                height: '600px',
+                                width: '100%',
+                                borderRadius: '24px',
+                                overflow: 'hidden',
+                                display: 'flex',
+                                alignItems: 'flex-start',
+                                justifyContent: 'center',
+                                paddingTop: '128px',
+                                backgroundColor: '#f5f5f5',
+                                borderColor: '#e5e5e5',
+                                borderWidth: '1px',
+                                borderStyle: 'solid',
+                                perspective: '1200px', // perspective-mid
+                                boxShadow: 'inset 0 2px 4px 0 rgba(0,0,0,0.05)'
+                            }}
+                        >
 
                             {/* Wall Gradient / Image */}
                             <img
-                                src="/wall-bg.jpg"
+                                src="/interior-wall.jpg"
                                 alt="Wall Background"
                                 className="absolute inset-0 w-full h-full object-cover opacity-90"
                             />
-                            <div className="absolute inset-0 bg-white/10 backdrop-blur-[1px]"></div>
+                            <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(255,255,255,0.1)' }}></div>
 
 
 
                             {/* Live Preview Badge */}
-                            <div className="absolute top-6 left-6 z-20 bg-white/80 backdrop-blur px-4 py-1.5 rounded-full text-xs font-bold text-neutral-600 border border-white/50 shadow-sm flex items-center gap-2">
+                            <div data-html2canvas-ignore="true" className="absolute top-6 left-6 z-20 bg-white/80 backdrop-blur px-4 py-1.5 rounded-full text-xs font-bold text-neutral-600 border border-white/50 shadow-sm flex items-center gap-2">
                                 <Sparkles className="w-3 h-3 text-primary" /> Live Wall Preview
                             </div>
 
-                            {/* Dynamic Sizing Scale based on max dimension relative to viewport area */}
                             <div
-                                className="relative transition-all duration-500 ease-out z-10"
+                                className="relative z-10 flex items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)]"
                                 style={{
-                                    // Subtle scaling to represent size differences (approximate)
-                                    transform: `scale(${selectedSize ? Math.min(1, Math.max(0.6, Math.max(selectedSize.width, selectedSize.height) / 40 + 0.3)) : 1})`
+                                    // Dynamic scaling: assumes visible wall height is approx 90 inches
+                                    height: selectedSize ? `${(selectedSize.height / 90) * 100}%` : '30%',
+                                    // Use aspect ratio to determine width automatically
+                                    aspectRatio: selectedSize ? `${selectedSize.width} / ${selectedSize.height}` : 'auto',
+                                    maxHeight: '80%', // Prevent overflowing the container
                                 }}
                             >
-                                {/* Dimension Labels */}
+                                {/* Dimension Labels - Repositioned for stability */}
                                 {selectedSize && (
-                                    <>
+                                    <div data-html2canvas-ignore="true">
                                         {/* Width Label */}
-                                        <div className="absolute -top-12 left-0 w-full text-center">
-                                            <div className="inline-block bg-white/90 backdrop-blur px-3 py-1 rounded-md shadow-sm border border-neutral-200/50">
-                                                <span className="text-xs font-bold text-neutral-700 flex items-center gap-1">
+                                        <div className="absolute -top-8 left-0 w-full text-center">
+                                            <div className="inline-block bg-white/90 backdrop-blur px-2 py-1 rounded-md shadow-sm border border-neutral-200/50">
+                                                <span className="text-[10px] font-bold text-neutral-700 flex items-center gap-1">
                                                     <Ruler className="w-3 h-3" /> {selectedSize.width}"
                                                 </span>
-                                            </div>
-                                            {/* Line */}
-                                            <div className="w-full h-px bg-neutral-400/50 absolute bottom-[-8px] left-0 flex items-center justify-between">
-                                                <div className="h-2 w-px bg-neutral-400/50"></div>
-                                                <div className="h-2 w-px bg-neutral-400/50"></div>
                                             </div>
                                         </div>
 
                                         {/* Height Label */}
-                                        <div className="absolute top-0 -left-12 h-full flex flex-col justify-center">
-                                            <div className="absolute left-[-8px] h-full w-px bg-neutral-400/50 flex flex-col justify-between items-center">
-                                                <div className="w-2 h-px bg-neutral-400/50"></div>
-                                                <div className="w-2 h-px bg-neutral-400/50"></div>
-                                            </div>
-                                            <div className="bg-white/90 backdrop-blur px-3 py-1 rounded-md shadow-sm border border-neutral-200/50 -rotate-90 origin-center whitespace-nowrap">
-                                                <span className="text-xs font-bold text-neutral-700 flex items-center gap-1">
+                                        <div className="absolute top-0 -left-10 h-full flex flex-col justify-center">
+                                            <div className="bg-white/90 backdrop-blur px-2 py-1 rounded-md shadow-sm border border-neutral-200/50 -rotate-90 origin-center">
+                                                <span className="text-[10px] font-bold text-neutral-700 flex items-center gap-1">
                                                     <Ruler className="w-3 h-3" /> {selectedSize.height}"
                                                 </span>
                                             </div>
                                         </div>
-                                    </>
+                                    </div>
                                 )}
 
                                 {/* The Frame */}
                                 <div
-                                    className={`relative transition-all duration-500 ${isRound ? 'rounded-full' : 'rounded-sm'} overflow-hidden bg-white`}
+                                    className={`relative w-full h-full overflow-hidden ${isRound ? 'rounded-full' : 'rounded-sm'}`}
                                     style={{
+                                        backgroundColor: 'white',
+                                        transition: 'all 0.5s ease',
                                         ...previewStyle,
-                                        width: selectedSize ? `${selectedSize.width * 12}px` : '300px', // Base pixel scale
-                                        maxWidth: '100%',
-                                        maxHeight: '400px', // Constraint
-                                        aspectRatio: selectedSize ? `${selectedSize.width} / ${selectedSize.height}` : 'auto',
-                                        // Use shadow from previewStyle unless custom shapes
                                     }}
                                 >
-                                    {/* Acrylic Reflection/Gloss Overlay */}
-                                    <div className="absolute inset-0 z-20 bg-gradient-to-tr from-white/10 via-transparent to-black/5 pointer-events-none mix-blend-overlay"></div>
-                                    <div className="absolute inset-0 z-20 bg-gradient-to-b from-white/5 to-transparent pointer-events-none"></div>
+                                    {/* Glassy Detail: Specular Highlight (Window Reflection) */}
+                                    <div className="absolute top-0 right-0 w-[200%] h-full bg-gradient-to-l from-transparent via-white/20 to-transparent skew-x-[-25deg] translate-x-1/2 opacity-30 pointer-events-none z-30"></div>
+
+                                    {/* Glassy Detail: Surface Gloss */}
+                                    <div className="absolute inset-0 z-20 bg-gradient-to-tr from-white/20 via-transparent to-black/10 pointer-events-none mix-blend-overlay"></div>
+
+                                    {/* Edge Highlight (Inner Glow) */}
+                                    <div className="absolute inset-0 z-20 shadow-[inset_0_0_2px_1px_rgba(255,255,255,0.4)] pointer-events-none rounded-inherit"></div>
 
                                     <img
                                         src={croppedImageUrl || photoData.url}
@@ -368,15 +499,7 @@ const GenericSizeSelector = ({ type, shape }) => {
                                     />
                                 </div>
 
-                                {/* Realistic Drop Shadow for Custom Shapes (since box-shadow is clipped) */}
-                                {(isLove || isHexagon || isRound) && (
-                                    <div
-                                        className={`absolute inset-0 -z-10 bg-black/40 blur-2xl transform translate-y-8 scale-95 opacity-60 rounded-full`}
-                                        style={{
-                                            // Approximate shadow shape
-                                        }}
-                                    ></div>
-                                )}
+                                {/* Redundant shadow removed - handled by filter */}
                             </div>
                         </div>
 
@@ -462,6 +585,63 @@ const GenericSizeSelector = ({ type, shape }) => {
                                                 <div className="text-[10px] opacity-70 font-normal mt-0.5">{opt.price === 0 ? 'Standard' : `+ ₹${opt.price}`}</div>
                                             </button>
                                         ))}
+                                    </div>
+                                </div>
+
+                                {/* Frame Color Section */}
+                                <div>
+                                    <div className="flex items-center justify-between mb-3">
+                                        <h3 className="font-bold text-secondary flex items-center gap-2">
+                                            <Frame className="w-5 h-5 text-primary" /> Frame Color
+                                        </h3>
+                                        {frameType === 'custom' && (
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-4 h-4 rounded-full border border-neutral-200" style={{ backgroundColor: selectedColor }}></div>
+                                                <span className="text-xs font-semibold text-neutral-500 uppercase">{selectedColor}</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="bg-neutral-50 p-4 rounded-2xl border border-neutral-100 space-y-4">
+                                        {/* Toggle */}
+                                        <div className="flex gap-2 p-1 bg-white rounded-xl border border-neutral-200">
+                                            {FRAME_ICONS.map((opt) => (
+                                                <button
+                                                    key={opt.value}
+                                                    onClick={() => setFrameType(opt.value)}
+                                                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${frameType === opt.value ? 'bg-primary text-white shadow-md' : 'text-neutral-500 hover:bg-neutral-50'}`}
+                                                >
+                                                    {opt.label}
+                                                </button>
+                                            ))}
+                                        </div>
+
+                                        {/* Color Picker */}
+                                        {frameType === 'custom' && (
+                                            <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                                                <div className="flex justify-center">
+                                                    <HexColorPicker color={selectedColor} onChange={setSelectedColor} style={{ width: '100%', height: '150px' }} />
+                                                </div>
+
+                                                <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-neutral-200 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+                                                    <div className="w-6 h-6 rounded-md border border-neutral-200 shrink-0" style={{ backgroundColor: selectedColor }}></div>
+                                                    <span className="text-neutral-400 font-medium">#</span>
+                                                    <input
+                                                        type="text"
+                                                        value={selectedColor.replace('#', '')}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value;
+                                                            if (/^[0-9A-Fa-f]{0,6}$/.test(val)) {
+                                                                setSelectedColor(`#${val}`);
+                                                            }
+                                                        }}
+                                                        className="w-full text-sm font-medium text-secondary outline-none uppercase tracking-wide"
+                                                        placeholder="HEX Code"
+                                                        maxLength={6}
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 

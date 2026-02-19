@@ -85,6 +85,7 @@ const Cart = () => {
             productId: item.productId,
             name: item.title || product?.title || "Custom Product",
             image: item.image || item.uploadedImageUrl || product?.image || "",
+            originalImage: item.uploadedImageUrl || "", // Explicitly capture original
             size: item.size || "N/A",
             thickness: item.thickness || "N/A",
             price: unitPrice,
@@ -188,17 +189,34 @@ const Cart = () => {
                                 >
                                     <div className="p-6">
                                         <div className="flex flex-col sm:flex-row gap-4 p-4 bg-neutral-50 rounded-xl border border-neutral-200 hover:border-primary-light transition-all duration-300 group">
-                                            {/* Product Image */}
-                                            <div className="relative flex-shrink-0 mx-auto sm:mx-0">
-                                                <img
-                                                    src={item.image}
-                                                    alt={item.name}
-                                                    className="w-28 h-28 sm:w-32 sm:h-32 object-cover rounded-xl shadow-md group-hover:shadow-lg transition-shadow"
-                                                    onError={(e) => {
-                                                        e.target.src =
-                                                            "https://via.placeholder.com/200?text=No+Image";
-                                                    }}
-                                                />
+                                            {/* Product Images */}
+                                            <div className="relative flex-shrink-0 mx-auto sm:mx-0 flex flex-col gap-3">
+                                                {/* Main Preview (Cropped/Framed) */}
+                                                <div className="relative group/image">
+                                                    <span className="absolute top-1 left-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover/image:opacity-100 transition-opacity">Preview</span>
+                                                    <img
+                                                        src={item.image}
+                                                        alt={item.name}
+                                                        className="w-28 h-28 sm:w-32 sm:h-32 object-contain rounded-xl shadow-md bg-white"
+                                                        onError={(e) => {
+                                                            e.target.src = "https://via.placeholder.com/200?text=No+Image";
+                                                        }}
+                                                    />
+                                                </div>
+
+                                                {/* Original Upload (if different) */}
+                                                {item.originalImage && item.originalImage !== item.image && (
+                                                    <div className="relative group/original">
+                                                        <p className="text-[10px] text-neutral-500 mb-1 text-center">Original</p>
+                                                        <div className="w-16 h-16 mx-auto relative rounded-lg overflow-hidden border border-neutral-200">
+                                                            <img
+                                                                src={item.originalImage}
+                                                                alt="Original Upload"
+                                                                className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
 
                                             {/* Product Details */}
