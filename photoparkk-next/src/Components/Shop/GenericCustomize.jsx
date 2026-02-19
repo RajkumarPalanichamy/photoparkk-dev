@@ -10,6 +10,7 @@ import axiosInstance from "../../utils/axiosInstance";
 
 const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 const MAX_UPLOAD_SIZE_MB = 10;
+const CROP_SIZE = 280;
 
 const GenericCustomize = ({ type, shape }) => {
     // type: "acrylic", "canvas", "backlight"
@@ -206,18 +207,10 @@ const GenericCustomize = ({ type, shape }) => {
     };
 
     const getCropShapeProps = () => {
-        if (shape === 'round') return { cropShape: 'round' };
-        return { cropShape: 'rect' };
-    };
-
-    const getCropAreaStyle = () => {
-        if (shape === 'love') {
-            return { clipPath: 'url(#love-clip)' };
-        }
-        if (shape === 'hexagon') {
-            return { clipPath: 'url(#hexagon-clip)' };
-        }
-        return {};
+        // We handle custom masks manually, so we tell Cropper to treat everything as 'rect'
+        // 'round' is supported natively but we can also standardise on the mask system for consistency if we want.
+        // For now, let's let Cropper handle round if it can, but for consistency with the mask system:
+        return { cropShape: 'rect' }; // We will visually mask it ourselves
     };
 
     return (
@@ -246,9 +239,9 @@ const GenericCustomize = ({ type, shape }) => {
                     className="hidden"
                 />
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                <div className="max-w-4xl mx-auto">
                     {/* Upload Section */}
-                    <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-neutral-200 order-2 lg:order-1">
+                    <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-neutral-200">
                         <div className="bg-primary px-6 py-4">
                             <h2 className="text-xl font-bold text-white flex items-center gap-2">
                                 <Upload className="w-6 h-6" />
@@ -257,17 +250,7 @@ const GenericCustomize = ({ type, shape }) => {
                         </div>
 
                         <div className="p-6 relative min-h-[400px]">
-                            {/* SVG Definitions for Clip Paths */}
-                            <svg width="0" height="0" className="absolute">
-                                <defs>
-                                    <clipPath id="love-clip" clipPathUnits="objectBoundingBox">
-                                        <path d="M0.5,0.9 C0.5,0.9 0.9,0.65 0.9,0.4 C0.9,0.2 0.75,0.1 0.6,0.1 C0.5,0.1 0.45,0.2 0.45,0.2 C0.45,0.2 0.4,0.1 0.3,0.1 C0.15,0.1 0,0.2 0,0.4 C0,0.65 0.4,0.9 0.4,0.9 L0.5,0.9" transform="translate(0.05,0) scale(0.9)" />
-                                    </clipPath>
-                                    <clipPath id="hexagon-clip" clipPathUnits="objectBoundingBox">
-                                        <path d="M0.5 0 L0.933 0.25 V0.75 L0.5 1 L0.067 0.75 V0.25 L0.5 0Z" />
-                                    </clipPath>
-                                </defs>
-                            </svg>
+                            {/* SVG Definitions Removed in favor of inline explicit paths handled by JS */}
 
                             {!photoData ? (
                                 <div
@@ -315,23 +298,108 @@ const GenericCustomize = ({ type, shape }) => {
                                         zoom={zoom}
                                         rotation={rotation}
                                         aspect={getAspectRatio()}
+                                        cropSize={{ width: CROP_SIZE, height: CROP_SIZE / getAspectRatio() }}
                                         onCropChange={setCrop}
                                         onCropComplete={onCropComplete}
                                         onZoomChange={setZoom}
                                         onRotationChange={setRotation}
-                                        {...getCropShapeProps()}
+                                        showGrid={false}
                                         style={{
                                             containerStyle: { background: '#1a1a1a' },
-                                            cropAreaStyle: getCropAreaStyle(),
+                                            cropAreaStyle: {
+                                                boxShadow: 'none', // Remove default dimmer
+                                                border: 'none',    // Remove default border
+                                                color: 'transparent' // Hide default dimmed overlay interaction
+                                                // We don't use clipPath here anymore
+                                            },
+                                            mediaStyle: {}
                                         }}
                                     />
 
-                                    {/* Overlay for specific shapes if needed to visualize border better */}
-                                    {shape === 'love' && (
-                                        <div className="absolute inset-0 w-full h-full pointer-events-none text-black/50">
-                                            {/* Optional: Add an SVG overlay if clip-path isn't enough context */}
+                                    {/* CUSTOM SHAPE MASK OVERLAY */}
+                                    <div className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center">
+                                        {/* 
+                                            SVG Mask Logic:
+                                            We create an SVG that covers the whole area.
+                                            We must position it ABSOLUTE so it doesn't take up space in the flex container 
+                                            and push the centered 'hole' div to the side.
+                                         */}
+                                        <svg className="absolute inset-0" width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                            <defs>
+                                                <mask id="shape-mask" x="0" y="0" width="100%" height="100%" maskUnits="userSpaceOnUse">
+                                                    {/* 1. Everything visible (White) */}
+                                                    <rect x="0" y="0" width="100%" height="100%" fill="white" />
+                                                    {/* Note: We rely on the CSS box-shadow trick for the visual blackout now, 
+                                                        so this SVG mask might be redundant if we use the 'box-shadow' method fully.
+                                                        But let's keep the structure clean. 
+                                                        actually, if we use the box-shadow method on the child div, we don't strictly need this parent SVG 
+                                                        unless we want to mask out the image itself (which we can't do easily over the canvas).
+                                                        
+                                                        The box-shadow method (below) creates the visual 'dimmed' overlay.
+                                                    */}
+                                                </mask>
+                                            </defs>
+                                        </svg>
+
+                                        {/* 
+                                            CSS SHAPE-OUTSIDE / BOX-SHADOW APPROACH
+                                            This div is centered by the parent flex container.
+                                         */}
+                                        <div
+                                            style={{
+                                                width: CROP_SIZE,
+                                                height: CROP_SIZE / getAspectRatio(),
+                                                boxShadow: '0 0 0 9999px rgba(0,0,0,0.6)', // Increased spread to ensure coverage
+                                                borderRadius: shape === 'round' ? '50%' : '0%', // Use CSS radius for round to be smoother
+                                            }}
+                                            className="relative"
+                                        >
+                                            <svg className="absolute inset-0 overflow-visible" width="100%" height="100%" viewBox="0 0 1 1">
+                                                {/* 
+                                                    This SVG is exactly the size of the crop area.
+                                                    We draw a path that is a HUGE rectangle (hole's outside) MINUS the internal shape.
+                                                    This ensures the 'ears' of non-rectangular shapes (like the corners of the hexagon) 
+                                                    are covered by the overlay if the box-shadow doesn't catch them (box shadow is rect/rounded).
+                                                */}
+                                                <path
+                                                    d={
+                                                        shape === 'love'
+                                                            ? "M -10 -10 H 10 V 10 H -10 Z M 0.5 0.9 C 0.5 0.9 0.9 0.65 0.9 0.4 C 0.9 0.2 0.75 0.1 0.6 0.1 C 0.5 0.1 0.45 0.2 0.45 0.2 C 0.45 0.2 0.4 0.1 0.3 0.1 C 0.15 0.1 0 0.2 0 0.4 C 0 0.65 0.4 0.9 0.4 0.9 L 0.5 0.9 Z" // Rect Clockwise, Heart Counter-Clockwise
+                                                            : shape === 'hexagon'
+                                                                ? "M -10 -10 H 10 V 10 H -10 Z M 0.5 0 L 0.933 0.25 V 0.75 L 0.5 1 L 0.067 0.75 V 0.25 Z"
+                                                                : shape === 'round'
+                                                                    ? "M -10 -10 H 10 V 10 H -10 Z M 0.5 0.5 m -0.5 0 a 0.5 0.5 0 1 0 1 0 a 0.5 0.5 0 1 0 -1 0"
+                                                                    : "M -10 -10 H 10 V 10 H -10 Z M 0 0 H 1 V 1 H 0 Z" // Square hole
+                                                    }
+                                                    fill="rgba(0,0,0,0.6)"
+                                                    fillRule="evenodd"
+                                                    transform="scale(1)"
+                                                // The path coordinates for the shape are 0..1 (viewBox 0 0 1 1).
+                                                // The huge rect is -10..10 (relative to 1x1).
+                                                />
+                                            </svg>
+
+                                            {/* Visual Border for the shape */}
+                                            <svg className="absolute inset-0 overflow-visible pointer-events-none" width="100%" height="100%" viewBox="0 0 1 1">
+                                                <path
+                                                    d={
+                                                        shape === 'love'
+                                                            ? "M 0.5 0.9 C 0.5 0.9 0.9 0.65 0.9 0.4 C 0.9 0.2 0.75 0.1 0.6 0.1 C 0.5 0.1 0.45 0.2 0.45 0.2 C 0.45 0.2 0.4 0.1 0.3 0.1 C 0.15 0.1 0 0.2 0 0.4 C 0 0.65 0.4 0.9 0.4 0.9 L 0.5 0.9 Z"
+                                                            : shape === 'hexagon'
+                                                                ? "M 0.5 0 L 0.933 0.25 V 0.75 L 0.5 1 L 0.067 0.75 V 0.25 Z"
+                                                                : shape === 'round'
+                                                                    ? "M 0.5 0.5 m -0.5 0 a 0.5 0.5 0 1 0 1 0 a 0.5 0.5 0 1 0 -1 0"
+                                                                    : "M 0 0 H 1 V 1 H 0 Z"
+                                                    }
+                                                    fill="none"
+                                                    stroke="white"
+                                                    strokeWidth="0.015"
+                                                    vectorEffect="non-scaling-stroke"
+                                                    className="drop-shadow-md"
+                                                />
+                                            </svg>
                                         </div>
-                                    )}
+                                    </div>
 
                                     {lowResWarning && (
                                         <div className="absolute top-6 left-6 bg-white/90 backdrop-blur text-error px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 z-20 shadow-xl border border-error/20 animate-pulse">
@@ -380,7 +448,7 @@ const GenericCustomize = ({ type, shape }) => {
                     </div>
 
                     {/* Footer Actions */}
-                    <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-neutral-100 pt-8 lg:col-span-2 order-3">
+                    <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-neutral-100 pt-8">
                         <div>
                             {photoData && (
                                 <button

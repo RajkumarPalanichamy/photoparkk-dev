@@ -184,16 +184,17 @@ const renderShapePreview = (shape) => {
         case "Round":
             return (
                 <div className={`${baseClass} w-36 h-36 rounded-full overflow-hidden border-2 border-white/50`}>
-                    <Image src={SquareImg} alt="Round" fill className={imgClass} />
+                    <Image src={PortraitImg} alt="Round" fill className={imgClass} />
                     {glassOverlay}
                 </div>
             );
         case "Hexagon":
             return (
+                // Flat-topped hexagon using slightly different clip-path for better look
                 <div className="w-40 h-40 flex items-center justify-center filter drop-shadow-xl group-hover:drop-shadow-2xl transition-all duration-300">
-                    <div className="relative w-full h-full transition-transform duration-500 group-hover:scale-105"
-                        style={{ clipPath: "polygon(25% 6.7%, 75% 6.7%, 100% 50%, 75% 93.3%, 25% 93.3%, 0% 50%)" }}>
-                        <Image src={SquareImg} alt="Hexagon" fill className={imgClass} />
+                    <div className="relative w-full h-full transition-transform duration-500 group-hover:scale-105 bg-white"
+                        style={{ clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" }}>
+                        <Image src={PortraitImg} alt="Hexagon" fill className={imgClass} />
                         {glassOverlay}
                     </div>
                 </div>
@@ -201,19 +202,18 @@ const renderShapePreview = (shape) => {
         case "Love":
             return (
                 <div className="w-40 h-40 relative filter drop-shadow-xl group-hover:drop-shadow-2xl transition-all duration-300">
-                    <svg viewBox="0 0 512 512" className="w-full h-full transform transition-transform duration-500 group-hover:scale-105">
+                    {/* SVG Heart Path Clip */}
+                    <svg width="0" height="0" className="absolute">
                         <defs>
-                            <clipPath id="heartClip">
-                                <path d="M256 448l-30.16-27.42C118.7 325 48 261 48 182.5 48 118.5 98.49 67.97 162.5 67.97c36.19 0 70.9 16.88 93.5 43.68 22.6-26.8 57.31-43.68 93.5-43.68 64 0 114.5 50.53 114.5 114.53 0 78.5-70.7 142.5-177.84 238.08L256 448z" />
+                            <clipPath id="myHeartClip" clipPathUnits="objectBoundingBox">
+                                <path d="M0.5,0.887 C0.111,0.675,0.015,0.473,0.015,0.306 C0.015,0.165,0.126,0.05,0.267,0.05 C0.347,0.05,0.423,0.087,0.472,0.148 L0.5,0.183 L0.528,0.148 C0.577,0.087,0.653,0.05,0.733,0.05 C0.874,0.05,0.985,0.165,0.985,0.306 C0.985,0.473,0.889,0.675,0.5,0.887 Z" />
                             </clipPath>
                         </defs>
-                        <foreignObject x="0" y="0" width="512" height="512" clipPath="url(#heartClip)">
-                            <div className="w-full h-full bg-neutral-100 relative">
-                                <Image src={SquareImg} alt="Love" fill className={`${imgClass} scale-150`} />
-                                <div className="absolute inset-0 bg-gradient-to-tr from-white/30 via-transparent to-transparent pointer-events-none" />
-                            </div>
-                        </foreignObject>
                     </svg>
+                    <div className="w-full h-full relative tranform group-hover:scale-105 transition-transform duration-500" style={{ clipPath: "url(#myHeartClip)" }}>
+                        <Image src={PortraitImg} alt="Love" fill className={`${imgClass}`} />
+                        {glassOverlay}
+                    </div>
                 </div>
             );
         default:

@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 export async function POST(request) {
     try {
         const body = await request.json();
-        const { userId, productId, productType, title, quantity, size, thickness, price, totalAmount, image } = body;
+        const { userId, productId, productType, title, quantity, size, thickness, price, totalAmount, image, uploadedImageUrl } = body;
 
         if (!userId || !productId) {
             return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
@@ -24,7 +24,9 @@ export async function POST(request) {
                     thickness,
                     price,
                     total_amount: totalAmount,
-                    image: image, // Main image for the cart item
+                    image: image, // Main preview image (e.g., cropped)
+                    uploaded_image_url: uploadedImageUrl, // Original full image
+                    // customization_details: body.customizationDetails, // Removed until column exists
                 },
             ])
             .select();
