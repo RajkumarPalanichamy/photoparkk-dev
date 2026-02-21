@@ -565,7 +565,7 @@ const CanvasCustomizer = ({ shape }) => {
 
                                     {/* Badges */}
                                     <div data-html2canvas-ignore="true" className="cvz-wall-tag cvz-wall-tag-tl">
-                                        <Eye size={12} color="#0071e3" /> Wall Preview
+                                        <Eye size={12} color="#0071e3" /> Live Wall Preview
                                     </div>
                                     {selectedSize && croppedImageUrl && (
                                         <div data-html2canvas-ignore="true" className="cvz-wall-tag cvz-wall-tag-tr cvz-wall-tag-size">

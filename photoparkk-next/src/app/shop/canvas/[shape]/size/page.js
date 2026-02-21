@@ -206,6 +206,16 @@ export default function CanvasSizePage() {
         return { width: `${w}px`, height: `${h}px` };
     };
 
+    const getSizeDisplay = (size) => {
+        if (!size) return "";
+        if (size.width && size.height) return `${size.width}x${size.height}`;
+        return String(size.label || "")
+            .replace(/\s*inches?/gi, "")
+            .replace(/"/g, "")
+            .replace(/×/g, "x")
+            .trim();
+    };
+
     if (!editorData) return (
         <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Poppins, sans-serif' }}>
             <Loader2 className="animate-spin" size={24} style={{ marginRight: 8 }} /> Loading...
@@ -244,26 +254,21 @@ export default function CanvasSizePage() {
                 }
                 .cs-wall-scene {
                     position: relative; height: 520px; overflow: hidden;
-                    background: #d5d5d0;
+                    background: #f7f7f7;
                     background-image:
-                        radial-gradient(ellipse at 35% 25%, rgba(255,255,255,0.18) 0%, transparent 55%),
-                        radial-gradient(ellipse at 80% 75%, rgba(0,0,0,0.05) 0%, transparent 45%);
+                        radial-gradient(circle at 20% 25%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 42%),
+                        radial-gradient(circle at 78% 72%, rgba(0,0,0,0.035) 0%, rgba(0,0,0,0) 38%);
                 }
-                /* Concrete / plaster texture */
                 .cs-wall-scene::before {
-                    content: ''; position: absolute; inset: 0; z-index: 1;
-                    opacity: 0.6; pointer-events: none;
+                    content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
                     background-image:
-                        repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.012) 1px, rgba(0,0,0,0.012) 2px),
+                        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.012) 2px, rgba(0,0,0,0.012) 3px),
                         repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.008) 2px, rgba(0,0,0,0.008) 3px);
+                    opacity: 0.45;
                 }
-                /* Grain overlay */
-                .cs-wall-scene::after {
+                .cs-wall-overlay {
                     content: ''; position: absolute; inset: 0; z-index: 2;
-                    background:
-                        radial-gradient(circle at 20% 80%, rgba(0,0,0,0.02) 0%, transparent 40%),
-                        radial-gradient(circle at 70% 20%, rgba(255,255,255,0.04) 0%, transparent 35%),
-                        radial-gradient(circle at 50% 50%, rgba(0,0,0,0.015) 0%, transparent 60%);
+                    background: linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 100%);
                     pointer-events: none;
                 }
 
@@ -275,47 +280,56 @@ export default function CanvasSizePage() {
                 }
                 .cs-frame-wrap {
                     position: relative;
+                    --canvas-depth: 8px;
                     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
                 }
                 /* 3D Canvas: front face */
                 .cs-frame {
                     position: relative;
-                    box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.15);
+                    border: 1px solid rgba(0,0,0,0.18);
+                    box-shadow: 0 8px 18px rgba(0,0,0,0.2), 0 1px 6px rgba(0,0,0,0.1);
                     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+                    z-index: 3;
                 }
                 .cs-frame img {
                     width: 100%; height: 100%; object-fit: cover; display: block;
                 }
                 /* Right side depth */
                 .cs-depth-right {
-                    position: absolute; top: 8px; right: -14px;
-                    width: 14px; bottom: -8px;
-                    background: linear-gradient(90deg, #3a3a3a 0%, #2a2a2a 40%, #1a1a1a 100%);
-                    transform: skewY(-40deg);
-                    transform-origin: top left;
+                    position: absolute; top: 0; right: calc(-1 * var(--canvas-depth));
+                    width: var(--canvas-depth); bottom: 0;
+                    background: linear-gradient(90deg, #2f2f2f 0%, #212121 65%, #151515 100%);
+                    border-radius: 0 1px 1px 0;
+                    z-index: 2;
                 }
                 .cs-depth-right::after {
                     content: ''; position: absolute; inset: 0;
-                    background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 50%);
+                    background: linear-gradient(180deg, rgba(255,255,255,0.14) 0%, transparent 56%);
                 }
                 /* Bottom side depth */
                 .cs-depth-bottom {
-                    position: absolute; left: 8px; bottom: -14px;
-                    height: 14px; right: -8px;
-                    background: linear-gradient(180deg, #2c2c2c 0%, #1c1c1c 60%, #111 100%);
-                    transform: skewX(-40deg);
-                    transform-origin: top left;
+                    position: absolute; left: 0; bottom: calc(-1 * var(--canvas-depth));
+                    height: calc(var(--canvas-depth) * 0.5);
+                    right: calc(-1 * var(--canvas-depth));
+                    background: linear-gradient(180deg, #2b2b2b 0%, #1b1b1b 70%, #121212 100%);
+                    border-radius: 0 0 2px 2px;
+                    z-index: 2;
                 }
                 .cs-depth-bottom::after {
                     content: ''; position: absolute; inset: 0;
-                    background: linear-gradient(90deg, rgba(255,255,255,0.05) 0%, transparent 40%);
+                    background: linear-gradient(90deg, rgba(255,255,255,0.08) 0%, transparent 42%);
                 }
                 /* Frame shadow on wall */
                 .cs-frame-shadow {
-                    position: absolute; width: 90%; height: 30px;
-                    bottom: -30px; left: 5%;
-                    background: radial-gradient(ellipse, rgba(0,0,0,0.25) 0%, transparent 65%);
-                    filter: blur(10px);
+                    position: absolute;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: calc(100% + (var(--canvas-depth) * 1.8));
+                    height: clamp(12px, 7%, 22px);
+                    bottom: calc(-1 * var(--canvas-depth) - 10px);
+                    background: radial-gradient(ellipse, rgba(0,0,0,0.13) 0%, rgba(0,0,0,0.06) 38%, transparent 72%);
+                    filter: blur(6px);
+                    z-index: 1;
                 }
 
                 /* Dimension lines */
@@ -494,15 +508,31 @@ export default function CanvasSizePage() {
                         <div className="cs-left">
                             <div className="cs-wall">
                                 <div className="cs-wall-scene" ref={previewRef}>
+                                    <div className="cs-wall-overlay" />
+
+                                    <div data-html2canvas-ignore="true" className="cs-tag cs-tag-tl">
+                                        <Eye size={12} color="#0071e3" /> Live Wall Preview
+                                    </div>
+                                    {selectedSize && (
+                                        <div data-html2canvas-ignore="true" className="cs-tag cs-tag-tr">
+                                            <Ruler size={12} /> {getSizeDisplay(selectedSize)}
+                                        </div>
+                                    )}
 
                                     <div className="cs-frame-area">
-                                        <div className="cs-frame-wrap" style={getFrameStyle()}>
+                                        <div
+                                            className="cs-frame-wrap"
+                                            style={{
+                                                ...getFrameStyle(),
+                                                "--canvas-depth": selectedThickness?.value === "gallery" ? "11px" : "7px",
+                                            }}
+                                        >
                                             {/* Dimension lines + label */}
                                             <div data-html2canvas-ignore="true" className="cs-dims">
                                                 <div className="cs-dim-top">
                                                     <div className="cs-dim-line" />
                                                     <span className="cs-dim-label">
-                                                        {selectedSize ? `${selectedSize.width}×${selectedSize.height} Canvas Frame` : 'Canvas Frame'}
+                                                        {selectedSize ? `${getSizeDisplay(selectedSize)} Canvas` : 'Canvas'}
                                                     </span>
                                                     <div className="cs-dim-line" />
                                                 </div>
@@ -555,7 +585,7 @@ export default function CanvasSizePage() {
                                     <div className="cs-sizes">
                                         {availableSizes.map((s, i) => (
                                             <div key={i} className={`cs-size ${selectedSize?.label === s.label ? 'on' : ''}`} onClick={() => setSelectedSize(s)}>
-                                                <div className="cs-size-name">{s.label}</div>
+                                                <div className="cs-size-name">{getSizeDisplay(s)}</div>
                                                 <div className="cs-size-price">₹{s.price}</div>
                                                 {selectedSize?.label === s.label && <CheckCircle2 size={16} color="#0071e3" className="cs-size-check" />}
                                             </div>
