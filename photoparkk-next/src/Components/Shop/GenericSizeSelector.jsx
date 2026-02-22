@@ -46,10 +46,7 @@ const EDGE_OPTIONS = [
     { label: "Beveled Edge", price: 350, value: "bevel" },
 ];
 
-const FRAME_ICONS = [
-    { label: "No Frame", value: "none", icon: <Frame className="w-5 h-5 text-neutral-400" /> },
-    { label: "Custom Frame", value: "custom", icon: <Frame className="w-5 h-5 text-primary" /> },
-];
+// Product-specific frame options will be defined within the component
 
 const GenericSizeSelector = ({ type, shape }) => {
     const router = useRouter();
@@ -66,6 +63,18 @@ const GenericSizeSelector = ({ type, shape }) => {
     const [totalPrice, setTotalPrice] = useState(0);
     const [loading, setLoading] = useState(false);
     const [userId, setUserId] = useState(null);
+    const [backlightColor, setBacklightColor] = useState("#ffffff");
+    const [backlightIntensity, setBacklightIntensity] = useState(1.0);
+
+    // Dynamic Frame Icons
+    const FRAME_ICONS = [
+        { label: "No Frame", value: "none", icon: <Frame className="w-5 h-5 text-neutral-400" /> },
+        { label: "Custom Frame", value: "custom", icon: <Frame className="w-5 h-5 text-primary" /> },
+    ];
+
+    if (type === 'backlight') {
+        FRAME_ICONS.push({ label: "LED Lightbox", value: "backlight", icon: <Sparkles className="w-5 h-5 text-yellow-500" /> });
+    }
 
     // Derived Constants
     const shapeTitle = shape.charAt(0).toUpperCase() + shape.slice(1);
@@ -114,7 +123,11 @@ const GenericSizeSelector = ({ type, shape }) => {
 
                         if (parsed.configuration?.thickness) setSelectedThickness(parsed.configuration.thickness);
                         if (parsed.configuration?.edge) setSelectedEdge(parsed.configuration.edge);
-                        if (parsed.configuration?.frameType) setFrameType(parsed.configuration.frameType);
+                        if (parsed.configuration?.frameType) {
+                            setFrameType(parsed.configuration.frameType);
+                        } else if (type === 'backlight') {
+                            setFrameType('backlight');
+                        }
                         if (parsed.configuration?.frameColor) setSelectedColor(parsed.configuration.frameColor);
                     } else {
                         // No photo data
@@ -318,6 +331,8 @@ const GenericSizeSelector = ({ type, shape }) => {
                     edge: selectedEdge,
                     frameType,
                     frameColor: selectedColor,
+                    backlightColor: type === 'backlight' ? backlightColor : null,
+                    backlightIntensity: type === 'backlight' ? backlightIntensity : null,
                     originalName: photoData?.name
                 }
             };
@@ -344,11 +359,11 @@ const GenericSizeSelector = ({ type, shape }) => {
     const isHexagon = shape === 'hexagon';
 
     // Determine visual style for preview based on user selection
-    const hasFrame = frameType === 'custom';
+    const hasFrame = frameType === 'custom' || frameType === 'backlight';
     const previewStyle = {
         // If frame is selected, add border width.
         borderWidth: hasFrame ? '12px' : (selectedThickness.value === '8mm' ? '2px' : '0px'),
-        borderColor: hasFrame ? selectedColor : 'transparent',
+        borderColor: frameType === 'custom' ? selectedColor : (frameType === 'backlight' ? '#171717' : 'transparent'), // Default sleek black for backlight
         borderStyle: 'solid',
         boxShadow: hasFrame
             ? `0 10px 30px rgba(0,0,0,0.3)`
@@ -356,6 +371,25 @@ const GenericSizeSelector = ({ type, shape }) => {
         transform: selectedEdge.value === 'bevel' && !hasFrame ? 'perspective(1000px) rotateX(2deg)' : 'none',
         clipPath: isLove ? 'url(#love-clip-preview)' : isHexagon ? 'url(#hexagon-clip-preview)' : 'none',
     };
+
+    if (frameType === 'backlight') {
+        const innerGlow = `inset 0 0 40px ${backlightColor}aa, inset 0 0 100px ${backlightColor}55`;
+        const borderGlow = `0 0 20px ${backlightColor}44`;
+        const frameBevel = `inset 0 0 10px rgba(0,0,0,0.8), inset 0 0 2px rgba(255,255,255,0.2)`;
+
+        previewStyle.boxShadow = `${previewStyle.boxShadow}, ${innerGlow}, ${borderGlow}, ${frameBevel}`;
+        previewStyle.borderColor = '#1a1817'; // Deep Charcoal/Wenge wood color
+        previewStyle.borderWidth = '28px'; // Thicker professional frame
+
+        // Add a subtle wood grain effect using a repeating linear gradient
+        previewStyle.backgroundImage = `
+            linear-gradient(45deg, rgba(255,255,255,0.02) 25%, transparent 25%),
+            linear-gradient(-45deg, rgba(255,255,255,0.02) 25%, transparent 25%),
+            linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.02) 75%),
+            linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.02) 75%)
+        `;
+        previewStyle.backgroundSize = '4px 4px';
+    }
 
     if (isLove || isHexagon) {
         // Switch to drop-shadow since box-shadow is clipped
@@ -372,8 +406,26 @@ const GenericSizeSelector = ({ type, shape }) => {
         previewStyle.borderWidth = '0px';
     }
 
+    // Backlight Effect (Lightbox)
+    if (type === 'backlight' && frameType === 'backlight') {
+        const intensity = backlightIntensity || 1.0;
+        const currentFilter = previewStyle.filter || '';
+
+        // Illuminate the graphic itself
+        previewStyle.filter = `${currentFilter} brightness(${1.1 + (intensity * 0.3)}) contrast(${1.1 + (intensity * 0.15)}) saturate(${1.15 + (intensity * 0.15)})`;
+
+        // Add a deeper, more realistic wall shadow (Ambient + Light Leak)
+        if (!isLove && !isHexagon) {
+            previewStyle.boxShadow = `
+                0 30px 60px -12px rgba(0, 0, 0, 0.45), 
+                0 18px 36px -18px rgba(0, 0, 0, 0.5), 
+                0 0 ${50 * intensity}px ${10 * intensity}px ${backlightColor}22
+            `;
+        }
+    }
+
     return (
-        <div className="bg-neutral-50 min-h-screen pt-[100px] pb-12 font-[Poppins]">
+        <div className="bg-white min-h-screen pt-[100px] pb-12">
             <svg width="0" height="0" className="absolute pointer-events-none">
                 <defs>
                     <clipPath id="love-clip-preview" clipPathUnits="objectBoundingBox">
@@ -474,29 +526,46 @@ const GenericSizeSelector = ({ type, shape }) => {
                                     </div>
                                 )}
 
-                                {/* The Frame */}
-                                <div
-                                    className={`relative w-full h-full overflow-hidden ${isRound ? 'rounded-full' : 'rounded-sm'}`}
-                                    style={{
-                                        backgroundColor: 'white',
-                                        transition: 'all 0.5s ease',
-                                        ...previewStyle,
-                                    }}
-                                >
-                                    {/* Glassy Detail: Specular Highlight (Window Reflection) */}
-                                    <div className="absolute top-0 right-0 w-[200%] h-full bg-gradient-to-l from-transparent via-white/20 to-transparent skew-x-[-25deg] translate-x-1/2 opacity-30 pointer-events-none z-30"></div>
+                                {/* The Frame Container with Cable */}
+                                <div className="relative group">
+                                    {/* Power Cable (Only for Backlight) */}
+                                    {type === 'backlight' && frameType === 'backlight' && (
+                                        <div
+                                            data-html2canvas-ignore="true"
+                                            className="absolute -right-[120px] top-1/2 w-[125px] h-1.5 bg-neutral-800 rounded-full blur-[0.5px] opacity-80"
+                                            style={{
+                                                transform: 'translateY(24px) rotate(12deg)',
+                                                boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
+                                                backgroundImage: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.4))'
+                                            }}
+                                        >
+                                            <div className="absolute -right-1 -top-1 w-3 h-3 bg-neutral-700 rounded-full shadow-md"></div>
+                                        </div>
+                                    )}
 
-                                    {/* Glassy Detail: Surface Gloss */}
-                                    <div className="absolute inset-0 z-20 bg-gradient-to-tr from-white/20 via-transparent to-black/10 pointer-events-none mix-blend-overlay"></div>
+                                    <div
+                                        className={`relative w-full h-full overflow-hidden ${isRound ? 'rounded-full' : 'rounded-sm'}`}
+                                        style={{
+                                            backgroundColor: 'white',
+                                            transition: 'all 0.5s ease',
+                                            ...previewStyle,
+                                        }}
+                                    >
+                                        {/* Glassy Detail: Specular Highlight (Window Reflection) */}
+                                        <div className="absolute top-0 right-0 w-[200%] h-full bg-gradient-to-l from-transparent via-white/20 to-transparent skew-x-[-25deg] translate-x-1/2 opacity-30 pointer-events-none z-30"></div>
 
-                                    {/* Edge Highlight (Inner Glow) */}
-                                    <div className="absolute inset-0 z-20 shadow-[inset_0_0_2px_1px_rgba(255,255,255,0.4)] pointer-events-none rounded-inherit"></div>
+                                        {/* Glassy Detail: Surface Gloss */}
+                                        <div className="absolute inset-0 z-20 bg-gradient-to-tr from-white/20 via-transparent to-black/10 pointer-events-none mix-blend-overlay"></div>
 
-                                    <img
-                                        src={croppedImageUrl || photoData.url}
-                                        alt="Preview"
-                                        className="w-full h-full object-cover block"
-                                    />
+                                        {/* Edge Highlight (Inner Glow) */}
+                                        <div className="absolute inset-0 z-20 shadow-[inset_0_0_2px_1px_rgba(255,255,255,0.4)] pointer-events-none rounded-inherit"></div>
+
+                                        <img
+                                            src={croppedImageUrl || photoData.url}
+                                            alt="Preview"
+                                            className="w-full h-full object-cover block"
+                                        />
+                                    </div>
                                 </div>
 
                                 {/* Redundant shadow removed - handled by filter */}
@@ -644,6 +713,54 @@ const GenericSizeSelector = ({ type, shape }) => {
                                         )}
                                     </div>
                                 </div>
+
+                                {/* Backlight Section */}
+                                {type === 'backlight' && (
+                                    <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-500">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <h3 className="font-bold text-secondary flex items-center gap-2">
+                                                <Sparkles className="w-5 h-5 text-primary" /> LED Brightness
+                                            </h3>
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-4 h-4 rounded-full border border-neutral-200" style={{ backgroundColor: backlightColor }}></div>
+                                                <span className="text-xs font-semibold text-neutral-500 uppercase">Lit</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-100 space-y-6">
+                                            <div className="flex justify-center">
+                                                <HexColorPicker color={backlightColor} onChange={setBacklightColor} style={{ width: '100%', height: '150px' }} />
+                                            </div>
+
+                                            <div className="space-y-3">
+                                                <div className="flex justify-between text-xs font-bold text-neutral-500 uppercase">
+                                                    <span>Light Intensity</span>
+                                                    <span>{Math.round(backlightIntensity * 100)}%</span>
+                                                </div>
+                                                <input
+                                                    type="range"
+                                                    min="0.2"
+                                                    max="1.5"
+                                                    step="0.1"
+                                                    value={backlightIntensity}
+                                                    onChange={(e) => setBacklightIntensity(parseFloat(e.target.value))}
+                                                    className="w-full h-2 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-primary"
+                                                />
+                                            </div>
+
+                                            <div className="grid grid-cols-5 gap-2">
+                                                {['#ffffff', '#0ea5e9', '#f43f5e', '#eab308', '#22c55e'].map((c) => (
+                                                    <button
+                                                        key={c}
+                                                        onClick={() => setBacklightColor(c)}
+                                                        className={`h-8 rounded-lg border-2 transition-transform hover:scale-110 ${backlightColor === c ? 'border-primary ring-2 ring-primary/20' : 'border-transparent'}`}
+                                                        style={{ backgroundColor: c }}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Quantity & Total */}
                                 <div className="pt-6 border-t border-neutral-100 space-y-4">
