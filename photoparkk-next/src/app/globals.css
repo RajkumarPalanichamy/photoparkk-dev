@@ -31,6 +31,8 @@
   --color-error-light: #f8d7da;
   --color-warning: #ff9500;
   --color-warning-light: #fff3cd;
+  /* Fonts */
+  --font-sans: var(--font-poppins), system-ui, sans-serif;
 }
 
 a.active hr {
@@ -39,7 +41,7 @@ a.active hr {
 
 body {
   background-color: #FAF8F4;
-  /* font-family: "Poppins", sans-serif; -- Pending google fonts import in layout */
+  font-family: var(--font-poppins), sans-serif;
 }
 
 html,

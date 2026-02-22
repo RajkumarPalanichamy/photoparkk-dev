@@ -196,7 +196,7 @@ const BacklightSizeSelector = ({ shape }) => {
     const imgSrc = croppedImageUrl || editorData.photoData.url;
 
     return (
-        <div className="min-h-screen bg-white font-[Inter]" style={{ paddingTop: '80px' }}>
+        <div className="min-h-screen bg-white" style={{ paddingTop: '80px' }}>
 
             {/* ═══ STICKY TOP BAR ═══ */}
             <div className="bg-white/95 backdrop-blur-md border-b border-neutral-100 sticky top-[80px] z-40">
@@ -367,8 +367,8 @@ const BacklightSizeSelector = ({ shape }) => {
                                             key={idx}
                                             onClick={() => setSelectedSize(size)}
                                             className={`relative p-4 rounded-2xl border-2 text-left transition-all duration-200 ${isSelected
-                                                    ? 'border-primary bg-primary/5 shadow-md ring-1 ring-primary/20'
-                                                    : 'border-neutral-100 hover:border-neutral-200 hover:shadow-sm bg-white'
+                                                ? 'border-primary bg-primary/5 shadow-md ring-1 ring-primary/20'
+                                                : 'border-neutral-100 hover:border-neutral-200 hover:shadow-sm bg-white'
                                                 }`}
                                         >
                                             <div className={`text-sm font-bold ${isSelected ? 'text-primary' : 'text-secondary'}`}>
