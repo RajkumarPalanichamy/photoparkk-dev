@@ -35,6 +35,23 @@ const BL_SIZES = {
     ],
 };
 
+// ─── Luxury Config Options ───
+const LIGHT_MODES = [
+    { label: "Warm Glow", value: "warm", color: "#FFD27D", desc: "Cozy & inviting" },
+    { label: "Cool White", value: "cool", color: "#E6F0FF", desc: "Modern & crisp" },
+    { label: "Natural", value: "natural", color: "#FFFFFF", desc: "Pure daylight" },
+];
+
+const POWER_OPTIONS = [
+    { label: "Standard USB", value: "usb", price: 0, desc: "Plug & play" },
+    { label: "Wireless Pack", value: "battery", price: 650, desc: "Cordless look" },
+];
+
+const SMART_UPGRADES = [
+    { id: "remote", label: "Remote Control", price: 499, desc: "Dim from distance" },
+    { id: "wifi", label: "Wi-Fi Switch", price: 899, desc: "Smart home ready" },
+];
+
 const BacklightSizeSelector = ({ shape }) => {
     const router = useRouter();
     const type = "backlight";
@@ -43,6 +60,9 @@ const BacklightSizeSelector = ({ shape }) => {
     const [editorData, setEditorData] = useState(null);
     const [frameConfig, setFrameConfig] = useState(null);
     const [selectedSize, setSelectedSize] = useState(null);
+    const [selectedLightMode, setSelectedLightMode] = useState(LIGHT_MODES[0]);
+    const [selectedPower, setSelectedPower] = useState(POWER_OPTIONS[0]);
+    const [upgrades, setUpgrades] = useState([]);
     const [quantity, setQuantity] = useState(1);
     const [totalPrice, setTotalPrice] = useState(0);
     const [loading, setLoading] = useState(false);
@@ -106,8 +126,10 @@ const BacklightSizeSelector = ({ shape }) => {
 
     // ─── Price ───
     useEffect(() => {
-        if (selectedSize) setTotalPrice(selectedSize.price * quantity);
-    }, [selectedSize, quantity]);
+        if (!selectedSize) return;
+        const upgradeBase = upgrades.reduce((sum, u) => sum + u.price, 0);
+        setTotalPrice((selectedSize.price + selectedPower.price + upgradeBase) * quantity);
+    }, [selectedSize, selectedPower, upgrades, quantity]);
 
     // ─── Crop ───
     const getCroppedImg = useCallback(async (imageSrc, pixelCrop, rotation = 0) => {
@@ -144,10 +166,14 @@ const BacklightSizeSelector = ({ shape }) => {
         if (!previewRef.current) return null;
         try {
             return await htmlToImage.toBlob(previewRef.current, {
-                quality: 0.95, pixelRatio: 2, backgroundColor: '#f5f5f5',
+                quality: 0.95, pixelRatio: 2, backgroundColor: '#f1eee9',
                 filter: n => !(n.hasAttribute && n.hasAttribute('data-html2canvas-ignore'))
             });
         } catch { return null; }
+    };
+
+    const toggleUpgrade = (u) => {
+        setUpgrades(prev => prev.find(x => x.id === u.id) ? prev.filter(x => x.id !== u.id) : [...prev, u]);
     };
 
     // ─── Add to Cart ───
@@ -179,7 +205,14 @@ const BacklightSizeSelector = ({ shape }) => {
                 frameType: "backlight", frameColor: "#1a1a1a",
                 price: totalPrice / quantity, quantity, totalAmount: totalPrice,
                 uploadedImageUrl: photoData?.url,
-                customizationDetails: { crop: prevConfig?.crop, ledBrightness, originalName: photoData?.name }
+                customizationDetails: {
+                    crop: prevConfig?.crop,
+                    ledBrightness,
+                    lightMode: selectedLightMode.label,
+                    powerType: selectedPower.label,
+                    upgrades: upgrades.map(u => u.label),
+                    originalName: photoData?.name
+                }
             });
             toast.success("Added to Cart!"); router.push("/cart");
         } catch (e) { console.error("Cart error", e); toast.error("Failed to add to cart."); }
@@ -188,15 +221,15 @@ const BacklightSizeSelector = ({ shape }) => {
 
     // ─── Loading ───
     if (!editorData) return (
-        <div className="min-h-screen flex items-center justify-center bg-neutral-50">
-            <Loader2 className="animate-spin mr-2 text-primary" /> <span className="text-secondary">Loading...</span>
+        <div className="min-h-screen flex items-center justify-center bg-neutral-50 uppercase tracking-widest text-[10px] font-bold">
+            <Loader2 className="animate-spin mr-3 text-primary w-4 h-4" /> <span className="text-secondary/60">Initializing Studio...</span>
         </div>
     );
 
     const imgSrc = croppedImageUrl || editorData.photoData.url;
 
     return (
-        <div className="min-h-screen bg-white" style={{ paddingTop: '80px' }}>
+        <div className="min-h-screen bg-white font-sans text-secondary selection:bg-blue-600/10 selection:text-blue-600" style={{ paddingTop: '80px' }}>
 
             {/* ═══ STICKY TOP BAR ═══ */}
             <div className="bg-white/95 backdrop-blur-md border-b border-neutral-100 sticky top-[80px] z-40">
@@ -206,21 +239,21 @@ const BacklightSizeSelector = ({ shape }) => {
                             <ArrowLeft className="w-4 h-4 text-neutral-500" />
                         </button>
                         <div className="flex items-center gap-2">
-                            <Sparkles className="w-4 h-4 text-primary" />
-                            <span className="font-semibold text-secondary text-sm">LED Photo Frames</span>
+                            <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                            <span className="font-extrabold text-secondary text-sm tracking-tight">Luxury LED Studio</span>
                         </div>
                         <span className="text-neutral-200 hidden sm:inline">|</span>
-                        <span className="text-xs text-neutral-400 hidden sm:inline">{shapeTitle}</span>
+                        <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider hidden sm:inline">{shapeTitle} Collection</span>
                     </div>
                     <div className="flex items-center gap-4">
-                        <span className="text-sm font-bold text-secondary">₹{totalPrice.toLocaleString()}</span>
+                        <span className="text-sm font-extrabold text-secondary">₹{totalPrice.toLocaleString()}</span>
                         <button
                             onClick={handleAddToCart}
                             disabled={loading || !selectedSize}
-                            className="bg-primary hover:bg-primary-hover text-white h-9 px-5 rounded-full text-sm font-semibold transition-all disabled:opacity-50 flex items-center gap-2 shadow-sm"
+                            className="bg-primary hover:bg-primary-hover text-white h-9 px-6 rounded-full text-xs font-bold uppercase tracking-wider transition-all disabled:opacity-50 flex items-center gap-2 shadow-[0_4px_12px_rgba(0,113,227,0.3)] hover:shadow-[0_6px_20px_rgba(0,113,227,0.4)] hover:-translate-y-0.5"
                         >
                             {loading ? <Loader2 className="animate-spin w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
-                            Add to Cart
+                            Secure Cart
                         </button>
                     </div>
                 </div>
@@ -237,31 +270,39 @@ const BacklightSizeSelector = ({ shape }) => {
                         style={{
                             height: '600px',
                             maxHeight: '75vh',
-                            background: '#e8e4de',
+                            background: '#f1eee9',
                             backgroundImage: `
-                                linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 50%),
-                                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4cfc7' fill-opacity='0.25'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
+                                radial-gradient(circle at 50% 10%, rgba(255,255,255,0.7) 0%, transparent 60%),
+                                url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 50h100M50 0v100' fill='none' stroke='%23d4cfc7' stroke-opacity='0.15' stroke-width='0.5'/%3E%3C/svg%3E")
                             `,
-                            boxShadow: 'inset 0 1px 30px rgba(0,0,0,0.06)',
+                            boxShadow: 'inset 0 1px 40px rgba(0,0,0,0.08)',
+                            border: '1px solid #e8e3dc'
                         }}
                     >
-                        {/* Wall light effect */}
-                        <div className="absolute inset-0 pointer-events-none" style={{
-                            background: 'radial-gradient(ellipse at 50% 30%, rgba(255,255,255,0.5) 0%, transparent 70%)',
+                        {/* Dynamic Gloom Overlay (reacts to brightness) */}
+                        <div className="absolute inset-0 transition-opacity duration-700 pointer-events-none" style={{
+                            background: 'rgba(15, 20, 30, 0.4)',
+                            opacity: Math.max(0, 0.7 - (ledBrightness * 0.4))
+                        }}></div>
+
+                        {/* Adaptive Wall light effect (reacts to color mode) */}
+                        <div className="absolute inset-x-0 top-0 transition-all duration-700 pointer-events-none" style={{
+                            height: '100%',
+                            background: `radial-gradient(circle at 50% 45%, ${selectedLightMode.color}${Math.round(ledBrightness * 40).toString(16).padStart(2, '0')}, transparent 65%)`,
                         }}></div>
 
                         {/* Live Preview Badge */}
                         <div data-html2canvas-ignore="true"
-                            className="absolute top-5 left-5 z-30 bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] font-semibold text-neutral-500 uppercase tracking-widest border border-neutral-200/50 shadow-sm flex items-center gap-1.5"
+                            className="absolute top-6 left-6 z-30 bg-white/70 backdrop-blur-xl px-4 py-2 rounded-2xl text-[9px] font-bold text-neutral-600 uppercase tracking-[0.2em] border border-white/40 shadow-xl flex items-center gap-2"
                         >
-                            <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></div>
-                            Wall Preview
+                            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_#22c55e]"></div>
+                            Studio Simulation
                         </div>
 
                         {/* ═══ CENTERED FRAME ═══ */}
                         <div className="absolute inset-0 flex items-center justify-center">
                             <div
-                                className="relative transition-all duration-700 ease-out"
+                                className="relative transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]"
                                 style={{
                                     height: selectedSize
                                         ? `${Math.min(Math.max((selectedSize.height / 30) * 100, 40), 75)}%`
@@ -269,69 +310,78 @@ const BacklightSizeSelector = ({ shape }) => {
                                     aspectRatio: selectedSize
                                         ? `${selectedSize.width} / ${selectedSize.height}`
                                         : '2/3',
-                                    maxWidth: '60%',
+                                    maxWidth: '65%',
                                 }}
                             >
                                 {/* ─── LED FRAME ─── */}
                                 <div
-                                    className="relative w-full h-full"
+                                    className="relative w-full h-full p-[18px] transition-all duration-700"
                                     style={{
-                                        border: '20px solid #1c1c1c',
-                                        borderRadius: '4px',
+                                        background: '#121212',
+                                        borderRadius: '6px',
                                         boxShadow: `
-                                            inset 0 0 0 1px rgba(80,80,80,0.5),
-                                            inset 0 0 ${25 * ledBrightness}px rgba(255,248,235,${0.2 * ledBrightness}),
-                                            0 40px 80px -20px rgba(0,0,0,0.4),
-                                            0 20px 40px -10px rgba(0,0,0,0.3),
-                                            0 0 0 1px rgba(0,0,0,0.08)
+                                            inset 0 0 1px rgba(255,255,255,0.15),
+                                            0 30px 60px -12px rgba(0,0,0,0.6),
+                                            ${ledBrightness > 0.6 ? `0 0 50px -10px ${selectedLightMode.color}${Math.round(ledBrightness * 30).toString(16).padStart(2, '0')}` : '0 0 0 transparent'}
                                         `,
-                                        transition: 'all 0.5s ease',
                                     }}
                                 >
-                                    {/* Photo */}
-                                    <img
-                                        src={imgSrc}
-                                        alt="Your LED Photo"
-                                        className="w-full h-full object-cover block"
-                                        style={{
-                                            filter: `brightness(${1.0 + (ledBrightness * 0.3)}) contrast(${1.05 + (ledBrightness * 0.12)}) saturate(${1.1 + (ledBrightness * 0.15)})`,
-                                            transition: 'filter 0.4s ease',
-                                        }}
-                                    />
-                                    {/* Glass reflection (subtle) */}
-                                    <div className="absolute inset-0 pointer-events-none z-10" style={{
-                                        background: 'linear-gradient(155deg, rgba(255,255,255,0.06) 0%, transparent 35%, transparent 65%, rgba(255,255,255,0.02) 100%)',
+                                    {/* Glass reflection (dynamic) */}
+                                    <div className="absolute inset-[18px] pointer-events-none z-10 transition-opacity duration-700" style={{
+                                        background: 'linear-gradient(155deg, rgba(255,255,255,0.12) 0%, transparent 40%, transparent 60%, rgba(255,255,255,0.05) 100%)',
+                                        opacity: 1.5 - ledBrightness,
+                                        borderRadius: '2px'
                                     }}></div>
+
+                                    {/* Inner Light Spread */}
+                                    <div className="absolute inset-[15px] pointer-events-none z-0 transition-all duration-500" style={{
+                                        boxShadow: `inset 0 0 ${40 * ledBrightness}px ${selectedLightMode.color}${Math.round(ledBrightness * 40).toString(16).padStart(2, '0')}`,
+                                    }}></div>
+
+                                    {/* Photo with dynamic treatment */}
+                                    <div className="w-full h-full overflow-hidden rounded-[2px]">
+                                        <img
+                                            src={imgSrc}
+                                            alt="Your LED Photo"
+                                            className="w-full h-full object-cover block transition-all duration-500"
+                                            style={{
+                                                filter: `brightness(${0.9 + (ledBrightness * 0.4)}) contrast(${1.08 + (ledBrightness * 0.1)}) saturate(${1.05 + (ledBrightness * 0.2)})`,
+                                                opacity: 0.95,
+                                            }}
+                                        />
+                                    </div>
                                 </div>
 
                                 {/* ─── Dimension Labels ─── */}
                                 {selectedSize && (
                                     <div data-html2canvas-ignore="true">
-                                        {/* Width (bottom) */}
-                                        <div className="absolute -bottom-9 left-0 w-full flex items-center gap-2">
-                                            <div className="h-[1px] flex-1 bg-neutral-400/30"></div>
-                                            <span className="text-[11px] font-semibold text-neutral-400 whitespace-nowrap font-mono">
-                                                {selectedSize.width}"
+                                        <div className="absolute -bottom-10 left-0 w-full flex items-center gap-3">
+                                            <div className="h-[1px] flex-1 bg-neutral-800/10"></div>
+                                            <span className="text-[10px] font-bold text-neutral-500/50 whitespace-nowrap tracking-wider">
+                                                {selectedSize.width}" WIDTH
                                             </span>
-                                            <div className="h-[1px] flex-1 bg-neutral-400/30"></div>
+                                            <div className="h-[1px] flex-1 bg-neutral-800/10"></div>
                                         </div>
-                                        {/* Height (right) */}
-                                        <div className="absolute top-0 -right-10 h-full flex flex-col items-center gap-2">
-                                            <div className="w-[1px] flex-1 bg-neutral-400/30"></div>
-                                            <span className="text-[11px] font-semibold text-neutral-400 whitespace-nowrap font-mono -rotate-90">
-                                                {selectedSize.height}"
+                                        <div className="absolute top-0 -right-12 h-full flex flex-col items-center gap-3">
+                                            <div className="w-[1px] flex-1 bg-neutral-800/10"></div>
+                                            <span className="text-[10px] font-bold text-neutral-500/50 whitespace-nowrap tracking-wider -rotate-90">
+                                                {selectedSize.height}" HEIGHT
                                             </span>
-                                            <div className="w-[1px] flex-1 bg-neutral-400/30"></div>
+                                            <div className="w-[1px] flex-1 bg-neutral-800/10"></div>
                                         </div>
                                     </div>
                                 )}
 
-                                {/* ─── USB Cable ─── */}
-                                <div data-html2canvas-ignore="true" className="absolute bottom-0 right-8 translate-y-full">
-                                    <div className="w-[1.5px] h-14 bg-neutral-600/30 mx-auto" style={{
-                                        background: 'linear-gradient(to bottom, #555, #aaa)'
-                                    }}></div>
-                                </div>
+                                {/* ─── Power Cable Simulation ─── */}
+                                {selectedPower.value === 'usb' && (
+                                    <div data-html2canvas-ignore="true" className="absolute bottom-0 right-10 translate-y-full flex flex-col items-center">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-[#121212] -mb-0.5"></div>
+                                        <div className="w-[2px] h-20 transition-all duration-700" style={{
+                                            background: 'linear-gradient(to bottom, #121212, transparent)',
+                                            opacity: 0.4
+                                        }}></div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -340,138 +390,176 @@ const BacklightSizeSelector = ({ shape }) => {
                 {/* ─── RIGHT: Config Panel ─── */}
                 <div className="lg:col-span-5 xl:col-span-4 border-l border-neutral-100 overflow-y-auto"
                     style={{ maxHeight: 'calc(100vh - 136px)' }}>
-                    <div className="p-6 md:p-8 lg:p-10">
+                    <div className="p-7 md:p-9 lg:p-12">
 
                         {/* Product Title */}
-                        <div className="mb-8">
-                            <div className="flex items-center gap-2 mb-2">
-                                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
-                                    <Lightbulb className="w-4 h-4 text-primary" />
+                        <div className="mb-10">
+                            <div className="flex items-center gap-2.5 mb-3">
+                                <div className="px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200/50 flex items-center gap-1.5">
+                                    <Sparkles className="w-3 h-3 text-amber-500" />
+                                    <span className="text-[9px] font-extrabold text-amber-700 uppercase tracking-widest">Masterpiece Series</span>
                                 </div>
-                                <span className="text-xs font-semibold text-primary uppercase tracking-widest">LED Photo Frame</span>
                             </div>
-                            <h1 className="text-2xl font-bold text-secondary tracking-tight">{shapeTitle} Backlight Frame</h1>
-                            <p className="text-sm text-neutral-400 mt-1.5">Premium LED-backlit • Black Aluminium Frame • USB Powered</p>
+                            <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 tracking-tighter leading-tight drop-shadow-sm">
+                                {shapeTitle} <span className="text-blue-600 italic font-medium">Luminescence</span>
+                            </h1>
+                            <p className="text-sm text-slate-400 font-medium leading-relaxed">Aerospace aluminium chassis • High-density LED array</p>
                         </div>
 
                         {/* ─── SIZE SELECTION ─── */}
-                        <div className="mb-8">
-                            <h3 className="text-[11px] font-bold text-neutral-400 uppercase tracking-[0.15em] mb-4 flex items-center gap-2">
-                                <Ruler className="w-3.5 h-3.5" /> Select Size
+                        <div className="mb-10">
+                            <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.25em] mb-5 flex items-center justify-between border-b border-slate-50 pb-2">
+                                <span className="flex items-center gap-2"><Ruler className="w-3.5 h-3.5" /> Dimensions</span>
+                                <span className="text-[10px] text-blue-600/60 lowercase italic">Choose your scale</span>
                             </h3>
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-2 gap-3.5">
                                 {availableSizes.map((size, idx) => {
                                     const isSelected = selectedSize?.label === size.label;
                                     return (
-                                        <button
-                                            key={idx}
-                                            onClick={() => setSelectedSize(size)}
-                                            className={`relative p-4 rounded-2xl border-2 text-left transition-all duration-200 ${isSelected
-                                                ? 'border-primary bg-primary/5 shadow-md ring-1 ring-primary/20'
-                                                : 'border-neutral-100 hover:border-neutral-200 hover:shadow-sm bg-white'
+                                        <button key={idx} onClick={() => setSelectedSize(size)}
+                                            className={`relative p-5 rounded-2xl border-2 text-left transition-all duration-300 ${isSelected
+                                                ? 'border-primary bg-primary/[0.02] shadow-[0_8px_20px_rgba(0,113,227,0.12)]'
+                                                : 'border-neutral-100 hover:border-neutral-200 bg-white'
                                                 }`}
                                         >
-                                            <div className={`text-sm font-bold ${isSelected ? 'text-primary' : 'text-secondary'}`}>
-                                                {size.label}
-                                            </div>
-                                            <div className="text-xs text-neutral-400 mt-1 font-medium">
-                                                ₹{size.price.toLocaleString()}
-                                            </div>
-                                            {isSelected && (
-                                                <CheckCircle2 className="absolute top-3 right-3 w-4 h-4 text-primary" />
-                                            )}
+                                            <div className="font-bold text-slate-900 text-sm tracking-tight">{size.label}</div>
+                                            <div className="text-xs text-slate-500 mt-2 font-bold">₹{size.price}</div>
+                                            {isSelected && <div className="absolute top-4 right-4 w-4 h-4 bg-primary rounded-full flex items-center justify-center"><CheckCircle2 className="w-2.5 h-2.5 text-white" /></div>}
                                         </button>
                                     );
                                 })}
                             </div>
                         </div>
 
-                        {/* ─── LED BRIGHTNESS ─── */}
-                        <div className="mb-8">
-                            <h3 className="text-[11px] font-bold text-neutral-400 uppercase tracking-[0.15em] mb-4 flex items-center gap-2">
-                                <Sun className="w-3.5 h-3.5" /> LED Brightness
+                        {/* ─── LIGHT MODE SELECTION ─── */}
+                        <div className="mb-10">
+                            <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.25em] mb-5 flex items-center gap-2 border-b border-slate-50 pb-2">
+                                <Sun className="w-3.5 h-3.5" /> Light Temperature
                             </h3>
-                            <div className="bg-neutral-50 rounded-2xl p-5 border border-neutral-100">
-                                <div className="flex items-center justify-between mb-3">
-                                    <span className="text-[10px] font-medium text-neutral-300 uppercase">Dim</span>
-                                    <div className="flex items-center gap-1.5">
-                                        <Sparkles className="w-3 h-3 text-amber-400" />
-                                        <span className="text-sm font-bold text-secondary">{Math.round(ledBrightness * 100)}%</span>
-                                    </div>
-                                    <span className="text-[10px] font-medium text-neutral-300 uppercase">Bright</span>
-                                </div>
-                                <input
-                                    type="range" min="0.3" max="1.5" step="0.05"
-                                    value={ledBrightness}
-                                    onChange={(e) => setLedBrightness(parseFloat(e.target.value))}
-                                    className="w-full h-[6px] rounded-full appearance-none cursor-pointer led-slider"
-                                    style={{
-                                        background: `linear-gradient(to right, #0071e3 0%, #0071e3 ${((ledBrightness - 0.3) / 1.2) * 100}%, #e5e5e5 ${((ledBrightness - 0.3) / 1.2) * 100}%, #e5e5e5 100%)`,
-                                    }}
+                            <div className="grid grid-cols-3 gap-3">
+                                {LIGHT_MODES.map((mode, i) => {
+                                    const isSelected = selectedLightMode.value === mode.value;
+                                    return (
+                                        <button key={i} onClick={() => setSelectedLightMode(mode)}
+                                            className={`p-3.5 rounded-2xl border-2 text-center transition-all duration-300 ${isSelected
+                                                ? 'border-amber-400 bg-amber-50/30'
+                                                : 'border-neutral-100 hover:border-neutral-200'
+                                                }`}>
+                                            <div className="w-7 h-7 rounded-full mx-auto mb-2 border border-neutral-100" style={{ background: mode.color }}></div>
+                                            <div className={`text-[10px] font-bold ${isSelected ? 'text-amber-700' : 'text-secondary'}`}>{mode.label}</div>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* ─── BRIGHTNESS SLIDER ─── */}
+                        <div className="mb-10">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.25em]">Intensity Control</h3>
+                                <span className="text-sm font-bold text-slate-900 tracking-tighter">{Math.round(ledBrightness * 100)}%</span>
+                            </div>
+                            <div className="px-2">
+                                <input type="range" min="0.3" max="1.5" step="0.05"
+                                    value={ledBrightness} onChange={(e) => setLedBrightness(parseFloat(e.target.value))}
+                                    className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-neutral-100 accent-primary"
                                 />
-                                <div className="mt-4 flex items-center gap-2 p-3 rounded-xl bg-amber-50/80 border border-amber-100/60">
-                                    <Zap className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                                    <span className="text-[10px] font-medium text-amber-600 leading-tight">
-                                        USB powered • Warm LED • 50,000hr lifespan
-                                    </span>
+                            </div>
+                        </div>
+
+                        {/* ─── POWER TYPE & UPGRADES ─── */}
+                        <div className="mb-10 space-y-7">
+                            <div>
+                                <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.25em] mb-5 flex items-center gap-2 border-b border-slate-50 pb-2">
+                                    <Zap className="w-3.5 h-3.5" /> Power Source
+                                </h3>
+                                <div className="flex gap-3">
+                                    {POWER_OPTIONS.map((p, i) => {
+                                        const isSelected = selectedPower.value === p.value;
+                                        return (
+                                            <button key={i} onClick={() => setSelectedPower(p)}
+                                                className={`flex-1 p-5 rounded-3xl border-2 text-left transition-all duration-300 relative overflow-hidden group ${isSelected
+                                                    ? 'border-blue-600 bg-blue-50/30'
+                                                    : 'border-slate-100 hover:border-slate-200 bg-white'
+                                                    }`}>
+                                                {isSelected && <div className="absolute top-0 right-0 w-12 h-12 bg-blue-600/10 rounded-bl-3xl flex items-center justify-center"><CheckCircle2 className="w-4 h-4 text-blue-600" /></div>}
+                                                <div className={`text-sm font-bold tracking-tight ${isSelected ? 'text-blue-900' : 'text-slate-900'}`}>{p.label}</div>
+                                                <div className="text-[11px] text-slate-500 font-medium mt-1">{p.desc}</div>
+                                                <div className={`text-xs font-black mt-3 ${isSelected ? 'text-blue-600' : 'text-slate-400'}`}>{p.price === 0 ? 'Included' : `+ ₹${p.price}`}</div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.25em] mb-5 flex items-center gap-2 border-b border-slate-50 pb-2">
+                                    <Shield className="w-3.5 h-3.5" /> Smart Upgrades
+                                </h3>
+                                <div className="space-y-3">
+                                    {SMART_UPGRADES.map((u, i) => {
+                                        const isSelected = !!upgrades.find(x => x.id === u.id);
+                                        return (
+                                            <button key={i} onClick={() => toggleUpgrade(u)}
+                                                className={`w-full flex items-center justify-between p-5 rounded-3xl border-2 transition-all duration-300 relative overflow-hidden ${isSelected
+                                                    ? 'border-blue-600 bg-blue-50/30 shadow-sm'
+                                                    : 'border-slate-100 hover:border-slate-200 bg-white'
+                                                    }`}>
+                                                <div className="flex items-center gap-4">
+                                                    <div className="text-left">
+                                                        <div className={`text-sm font-bold tracking-tight ${isSelected ? 'text-blue-900' : 'text-slate-900'}`}>{u.label}</div>
+                                                        <div className="text-[11px] text-slate-500 font-medium">{u.desc}</div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-4">
+                                                    <div className={`text-xs font-black ${isSelected ? 'text-blue-600' : 'text-slate-400'}`}>+ ₹{u.price}</div>
+                                                    {isSelected && <CheckCircle2 className="w-5 h-5 text-blue-600" />}
+                                                </div>
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         </div>
 
-                        {/* ─── QUANTITY ─── */}
-                        <div className="mb-8">
-                            <h3 className="text-[11px] font-bold text-neutral-400 uppercase tracking-[0.15em] mb-4">Quantity</h3>
-                            <div className="flex items-center border border-neutral-200 rounded-xl overflow-hidden w-fit">
-                                <button onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                    className="w-10 h-10 flex items-center justify-center hover:bg-neutral-50 text-neutral-500 font-medium transition-colors text-lg">−</button>
-                                <span className="w-12 h-10 flex items-center justify-center font-bold text-sm text-secondary border-x border-neutral-200">{quantity}</span>
-                                <button onClick={() => setQuantity(quantity + 1)}
-                                    className="w-10 h-10 flex items-center justify-center hover:bg-neutral-50 text-neutral-500 font-medium transition-colors text-lg">+</button>
-                            </div>
-                        </div>
-
-                        {/* ─── PRICE SUMMARY ─── */}
-                        <div className="border-t border-neutral-100 pt-6 mb-6">
-                            <div className="flex items-end justify-between">
+                        {/* ─── SUMMARY & CART ─── */}
+                        <div className="pt-8 border-t border-neutral-100">
+                            <div className="flex items-end justify-between mb-8">
                                 <div>
-                                    <p className="text-xs text-neutral-400 mb-0.5">
-                                        {quantity} × ₹{selectedSize?.price?.toLocaleString() || 0}
-                                    </p>
-                                    <p className="text-[10px] text-neutral-300">Inclusive of all taxes</p>
+                                    <h3 className="text-[11px] font-extrabold text-slate-400 uppercase tracking-[0.3em] flex items-center gap-3 mb-3">
+                                        Project Forecast
+                                    </h3>
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex items-center bg-slate-50 rounded-2xl p-1.5 border border-slate-100 shadow-inner">
+                                            <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-10 h-8 text-slate-400 hover:text-blue-600 font-black transition-colors">−</button>
+                                            <span className="w-10 text-center text-sm font-bold text-slate-900">{quantity}</span>
+                                            <button onClick={() => setQuantity(quantity + 1)} className="w-10 h-8 text-slate-400 hover:text-blue-600 font-black transition-colors">+</button>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div className="text-right">
-                                    <span className="text-3xl font-extrabold text-secondary">₹{totalPrice.toLocaleString()}</span>
+                                    <div className="text-[10px] font-bold text-slate-300 mb-0.5 line-through decoration-slate-200 uppercase tracking-widest">₹{(totalPrice * 1.2).toLocaleString()}</div>
+                                    <div className="text-4xl font-bold text-slate-950 tracking-tighter">₹{totalPrice.toLocaleString()}</div>
                                 </div>
                             </div>
+
+                            <button onClick={handleAddToCart} disabled={loading || !selectedSize}
+                                className="w-full bg-secondary hover:bg-black text-white py-5 rounded-2xl font-black text-[13px] uppercase tracking-[0.15em] shadow-2xl hover:-translate-y-1 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                            >
+                                {loading ? <Loader2 className="animate-spin w-5 h-5 text-white/40" /> : <ChevronRight className="w-5 h-5 translate-x-1" />}
+                                Finalize & Add to Cart
+                            </button>
                         </div>
 
-                        {/* ─── ADD TO CART ─── */}
-                        <button
-                            onClick={handleAddToCart}
-                            disabled={loading || !selectedSize}
-                            className="w-full bg-primary hover:bg-primary-hover text-white py-4 rounded-2xl font-bold text-[15px] shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
-                        >
-                            {loading ? <Loader2 className="animate-spin w-5 h-5" /> : <ShoppingCart className="w-5 h-5" />}
-                            Add To Cart
-                        </button>
-                        <p className="text-[10px] text-center text-neutral-300 mt-3">
-                            Confirm your customization and proceed.
-                        </p>
-
-                        {/* ─── FEATURES ─── */}
-                        <div className="mt-10 space-y-3">
-                            <h3 className="text-[11px] font-bold text-neutral-400 uppercase tracking-[0.15em] mb-3">What's Included</h3>
+                        {/* ─── FOOTER FEATURES ─── */}
+                        <div className="mt-12 grid grid-cols-2 gap-4">
                             {[
-                                { icon: <Package className="w-4 h-4" />, label: "Premium gift packaging" },
-                                { icon: <Truck className="w-4 h-4" />, label: "Free express shipping" },
-                                { icon: <Shield className="w-4 h-4" />, label: "1-year LED warranty" },
-                                { icon: <Star className="w-4 h-4" />, label: "High-resolution print on backlit film" },
+                                { icon: <Package className="w-4 h-4" />, label: "Luxury Gifting Box" },
+                                { icon: <Shield className="w-4 h-4" />, label: "Lifetime LED Life" },
                             ].map((item, i) => (
-                                <div key={i} className="flex items-center gap-3 py-2">
-                                    <div className="w-8 h-8 rounded-lg bg-neutral-50 flex items-center justify-center text-neutral-400 shrink-0">
-                                        {item.icon}
-                                    </div>
-                                    <span className="text-xs font-medium text-neutral-500">{item.label}</span>
+                                <div key={i} className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100 shadow-sm transition-all hover:bg-slate-100">
+                                    <div className="text-slate-400 shrink-0">{item.icon}</div>
+                                    <span className="text-[10px] font-bold text-slate-500 leading-tight uppercase tracking-widest">{item.label}</span>
                                 </div>
                             ))}
                         </div>

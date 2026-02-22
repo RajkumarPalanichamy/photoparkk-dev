@@ -397,13 +397,13 @@ const CanvasSizeSelector = ({ shape }) => {
                                 </div>
                                 <span className="text-xs font-semibold text-primary uppercase tracking-widest">Canvas Print</span>
                             </div>
-                            <h1 className="text-2xl font-bold text-secondary tracking-tight">{shapeTitle} Canvas</h1>
-                            <p className="text-sm text-neutral-400 mt-1.5">Premium poly-cotton blend • Solid wood stretcher bars • Ready to hang</p>
+                            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight leading-tight mb-2">{shapeTitle} Canvas</h1>
+                            <p className="text-sm text-slate-400 mt-1.5 leading-relaxed">Premium poly-cotton blend • Solid wood stretcher bars • Ready to hang</p>
                         </div>
 
                         {/* ─── SIZE SELECTION ─── */}
                         <div className="mb-8">
-                            <h3 className="text-[11px] font-bold text-neutral-400 uppercase tracking-[0.15em] mb-4 flex items-center gap-2">
+                            <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.25em] mb-4 flex items-center gap-2 border-b border-slate-50 pb-2">
                                 <Ruler className="w-3.5 h-3.5" /> Select Size
                             </h3>
                             <div className="grid grid-cols-2 gap-3">
@@ -435,7 +435,7 @@ const CanvasSizeSelector = ({ shape }) => {
 
                         {/* ─── CANVAS DEPTH ─── */}
                         <div className="mb-8">
-                            <h3 className="text-[11px] font-bold text-neutral-400 uppercase tracking-[0.15em] mb-4 flex items-center gap-2">
+                            <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.25em] mb-4 flex items-center gap-2 border-b border-slate-50 pb-2">
                                 <Layers className="w-3.5 h-3.5" /> Canvas Depth
                             </h3>
                             <div className="flex gap-3">
@@ -461,7 +461,7 @@ const CanvasSizeSelector = ({ shape }) => {
 
                         {/* ─── EDGE FINISH ─── */}
                         <div className="mb-8">
-                            <h3 className="text-[11px] font-bold text-neutral-400 uppercase tracking-[0.15em] mb-4 flex items-center gap-2">
+                            <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.25em] mb-4 flex items-center gap-2 border-b border-slate-50 pb-2">
                                 <Scissors className="w-3.5 h-3.5" /> Edge Finish
                             </h3>
                             <div className="space-y-2">
@@ -492,7 +492,7 @@ const CanvasSizeSelector = ({ shape }) => {
 
                         {/* ─── QUANTITY ─── */}
                         <div className="mb-8">
-                            <h3 className="text-[11px] font-bold text-neutral-400 uppercase tracking-[0.15em] mb-4">Quantity</h3>
+                            <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.25em] mb-4 border-b border-slate-50 pb-2">Quantity</h3>
                             <div className="flex items-center border border-neutral-200 rounded-xl overflow-hidden w-fit">
                                 <button onClick={() => setQuantity(Math.max(1, quantity - 1))}
                                     className="w-10 h-10 flex items-center justify-center hover:bg-neutral-50 text-neutral-500 font-medium transition-colors text-lg">−</button>

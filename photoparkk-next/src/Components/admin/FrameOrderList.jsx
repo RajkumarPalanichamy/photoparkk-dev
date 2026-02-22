@@ -84,36 +84,51 @@ const FrameOrderList = () => {
 
     return (
         <div className="space-y-4">
-            {loading ? <Loader2 className="animate-spin mx-auto" /> : orders.length === 0 ? (
-                <div className="text-center p-8 border rounded-xl bg-white text-neutral-500">
-                    <ShoppingBag className="mx-auto w-12 h-12 mb-2 opacity-20" />
-                    No Frame Orders Found
+            {loading ? <div className="flex justify-center p-20"><Loader2 className="animate-spin text-blue-600 w-10 h-10" /></div> : orders.length === 0 ? (
+                <div className="text-center p-20 bg-white rounded-3xl border border-slate-100 text-slate-400 shadow-sm transition-all">
+                    <ShoppingBag className="mx-auto w-16 h-16 mb-4 opacity-10" />
+                    <p className="text-sm font-bold tracking-wide">No specialized frame projects found.</p>
                 </div>
             ) : (
-                orders.map(o => {
-                    const order = getFrameOrderDetails(o);
-                    return (
-                        <div key={order.id} className="bg-white p-6 rounded-xl border border-neutral-200 shadow-sm hover:shadow-md transition-shadow">
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <h3 className="font-bold text-lg text-secondary">Order #{order.id.slice(0, 8)}</h3>
-                                    <p className="text-sm text-neutral-500">Customer: {order.customerName}</p>
-                                    <p className="text-sm text-neutral-500">{new Date(order.createdAt).toLocaleDateString()}</p>
-                                    <div className="mt-2 text-sm bg-neutral-100 px-2 py-1 rounded inline-block">
-                                        Status: {order.status}
+                <div className="grid grid-cols-1 gap-6">
+                    {orders.map(o => {
+                        const order = getFrameOrderDetails(o);
+                        return (
+                            <div key={order.id} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 group hover:-translate-y-1 overflow-hidden relative">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50/30 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
+                                    <div className="flex gap-5 items-center">
+                                        <div className="w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:rotate-6 transition-transform">
+                                            <ImageIcon className="w-7 h-7" />
+                                        </div>
+                                        <div>
+                                            <div className="flex items-center gap-3 mb-1">
+                                                <h3 className="font-bold text-lg text-slate-900 tracking-tight">Project #{order.id.slice(0, 8).toUpperCase()}</h3>
+                                                <span className="text-[10px] font-black uppercase tracking-widest bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full border border-blue-100 shadow-sm">{order.status}</span>
+                                            </div>
+                                            <p className="text-xs font-bold text-slate-400 uppercase tracking-tighter">Account: <span className="text-slate-900">{order.customerName}</span></p>
+                                            <p className="text-[10px] text-slate-400 mt-1 font-medium">{new Date(order.createdAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="text-right">
-                                    <div className="text-xl font-bold text-primary">₹{order.totalAmount}</div>
-                                    <div className="mt-2 flex gap-2">
-                                        <button onClick={() => { setSelectedOrder(order); setShowModal(true); }} className="p-2 hover:bg-neutral-100 rounded text-neutral-600"><Eye className="w-4 h-4" /></button>
-                                        <button onClick={() => deleteOrder(order.id)} className="p-2 hover:bg-red-50 rounded text-red-500"><Trash2 className="w-4 h-4" /></button>
+                                    <div className="flex flex-col md:items-end gap-4">
+                                        <div className="text-left md:text-right">
+                                            <div className="text-2xl font-black text-slate-900 tracking-tight leading-none">₹{order.totalAmount}</div>
+                                            <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-1">{order.items.length} Configured Units</p>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button onClick={() => { setSelectedOrder(order); setShowModal(true); }} className="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold transition-all border border-slate-100 shadow-sm">
+                                                <Eye className="w-3.5 h-3.5" /> View
+                                            </button>
+                                            <button onClick={() => deleteOrder(order.id)} className="p-2.5 hover:bg-red-50 text-red-500 rounded-xl transition-all border border-transparent hover:border-red-100">
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    );
-                })
+                        );
+                    })}
+                </div>
             )}
 
             {showModal && selectedOrder && (
@@ -124,15 +139,16 @@ const FrameOrderList = () => {
                             <button onClick={() => setShowModal(false)}><X /></button>
                         </div>
                         <div className="p-6 space-y-6">
-                            <div className="grid grid-cols-2 gap-4 bg-neutral-50 p-4 rounded-xl">
+                            <div className="grid grid-cols-2 gap-4 bg-slate-50 p-5 rounded-2xl border border-slate-100">
                                 <div>
-                                    <h4 className="font-semibold text-xs uppercase text-neutral-500">Customer</h4>
-                                    <p>{selectedOrder.customerName}</p>
-                                    <p className="text-sm">{selectedOrder.phone}</p>
+                                    <h4 className="font-bold text-[10px] uppercase text-slate-400 tracking-widest mb-1">Customer</h4>
+                                    <p className="font-bold text-slate-900">{selectedOrder.customerName}</p>
+                                    <p className="text-sm text-slate-500 font-medium">{selectedOrder.phone}</p>
                                 </div>
                                 <div>
-                                    <h4 className="font-semibold text-xs uppercase text-neutral-500">Shipping</h4>
-                                    <p className="text-sm">{selectedOrder.address}, {selectedOrder.pincode}</p>
+                                    <h4 className="font-bold text-[10px] uppercase text-slate-400 tracking-widest mb-1">Shipping</h4>
+                                    <p className="text-sm text-slate-900 font-bold">{selectedOrder.address}</p>
+                                    <p className="text-[11px] text-slate-500 uppercase font-black">{selectedOrder.pincode}</p>
                                 </div>
                             </div>
 
@@ -154,12 +170,12 @@ const FrameOrderList = () => {
                                 </div>
                             </div>
 
-                            <div className="border-t pt-4 flex justify-between items-center">
-                                <div className="font-bold text-xl">Total: ₹{selectedOrder.totalAmount}</div>
+                            <div className="border-t border-slate-100 pt-6 flex justify-between items-center">
+                                <div className="font-black text-2xl text-slate-900 tracking-tight">Total: ₹{selectedOrder.totalAmount}</div>
                                 <select
                                     value={selectedOrder.status}
                                     onChange={(e) => updateStatus(selectedOrder.id, e.target.value)}
-                                    className="border rounded px-3 py-2 bg-white"
+                                    className="bg-blue-600 text-white rounded-xl px-5 py-2.5 text-sm font-bold shadow-md shadow-blue-500/10 cursor-pointer outline-none hover:bg-blue-700 transition-all border-none"
                                 >
                                     <option value="Pending">Pending</option>
                                     <option value="Shipped">Shipped</option>

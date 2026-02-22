@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   ShoppingBag,
   Package,
   Frame,
+  MessageCircle,
   BarChart3,
   Menu,
   X,
@@ -67,8 +69,13 @@ const AdminLayout = () => {
     },
     {
       icon: Frame,
-      label: "Manage Frames",
+      label: "Customizer",
       path: "/admin/frames",
+    },
+    {
+      icon: MessageCircle,
+      label: "WhatsApp Templates",
+      path: "/admin/frames/templates",
     },
   ];
 
@@ -90,9 +97,8 @@ const AdminLayout = () => {
 
           <div
             id="collapseMenu"
-            className={`max-lg:hidden lg:!block max-lg:before:fixed max-lg:before:bg-black max-lg:before:opacity-50 max-lg:before:inset-0 max-lg:before:z-50 ${
-              mobileMenuOpen ? "max-lg:block" : "max-lg:hidden"
-            }`}
+            className={`max-lg:hidden lg:!block max-lg:before:fixed max-lg:before:bg-black max-lg:before:opacity-50 max-lg:before:inset-0 max-lg:before:z-50 ${mobileMenuOpen ? "max-lg:block" : "max-lg:hidden"
+              }`}
           >
             <button
               id="toggleClose"
@@ -167,11 +173,10 @@ const AdminLayout = () => {
             <div
               id="sidebar-collapse-menu"
               style={{ height: "calc(100vh - 72px)" }}
-              className={`bg-white shadow-lg h-screen fixed py-6 px-4 top-[70px] left-0 overflow-auto z-[99] lg:min-w-[270px] lg:w-max max-lg:w-0 max-lg:invisible transition-all duration-500 ${
-                sidebarOpen
-                  ? "max-lg:w-1/2 max-lg:min-w-[300px] max-lg:visible"
-                  : ""
-              }`}
+              className={`bg-white shadow-lg h-screen fixed py-6 px-4 top-[70px] left-0 overflow-auto z-[99] lg:min-w-[270px] lg:w-max max-lg:w-0 max-lg:invisible transition-all duration-500 ${sidebarOpen
+                ? "max-lg:w-1/2 max-lg:min-w-[300px] max-lg:visible"
+                : ""
+                }`}
             >
               <ul className="space-y-1.5">
                 {menuItems.map((item) => {
@@ -182,9 +187,8 @@ const AdminLayout = () => {
                       <Link
                         href={item.path}
                         onClick={() => setSidebarOpen(false)}
-                        className={`text-slate-800 text-[15px] font-medium flex items-center hover:bg-neutral-100 rounded-md px-4 py-2 transition-all ${
-                          active ? "bg-primary-light text-primary" : ""
-                        }`}
+                        className={`text-slate-800 text-[15px] font-medium flex items-center hover:bg-neutral-100 rounded-md px-4 py-2 transition-all ${active ? "bg-primary-light text-primary" : ""
+                          }`}
                       >
                         <Icon className="w-[18px] h-[18px] mr-3" />
                         <span>{item.label}</span>

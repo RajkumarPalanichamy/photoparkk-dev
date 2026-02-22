@@ -159,9 +159,31 @@ create table if not exists frame_orders (
   updated_at timestamp with time zone default now()
 );
 
--- Enable RLS (Optional - recommended for production)
+-- Customizer Templates (WhatsApp Order Templates)
+create table if not exists customizer_templates (
+  id uuid primary key default uuid_generate_v4(),
+  title text not null,
+  description text,
+  image text,
+  price numeric,
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
+);
+
+-- Enable RLS
 alter table users enable row level security;
 alter table cart_items enable row level security;
 alter table orders enable row level security;
 alter table frame_orders enable row level security;
--- (Add policies as needed for secure access)
+alter table customizer_templates enable row level security;
+
+-- Public Select Policies
+create policy "Public Read Access" on new_arrivals for select using (true);
+create policy "Public Read Access" on special_offers for select using (true);
+create policy "Public Read Access" on acrylic_customize for select using (true);
+create policy "Public Read Access" on canvas_customize for select using (true);
+create policy "Public Read Access" on backlight_customize for select using (true);
+create policy "Public Read Access" on customizer_templates for select using (true);
+
+-- Admin Management Policies (Simplified for dev)
+create policy "Admin All Access" on customizer_templates for all using (true);

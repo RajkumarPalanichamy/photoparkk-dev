@@ -24,7 +24,7 @@ export default function LandingPage() {
     <div className="relative">
       {/* Offers Scrolling Banner */}
       <motion.div
-        className="bg-secondary text-white py-3 overflow-hidden relative z-10"
+        className="bg-primary text-white py-3 overflow-hidden relative z-10"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -40,15 +40,15 @@ export default function LandingPage() {
               ease: "linear",
             }}
           >
-            <span className="bg-red-600 px-3 py-1 rounded-full text-sm font-bold">
+            <span className="bg-white/20 px-3 py-1 rounded-full text-sm font-bold border border-white/30">
               NEW
             </span>
             <span>
               Premium Photography Collections - Handcrafted Excellence
             </span>
-            <span className="text-red-400">•</span>
+            <span className="text-white/40">•</span>
             <span>Free shipping on orders above ₹999</span>
-            <span className="text-red-400">•</span>
+            <span className="text-white/40">•</span>
             <span>Transform your memories into timeless art</span>
           </motion.div>
         </div>
@@ -112,7 +112,7 @@ export default function LandingPage() {
                 >
                   <h1 className="text-3xl font-bold text-white mb-4">
                     Premium{" "}
-                    <span className="bg-red-600 px-2 py-1 rounded text-2xl">
+                    <span className="bg-blue-600 px-2 py-1 rounded text-2xl shadow-lg">
                       Collections
                     </span>
                   </h1>
@@ -124,7 +124,7 @@ export default function LandingPage() {
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className="bg-white text-secondary px-6 py-3 rounded-lg font-semibold hover:bg-neutral-100 transition-colors"
+                      className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg"
                     >
                       SHOP NOW
                     </motion.button>
@@ -142,7 +142,7 @@ export default function LandingPage() {
                 >
                   <h1 className="text-5xl font-bold text-white mb-6 leading-tight">
                     Premium{" "}
-                    <span className="bg-red-600 px-3 py-2 rounded text-4xl">
+                    <span className="bg-blue-600 px-3 py-2 rounded text-4xl shadow-2xl">
                       Collections
                     </span>
                   </h1>
@@ -155,7 +155,7 @@ export default function LandingPage() {
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="bg-white text-secondary px-8 py-4 rounded-lg font-semibold hover:bg-neutral-100 transition-colors text-lg"
+                        className="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-lg shadow-xl"
                       >
                         SHOP NOW
                       </motion.button>

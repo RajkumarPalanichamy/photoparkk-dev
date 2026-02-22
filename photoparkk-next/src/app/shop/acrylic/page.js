@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, Sparkles, Layers, ShieldCheck, Clock, Box } from "lucide-react";
 
 // ─── Shape Data ───────────────────────────────────────────────────────────────
 const shapeData = [
@@ -63,477 +63,181 @@ const shapeData = [
 ];
 
 const guarantees = [
-    "Crystal-clear UV-grade acrylic",
-    "Vibrant HD print quality",
-    "Ready to hang — hardware included",
-    "Ships in 4–6 business days",
+    { icon: <ShieldCheck className="w-4 h-4" />, text: "Crystal-clear UV-grade acrylic" },
+    { icon: <Sparkles className="w-4 h-4" />, text: "Vibrant HD print quality" },
+    { icon: <Box className="w-4 h-4" />, text: "Ready to hang hardware" },
+    { icon: <Clock className="w-4 h-4" />, text: "Ships in 4–6 business days" },
 ];
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
 export default function AcrylicShop() {
     const router = useRouter();
 
     return (
-        <>
-            <style>{`
-                /* ── ALL STYLES SCOPED UNDER .acrylic-page ── */
-                /* Site palette: primary #0071e3 | secondary #1d1d1f | primary-light #e6f2ff */
+        <div className="min-h-screen bg-white font-sans selection:bg-blue-600/10 selection:text-blue-600">
+            {/* ═══ LUXURY HERO SECTION ═══ */}
+            <section className="relative min-h-[85vh] flex items-center overflow-hidden bg-slate-900 pt-[100px]">
+                {/* Immersive Background */}
+                <img
+                    src="/assets/frontend_assets/CanvasCustomized/AcrylicBanner.jpg"
+                    alt="Acrylic Backdrop"
+                    className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-overlay"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/80 to-transparent z-10" />
 
-                .acrylic-page {
-                    font-family: 'Poppins', sans-serif;
-                    background: #FAF8F4;
-                    color: #1d1d1f;
-                    min-height: 100vh;
-                }
-
-                /* ── Hero ── */
-                .acrylic-page .ap-hero {
-                    position: relative;
-                    width: 100%;
-                    min-height: 78vh;
-                    background: linear-gradient(160deg, #0a0f1e 0%, #0d1a3a 55%, #0a1228 100%);
-                    display: flex;
-                    align-items: center;
-                    overflow: hidden;
-                }
-                .acrylic-page .ap-hero-bg-img {
-                    position: absolute; inset: 0; width: 100%; height: 100%;
-                    object-fit: cover; object-position: center 30%;
-                    opacity: 0.22;
-                    filter: saturate(0.6);
-                }
-                .acrylic-page .ap-hero-overlay {
-                    position: absolute; inset: 0;
-                    background: linear-gradient(to right, rgba(10,15,30,0.9) 0%, rgba(10,15,30,0.5) 55%, rgba(10,15,30,0.15) 100%);
-                }
-                .acrylic-page .ap-hero-content {
-                    position: relative; z-index: 2;
-                    max-width: 1260px; margin: 0 auto;
-                    padding: 80px 48px;
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 48px;
-                    align-items: center;
-                    width: 100%;
-                }
-                .acrylic-page .ap-hero-eyebrow {
-                    display: inline-flex; align-items: center; gap: 10px;
-                    margin-bottom: 24px;
-                }
-                .acrylic-page .ap-hero-eyebrow-line {
-                    width: 40px; height: 1px;
-                    background: linear-gradient(90deg, #0071e3, #60a5fa);
-                }
-                .acrylic-page .ap-hero-eyebrow-text {
-                    font-size: 11px; letter-spacing: 3.5px; text-transform: uppercase;
-                    color: #60a5fa; font-weight: 500;
-                }
-                .acrylic-page .ap-hero-h1 {
-                    font-family: 'Poppins', sans-serif;
-                    font-size: clamp(2.4rem, 5.5vw, 4.4rem);
-                    font-weight: 700; line-height: 1.08;
-                    color: #f5f5f7; letter-spacing: -0.5px;
-                    margin-bottom: 20px;
-                }
-                .acrylic-page .ap-hero-h1 em { font-style: normal; color: #60a5fa; }
-                .acrylic-page .ap-hero-p {
-                    font-size: 15px; line-height: 1.85;
-                    color: rgba(245,245,247,0.6);
-                    font-weight: 300; max-width: 440px;
-                    margin-bottom: 40px;
-                }
-                .acrylic-page .ap-hero-cta {
-                    display: inline-flex; align-items: center; gap: 12px;
-                    padding: 14px 32px;
-                    background: #0071e3;
-                    color: #fff; font-size: 13px; font-weight: 600;
-                    letter-spacing: 1.2px; text-transform: uppercase;
-                    border: none; border-radius: 6px; cursor: pointer;
-                    transition: all 0.3s;
-                    text-decoration: none;
-                    box-shadow: 0 4px 20px rgba(0,113,227,0.4);
-                }
-                .acrylic-page .ap-hero-cta:hover {
-                    background: #0077ed;
-                    transform: translateY(-2px);
-                    box-shadow: 0 8px 30px rgba(0,113,227,0.5);
-                }
-                .acrylic-page .ap-hero-right {
-                    display: flex; flex-direction: column; gap: 12px;
-                    align-items: flex-end;
-                }
-                .acrylic-page .ap-hero-tag {
-                    background: rgba(0,113,227,0.15);
-                    border: 1px solid rgba(0,113,227,0.35);
-                    border-radius: 4px;
-                    padding: 4px 12px;
-                    font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
-                    color: #60a5fa; align-self: flex-start;
-                    margin-bottom: 8px;
-                }
-                .acrylic-page .ap-hero-features {
-                    list-style: none;
-                    display: flex; flex-direction: column; gap: 10px;
-                    width: 100%;
-                    padding: 0; margin: 0;
-                }
-                .acrylic-page .ap-hero-feature-item {
-                    display: flex; align-items: center; gap: 10px;
-                    font-size: 13px; color: rgba(245,245,247,0.65); font-weight: 300;
-                }
-                .acrylic-page .ap-hero-feature-dot {
-                    width: 4px; height: 4px; border-radius: 50%;
-                    background: #0071e3; flex-shrink: 0;
-                }
-
-                /* ── Steps Bar ── */
-                .acrylic-page .ap-steps-bar {
-                    background: #fff;
-                    border-bottom: 1px solid #e5e5e5;
-                    padding: 0 48px;
-                }
-                .acrylic-page .ap-steps-inner {
-                    max-width: 1260px; margin: 0 auto;
-                    display: flex; align-items: stretch;
-                }
-                .acrylic-page .ap-step-item {
-                    display: flex; align-items: center; gap: 14px;
-                    padding: 22px 0; flex: 1;
-                    border-right: 1px solid #e5e5e5;
-                    position: relative;
-                }
-                .acrylic-page .ap-step-item:last-child { border-right: none; padding-right: 0; }
-                .acrylic-page .ap-step-item:not(:first-child) { padding-left: 36px; }
-                .acrylic-page .ap-step-num {
-                    width: 36px; height: 36px; border-radius: 50%;
-                    display: flex; align-items: center; justify-content: center;
-                    font-size: 12px; font-weight: 600; flex-shrink: 0;
-                }
-                .acrylic-page .ap-step-num.active { background: #0071e3; color: #fff; }
-                .acrylic-page .ap-step-num.inactive { background: #f5f5f5; color: #a3a3a3; }
-                .acrylic-page .ap-step-text-label {
-                    font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 600;
-                }
-                .acrylic-page .ap-step-text-label.active { color: #1d1d1f; }
-                .acrylic-page .ap-step-text-label.inactive { color: #a3a3a3; }
-                .acrylic-page .ap-step-text-sub { font-size: 11px; color: #a3a3a3; font-weight: 300; }
-
-                /* ── Section: Choose Shape ── */
-                .acrylic-page .ap-choose-section {
-                    max-width: 1260px;
-                    margin: 0 auto;
-                    padding: 80px 48px 100px;
-                }
-                .acrylic-page .ap-section-header {
-                    display: flex; align-items: flex-end; justify-content: space-between;
-                    margin-bottom: 56px;
-                    gap: 24px;
-                }
-                .acrylic-page .ap-section-eyebrow {
-                    display: inline-block;
-                    font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
-                    color: #0071e3; font-weight: 600; margin-bottom: 12px;
-                }
-                .acrylic-page .ap-section-h2 {
-                    font-family: 'Poppins', sans-serif;
-                    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
-                    font-weight: 700; color: #1d1d1f; line-height: 1.2;
-                    letter-spacing: -0.5px;
-                }
-                .acrylic-page .ap-section-h2 em { font-style: normal; color: #0071e3; }
-                .acrylic-page .ap-section-divider {
-                    flex-shrink: 0;
-                    height: 1px; width: 80px;
-                    background: linear-gradient(90deg, #0071e3, transparent);
-                    margin-bottom: 6px;
-                }
-
-                /* ── Cards Grid ── */
-                .acrylic-page .ap-cards-grid {
-                    display: grid;
-                    grid-template-columns: repeat(3, 1fr);
-                    gap: 28px;
-                }
-                @media (max-width: 1024px) {
-                    .acrylic-page .ap-cards-grid { grid-template-columns: repeat(2, 1fr); }
-                }
-                @media (max-width: 640px) {
-                    .acrylic-page .ap-cards-grid { grid-template-columns: 1fr; }
-                    .acrylic-page .ap-hero-content { grid-template-columns: 1fr; padding: 60px 24px; }
-                    .acrylic-page .ap-hero-right { display: none; }
-                    .acrylic-page .ap-choose-section { padding: 56px 24px 80px; }
-                    .acrylic-page .ap-section-header { flex-direction: column; align-items: flex-start; }
-                    .acrylic-page .ap-steps-bar { padding: 0 24px; }
-                }
-
-                /* ── Card ── */
-                .acrylic-page .ap-shape-card {
-                    background: #fff;
-                    border-radius: 16px;
-                    border: 1px solid #e5e5e5;
-                    overflow: hidden;
-                    cursor: pointer;
-                    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-                    display: flex; flex-direction: column;
-                }
-                .acrylic-page .ap-shape-card:hover {
-                    border-color: #0071e3;
-                    transform: translateY(-8px);
-                    box-shadow: 0 24px 60px rgba(0,113,227,0.15), 0 4px 20px rgba(0,0,0,0.06);
-                }
-                .acrylic-page .ap-card-image-area {
-                    position: relative;
-                    height: 220px;
-                    background: #f5f5f7;
-                    display: flex; align-items: center; justify-content: center;
-                    overflow: hidden;
-                }
-                .acrylic-page .ap-card-image-bg {
-                    position: absolute; inset: 0;
-                    background: linear-gradient(160deg, #f5f5f7 0%, #e8eaf0 100%);
-                }
-                .acrylic-page .ap-card-tag {
-                    position: absolute; top: 14px; left: 14px; z-index: 5;
-                    background: #0071e3; color: #fff;
-                    font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
-                    font-weight: 600; padding: 4px 10px; border-radius: 4px;
-                }
-                .acrylic-page .ap-card-image-wrap {
-                    position: relative; z-index: 2;
-                    transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-                    filter: drop-shadow(0 12px 32px rgba(0,0,0,0.18));
-                }
-                .acrylic-page .ap-shape-card:hover .ap-card-image-wrap { transform: scale(1.05); }
-                .acrylic-page .ap-card-img {
-                    display: block; object-fit: cover;
-                    transition: transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
-                }
-                .acrylic-page .ap-shape-card:hover .ap-card-img { transform: scale(1.06); }
-                .acrylic-page .ap-card-gloss {
-                    position: absolute; inset: 0; z-index: 3; pointer-events: none;
-                    background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.15) 100%);
-                }
-                .acrylic-page .ap-card-body {
-                    padding: 24px 26px 26px;
-                    flex: 1; display: flex; flex-direction: column;
-                    gap: 10px;
-                }
-                .acrylic-page .ap-card-header-row {
-                    display: flex; align-items: center; justify-content: space-between;
-                }
-                .acrylic-page .ap-card-name {
-                    font-family: 'Poppins', sans-serif;
-                    font-size: 17px; font-weight: 600; color: #1d1d1f;
-                    letter-spacing: -0.2px;
-                }
-                .acrylic-page .ap-card-subtitle {
-                    font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
-                    color: #0071e3; font-weight: 600;
-                    background: #e6f2ff; border: 1px solid #bfdbfe;
-                    padding: 3px 8px; border-radius: 4px;
-                }
-                .acrylic-page .ap-card-desc {
-                    font-size: 12.5px; color: #737373; line-height: 1.7; font-weight: 300;
-                }
-                .acrylic-page .ap-card-footer {
-                    display: flex; align-items: center; justify-content: space-between;
-                    margin-top: 6px; padding-top: 16px;
-                    border-top: 1px solid #f5f5f5;
-                }
-                .acrylic-page .ap-card-cta-text {
-                    font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
-                    font-weight: 600; color: #0071e3;
-                }
-                .acrylic-page .ap-card-arrow {
-                    width: 32px; height: 32px; border-radius: 50%;
-                    background: #e6f2ff; border: 1px solid #bfdbfe;
-                    display: flex; align-items: center; justify-content: center;
-                    transition: all 0.3s;
-                }
-                .acrylic-page .ap-shape-card:hover .ap-card-arrow {
-                    background: #0071e3; border-color: #0071e3;
-                }
-
-                /* ── Guarantee Strip ── */
-                .acrylic-page .ap-guarantee-strip {
-                    background: linear-gradient(135deg, #1d1d1f 0%, #2d2d2f 100%);
-                    padding: 40px 48px;
-                }
-                .acrylic-page .ap-guarantee-inner {
-                    max-width: 1260px; margin: 0 auto;
-                    display: flex; align-items: center; justify-content: space-between;
-                    flex-wrap: wrap; gap: 20px;
-                }
-                .acrylic-page .ap-guarantee-title {
-                    font-family: 'Poppins', sans-serif;
-                    font-size: 15px; font-weight: 600; color: #f5f5f7;
-                    letter-spacing: 0.2px;
-                }
-                .acrylic-page .ap-guarantee-items {
-                    display: flex; flex-wrap: wrap; gap: 24px;
-                }
-                .acrylic-page .ap-guarantee-item {
-                    display: flex; align-items: center; gap: 8px;
-                    font-size: 12px; color: rgba(245,245,247,0.65); font-weight: 300;
-                }
-                .acrylic-page .ap-guarantee-check {
-                    width: 18px; height: 18px; border-radius: 50%;
-                    background: rgba(0,113,227,0.25); border: 1px solid rgba(0,113,227,0.5);
-                    display: flex; align-items: center; justify-content: center;
-                    flex-shrink: 0;
-                }
-            `}</style>
-
-            <div className="acrylic-page">
-
-                {/* ── HERO ─────────────────────────────────────────────── */}
-                <section className="ap-hero">
-                    <img
-                        src="/assets/frontend_assets/CanvasCustomized/AcrylicBanner.jpg"
-                        alt="backdrop"
-                        className="ap-hero-bg-img"
-                    />
-                    <div className="ap-hero-overlay" />
-
-                    <div className="ap-hero-content">
-                        <div>
-                            <div className="ap-hero-eyebrow">
-                                <div className="ap-hero-eyebrow-line" />
-                                <span className="ap-hero-eyebrow-text">The Premium Acrylic Collection</span>
-                            </div>
-                            <h1 className="ap-hero-h1">
-                                Your Memories,<br />
-                                <em>Crystallised</em> in<br />
-                                Acrylic Glass
-                            </h1>
-                            <p className="ap-hero-p">
-                                Premium UV-grade acrylic printing with unmatched colour depth. Choose your shape, upload your moment — we handle the rest.
-                            </p>
-                            <button
-                                className="ap-hero-cta"
-                                onClick={() => {
-                                    document.getElementById('choose-shape')?.scrollIntoView({ behavior: 'smooth' });
-                                }}
-                            >
-                                Explore Shapes
-                                <ArrowRight size={14} />
-                            </button>
+                <div className="max-w-7xl mx-auto px-6 relative z-20 w-full grid md:grid-cols-2 gap-16 items-center py-20">
+                    <div className="space-y-8 animate-in fade-in slide-in-from-left-10 duration-1000">
+                        <div className="flex items-center gap-3">
+                            <div className="h-[1px] w-12 bg-blue-500" />
+                            <span className="text-[11px] font-black text-blue-400 uppercase tracking-[0.4em]">Elite Glass Architecture</span>
                         </div>
+                        <h1 className="text-6xl md:text-8xl font-extrabold text-white tracking-tighter leading-[0.9] mb-4">
+                            Crystal <br /> <span className="text-blue-500 italic font-medium">Boutique</span>
+                        </h1>
+                        <p className="text-slate-400 text-lg font-medium max-w-md leading-relaxed">
+                            Experience museum-grade visual depth. Our UV-curable acrylic technology transforms frames into luminous 3D masterpieces.
+                        </p>
+                        <button
+                            onClick={() => document.getElementById('shapes')?.scrollIntoView({ behavior: 'smooth' })}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-2xl shadow-blue-500/40 flex items-center gap-4 group"
+                        >
+                            Select Your Format
+                            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                        </button>
+                    </div>
 
-                        <div className="ap-hero-right">
-                            <span className="ap-hero-tag">Why Acrylic?</span>
-                            <ul className="ap-hero-features">
+                    <div className="hidden md:flex flex-col items-end space-y-4">
+                        <div className="bg-white/10 backdrop-blur-xl border border-white/10 p-8 rounded-[40px] max-w-sm">
+                            <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest block mb-6">Technical Specifications</span>
+                            <ul className="space-y-4">
                                 {[
-                                    "Crystal-clear UV-grade acrylic glass",
-                                    "10× more vibrant than standard prints",
-                                    "Anti-scratch & moisture resistant",
-                                    "Ready-to-hang wall hardware included",
-                                    "Handcrafted & QC-checked at our studio",
-                                    "Ships pan-India in 4–6 business days",
-                                ].map((f, i) => (
-                                    <li key={i} className="ap-hero-feature-item">
-                                        <div className="ap-hero-feature-dot" />
-                                        {f}
+                                    "Optical-grade perspex core",
+                                    "Edge-to-edge diamond polish",
+                                    "Advanced light refraction tech",
+                                    "Life-long color permanence"
+                                ].map((t, i) => (
+                                    <li key={i} className="flex items-center gap-3 text-slate-300 text-sm font-medium">
+                                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.8)]" />
+                                        {t}
                                     </li>
                                 ))}
                             </ul>
                         </div>
                     </div>
-                </section>
+                </div>
+            </section>
 
-                {/* ── STEPS BAR ────────────────────────────────────────── */}
-                <div className="ap-steps-bar">
-                    <div className="ap-steps-inner">
-                        {[
-                            { n: "1", label: "Select Shape", sub: "You are here" },
-                            { n: "2", label: "Upload Photo", sub: "Crop & customise" },
-                            { n: "3", label: "Place Order", sub: "Checkout securely" },
-                        ].map((s, i) => (
-                            <div key={i} className="ap-step-item">
-                                <div className={`ap-step-num ${i === 0 ? "active" : "inactive"}`}>{s.n}</div>
-                                <div>
-                                    <div className={`ap-step-text-label ${i === 0 ? "active" : "inactive"}`}>{s.label}</div>
-                                    <div className="ap-step-text-sub">{s.sub}</div>
+            {/* ═══ PROCESS STEPS ═══ */}
+            <div className="bg-white border-b border-slate-50 relative z-30 -mt-10 mx-6 rounded-[32px] shadow-2xl shadow-slate-900/10">
+                <div className="max-w-7xl mx-auto px-10 flex flex-wrap md:flex-nowrap divide-x divide-slate-50">
+                    {[
+                        { n: "01", label: "Format", sub: "Select Shape", active: true },
+                        { n: "02", label: "Studio", sub: "Upload Media", active: false },
+                        { n: "03", label: "Protocol", sub: "Secure Order", active: false },
+                    ].map((s, i) => (
+                        <div key={i} className="flex-1 py-8 px-8 flex items-center gap-5">
+                            <span className={`text-2xl font-black ${s.active ? 'text-blue-600' : 'text-slate-200'}`}>{s.n}</span>
+                            <div>
+                                <div className={`text-[10px] font-black uppercase tracking-widest ${s.active ? 'text-slate-900' : 'text-slate-400'}`}>{s.label}</div>
+                                <div className="text-xs text-slate-400 font-medium">{s.sub}</div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* ═══ SHAPE SELECTION ═══ */}
+            <section id="shapes" className="py-24 max-w-7xl mx-auto px-6">
+                <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
+                    <div className="space-y-2">
+                        <span className="text-[11px] font-black text-blue-600 uppercase tracking-[0.3em]">Selection Interface</span>
+                        <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter">
+                            Architectural <span className="text-slate-300 font-medium">Shapes</span>
+                        </h2>
+                    </div>
+                    <div className="h-[1px] flex-1 bg-slate-100 mx-12 hidden lg:block" />
+                    <p className="text-slate-400 font-medium text-sm max-w-xs text-right leading-relaxed">
+                        Precision engineering applied to every silhouette. Choose the geometry that defines your space.
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+                    {shapeData.map((shape, idx) => (
+                        <ShapeCard
+                            key={idx}
+                            shape={shape}
+                            onClick={() => router.push(shape.route)}
+                        />
+                    ))}
+                </div>
+            </section>
+
+            {/* ═══ LUXURY GUARANTEE ═══ */}
+            <div className="bg-slate-900 py-16 px-6 overflow-hidden relative">
+                <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-600/10 rounded-full blur-[100px] -mr-48 -mt-48" />
+                <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-12 relative z-10">
+                    <div className="space-y-2">
+                        <h3 className="text-[11px] font-black text-blue-400 uppercase tracking-[0.4em]">The Photoparkk Vow</h3>
+                        <p className="text-white text-2xl font-bold tracking-tight">Executive Grade Assurance</p>
+                    </div>
+                    <div className="flex flex-wrap justify-center gap-10">
+                        {guarantees.map((g, i) => (
+                            <div key={i} className="flex items-center gap-4 text-slate-400 group">
+                                <div className="w-10 h-10 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center text-blue-400 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                                    {g.icon}
                                 </div>
+                                <span className="text-xs font-black uppercase tracking-widest">{g.text}</span>
                             </div>
                         ))}
                     </div>
                 </div>
-
-                {/* ── SHAPE GRID ────────────────────────────────────────── */}
-                <section className="ap-choose-section" id="choose-shape">
-                    <div className="ap-section-header">
-                        <div>
-                            <span className="ap-section-eyebrow">Step 01 / 03</span>
-                            <h2 className="ap-section-h2">
-                                Choose Your <em>Perfect</em> Frame Shape
-                            </h2>
-                        </div>
-                        <div className="ap-section-divider" />
-                    </div>
-
-                    <div className="ap-cards-grid">
-                        {shapeData.map((shape, index) => (
-                            <ShapeCard
-                                key={index}
-                                shape={shape}
-                                onClick={() => router.push(shape.route)}
-                            />
-                        ))}
-                    </div>
-                </section>
-
-                {/* ── GUARANTEE STRIP ──────────────────────────────────── */}
-                <div className="ap-guarantee-strip">
-                    <div className="ap-guarantee-inner">
-                        <span className="ap-guarantee-title">Our Promise to You</span>
-                        <div className="ap-guarantee-items">
-                            {guarantees.map((g, i) => (
-                                <div key={i} className="ap-guarantee-item">
-                                    <div className="ap-guarantee-check">
-                                        <Check size={10} color="#60a5fa" strokeWidth={2.5} />
-                                    </div>
-                                    {g}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
             </div>
-        </>
+        </div>
     );
 }
 
-// ─── Shape Card ───────────────────────────────────────────────────────────────
 function ShapeCard({ shape, onClick }) {
     const [hovered, setHovered] = useState(false);
 
     return (
         <div
-            className="ap-shape-card"
             onClick={onClick}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
+            className="group relative bg-white rounded-[40px] border border-slate-100 overflow-hidden cursor-pointer transition-all duration-700 hover:shadow-[0_40px_80px_rgba(0,0,0,0.1)] hover:-translate-y-4 hover:border-blue-600/20"
         >
-            <div className="ap-card-image-area">
-                <div className="ap-card-image-bg" />
-                {shape.tag && <span className="ap-card-tag">{shape.tag}</span>}
-                <div className="ap-card-image-wrap">
+            {/* Gloss Area */}
+            <div className="relative aspect-[4/3] bg-slate-50 flex items-center justify-center p-8 overflow-hidden">
+                {/* Product Tag */}
+                <div className="absolute top-6 left-6 z-20">
+                    <span className="bg-white/80 backdrop-blur-xl px-4 py-2 rounded-2xl text-[9px] font-black text-blue-600 uppercase tracking-[0.2em] shadow-xl border border-white/50">
+                        {shape.tag}
+                    </span>
+                </div>
+
+                {/* Refined Image Base */}
+                <div className="relative z-10 transition-all duration-1000 group-hover:scale-110 drop-shadow-[0_20px_40px_rgba(0,0,0,0.2)]">
                     <ShapeImageClip shape={shape} hovered={hovered} />
+                    {/* Realistic Gloss Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-white/20 via-white/5 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                 </div>
             </div>
 
-            <div className="ap-card-body">
-                <div className="ap-card-header-row">
-                    <h3 className="ap-card-name">{shape.name}</h3>
-                    <span className="ap-card-subtitle">{shape.subtitle}</span>
+            {/* Info Body */}
+            <div className="p-8 space-y-6">
+                <div className="flex items-center justify-between">
+                    <h3 className="text-2xl font-bold text-slate-900 tracking-tight">{shape.name}</h3>
+                    <span className="text-[10px] font-black text-slate-300 border border-slate-100 px-3 py-1 rounded-full uppercase tracking-widest">
+                        {shape.subtitle}
+                    </span>
                 </div>
-                <p className="ap-card-desc">{shape.description}</p>
-                <div className="ap-card-footer">
-                    <span className="ap-card-cta-text">Customise Now</span>
-                    <div className="ap-card-arrow">
-                        <ArrowRight size={13} color={hovered ? "#fff" : "#0071e3"} />
+                <p className="text-slate-400 text-sm leading-relaxed font-medium line-clamp-2">
+                    {shape.description}
+                </p>
+
+                <div className="pt-6 border-t border-slate-50 flex items-center justify-between">
+                    <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] opacity-0 group-hover:opacity-100 transition-all -translate-x-4 group-hover:translate-x-0">Enter Studio</span>
+                    <div className="w-12 h-12 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-blue-600 group-hover:border-blue-600 group-hover:text-white transition-all duration-500">
+                        <ArrowRight size={18} className="transition-transform group-hover:translate-x-0.5" />
                     </div>
                 </div>
             </div>
@@ -541,64 +245,57 @@ function ShapeCard({ shape, onClick }) {
     );
 }
 
-// ─── Shape Image Clip ────────────────────────────────────────────────────────
 function ShapeImageClip({ shape, hovered }) {
     const { name, img } = shape;
-    const gloss = <div className="ap-card-gloss" />;
-    const imgStyle = {
-        transition: "transform 0.7s cubic-bezier(0.23, 1, 0.32, 1)",
-        transform: hovered ? "scale(1.08)" : "scale(1.0)",
+
+    const getShapeStyles = () => {
+        switch (name) {
+            case "Portrait": return { width: "110px", height: "150px", borderRadius: "8px" };
+            case "Landscape": return { width: "160px", height: "120px", borderRadius: "8px" };
+            case "Square": return { width: "135px", height: "135px", borderRadius: "8px" };
+            case "Round": return { width: "140px", height: "140px", borderRadius: "50%" };
+            case "Love Heart": return { width: "140px", height: "140px" };
+            case "Hexagon": return { width: "140px", height: "140px" };
+            default: return { width: "130px", height: "130px", borderRadius: "8px" };
+        }
     };
 
-    if (name === "Portrait") return (
-        <div style={{ position: "relative", width: "100px", height: "138px", borderRadius: "6px", overflow: "hidden" }}>
-            <img src={img} alt={name} className="ap-card-img" style={{ ...imgStyle, width: "100%", height: "100%", objectFit: "cover" }} />
-            {gloss}
-        </div>
-    );
-    if (name === "Landscape") return (
-        <div style={{ position: "relative", width: "158px", height: "110px", borderRadius: "6px", overflow: "hidden" }}>
-            <img src={img} alt={name} className="ap-card-img" style={{ ...imgStyle, width: "100%", height: "100%", objectFit: "cover" }} />
-            {gloss}
-        </div>
-    );
-    if (name === "Square") return (
-        <div style={{ position: "relative", width: "124px", height: "124px", borderRadius: "6px", overflow: "hidden" }}>
-            <img src={img} alt={name} className="ap-card-img" style={{ ...imgStyle, width: "100%", height: "100%", objectFit: "cover" }} />
-            {gloss}
-        </div>
-    );
-    if (name === "Round") return (
-        <div style={{ position: "relative", width: "124px", height: "124px", borderRadius: "50%", overflow: "hidden" }}>
-            <img src={img} alt={name} className="ap-card-img" style={{ ...imgStyle, width: "100%", height: "100%", objectFit: "cover" }} />
-            {gloss}
-        </div>
-    );
-    if (name === "Love Heart") return (
-        <div style={{ position: "relative", width: "130px", height: "130px" }}>
-            <svg width="0" height="0" style={{ position: "absolute" }}>
-                <defs>
-                    <clipPath id="heartClip" clipPathUnits="objectBoundingBox">
-                        <path d="M0.5,0.9 C0.1,0.68,0.01,0.46,0.01,0.3 C0.01,0.155,0.12,0.04,0.265,0.04 C0.346,0.04,0.42,0.08,0.47,0.145 L0.5,0.18 L0.53,0.145 C0.58,0.08,0.654,0.04,0.735,0.04 C0.88,0.04,0.99,0.155,0.99,0.3 C0.99,0.46,0.9,0.68,0.5,0.9 Z" />
-                    </clipPath>
-                </defs>
-            </svg>
-            <div style={{ width: "100%", height: "100%", clipPath: "url(#heartClip)", overflow: "hidden" }}>
-                <img src={img} alt={name} className="ap-card-img" style={{ ...imgStyle, width: "100%", height: "100%", objectFit: "cover" }} />
-                {gloss}
+    const containerStyle = {
+        ...getShapeStyles(),
+        position: "relative",
+        overflow: "hidden",
+        boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.4)",
+        border: "1px solid rgba(255,255,255,0.2)"
+    };
+
+    if (name === "Love Heart") {
+        return (
+            <div style={{ position: "relative", width: "140px", height: "140px" }}>
+                <svg width="0" height="0" style={{ position: "absolute" }}>
+                    <defs>
+                        <clipPath id="heartClip" clipPathUnits="objectBoundingBox">
+                            <path d="M0.5,0.9 C0.1,0.68,0.01,0.46,0.01,0.3 C0.01,0.155,0.12,0.04,0.265,0.04 C0.346,0.04,0.42,0.08,0.47,0.145 L0.5,0.18 L0.53,0.145 C0.58,0.08,0.654,0.04,0.735,0.04 C0.88,0.04,0.99,0.155,0.99,0.3 C0.99,0.46,0.9,0.68,0.5,0.9 Z" />
+                        </clipPath>
+                    </defs>
+                </svg>
+                <div style={{ ...containerStyle, clipPath: "url(#heartClip)" }}>
+                    <img src={img} alt={name} className="w-full h-full object-cover" />
+                </div>
             </div>
-        </div>
-    );
-    if (name === "Hexagon") return (
-        <div style={{ position: "relative", width: "130px", height: "130px", clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)", overflow: "hidden" }}>
-            <img src={img} alt={name} className="ap-card-img" style={{ ...imgStyle, width: "100%", height: "100%", objectFit: "cover" }} />
-            {gloss}
-        </div>
-    );
+        );
+    }
+
+    if (name === "Hexagon") {
+        return (
+            <div style={{ ...containerStyle, clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" }}>
+                <img src={img} alt={name} className="w-full h-full object-cover" />
+            </div>
+        );
+    }
+
     return (
-        <div style={{ position: "relative", width: "120px", height: "120px", borderRadius: "8px", overflow: "hidden" }}>
-            <img src={img} alt={name} className="ap-card-img" style={{ ...imgStyle, width: "100%", height: "100%", objectFit: "cover" }} />
-            {gloss}
+        <div style={containerStyle}>
+            <img src={img} alt={name} className="w-full h-full object-cover" />
         </div>
     );
 }

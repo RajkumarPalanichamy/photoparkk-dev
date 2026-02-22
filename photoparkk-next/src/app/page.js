@@ -4,6 +4,7 @@ import React from "react";
 import LandingPage from "@/Components/LandingPage";
 import Customize from "@/Components/HomePageComponents/Customize";
 import OurCollection from "@/Components/HomePageComponents/OurCollection";
+import ProductListing from "@/Components/HomePageComponents/ProductListing";
 import CategoryShowcase from "@/Components/HomePageComponents/CategoryShowcase";
 import Faq from "@/Components/HomePageComponents/Faq";
 import ShippingDetails from "@/Components/HomePageComponents/ShippingDetails";
@@ -16,14 +17,27 @@ export default function Home() {
       {/* Featured Overview */}
       <OurCollection />
 
-      {/* Modern Detailed Sections */}
+      {/* Hero Showcase: Backlight (New Arrival) */}
+      <CategoryShowcase
+        type="backlight"
+        variant="backlight"
+        title="Illuminated Backlight Customizer"
+        description="Make your memories glow. These vibrant LED-lit frames create a stunning cinematic effect, perfect for creating an ambient focal point in any interior space."
+        badgeColor="bg-blue-600"
+        accentColor="text-blue-600"
+      />
+
+      {/* Full Inventory Under Hero Showcase */}
+      <ProductListing />
+
+      {/* Secondary Detailed Sections */}
       <CategoryShowcase
         type="acrylic"
         variant="acrylic"
-        title="Premium Acrylic Frames"
+        title="Premium Acrylic Customizer"
         description="Experience unparalleled depth and clarity. Our 3D-polished acrylic frames bring your photos to life with museum-grade brilliance and modern floating effects."
-        badgeColor="bg-blue-500"
-        accentColor="text-blue-500"
+        badgeColor="bg-blue-600"
+        accentColor="text-blue-600"
       />
 
       <CategoryShowcase
@@ -31,17 +45,8 @@ export default function Home() {
         variant="canvas"
         title="Handcrafted Canvas Gallery"
         description="Classic textures meet modern craftsmanship. Our premium gallery-wrapped canvases offer a warm, artistic touch that transforms any room into a personal gallery."
-        badgeColor="bg-orange-600"
-        accentColor="text-orange-600"
-      />
-
-      <CategoryShowcase
-        type="backlight"
-        variant="backlight"
-        title="Illuminated Backlight Frames"
-        description="Make your memories glow. These vibrant LED-lit frames create a stunning cinematic effect, perfect for creating an ambient focal point in any interior space."
-        badgeColor="bg-primary"
-        accentColor="text-primary"
+        badgeColor="bg-blue-600"
+        accentColor="text-blue-600"
       />
 
       <Customize />

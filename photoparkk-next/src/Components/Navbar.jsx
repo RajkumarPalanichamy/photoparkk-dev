@@ -164,7 +164,7 @@ const Navbar = () => {
                   >
                     <div className="font-medium">Our Collection</div>
                     <div className="text-xs text-neutral-500 mt-0.5">
-                      Explore all customizable frames
+                      Explore all customizations
                     </div>
                   </Link>
                   <Link
@@ -189,7 +189,7 @@ const Navbar = () => {
                     href="/shop/backlight"
                     className="block px-4 py-3 text-sm text-neutral-700 hover:bg-primary-light hover:text-primary transition-all duration-200 border-l-2 border-transparent hover:border-primary"
                   >
-                    <div className="font-medium">Backlight Frames</div>
+                    <div className="font-medium">Backlight Customizer</div>
                     <div className="text-xs text-neutral-500 mt-0.5">
                       Illuminated displays
                     </div>
@@ -198,7 +198,7 @@ const Navbar = () => {
               </div>
             </div>
 
-            <StyledNavLink href="/frames">Frames</StyledNavLink>
+            <StyledNavLink href="/frames">Customizer</StyledNavLink>
             <StyledNavLink href="/about">About</StyledNavLink>
             <StyledNavLink href="/contact">Contact</StyledNavLink>
             {isAdmin && (
@@ -383,14 +383,19 @@ const Navbar = () => {
             )}
           </div>
 
-          {["Frames", "Customize", "About", "Contact"].map((item) => (
+          {[
+            { label: "Customizer", path: "/frames" },
+            { label: "Customize", path: "/customize" },
+            { label: "About", path: "/about" },
+            { label: "Contact", path: "/contact" }
+          ].map((item) => (
             <Link
-              key={item}
-              href={`/${item.toLowerCase()}`}
+              key={item.label}
+              href={item.path}
               onClick={() => setMobileMenuOpen(false)}
               className="block px-4 py-3 rounded-xl text-neutral-700 hover:bg-primary-light hover:text-primary transition-all duration-200 font-medium"
             >
-              {item}
+              {item.label}
             </Link>
           ))}
 
