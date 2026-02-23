@@ -9,16 +9,16 @@ const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.
 async function check() {
     const tables = ['acrylic_customize', 'canvas_customize', 'backlight_customize', 'customizer_templates', 'products'];
     for (const table of tables) {
-        console.log(`Checking table: ${table}...`);
+        process.stdout.write(`Checking ${table}... `);
         try {
-            const { data, error } = await supabase.from(table).select('*').limit(1);
+            const { count, error } = await supabase.from(table).select('*', { count: 'exact', head: true });
             if (error) {
-                console.log(`RESULT:${table}:ERROR:${error.code}:${error.message}`);
+                console.log(`ERROR: ${error.code} - ${error.message}`);
             } else {
-                console.log(`RESULT:${table}:SUCCESS`);
+                console.log(`SUCCESS: Found ${count} records`);
             }
         } catch (e) {
-            console.log(`RESULT:${table}:EXCEPTION:${e.message}`);
+            console.log(`EXCEPTION: ${e.message}`);
         }
     }
 }

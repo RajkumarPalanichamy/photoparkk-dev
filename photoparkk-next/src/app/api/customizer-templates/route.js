@@ -8,7 +8,11 @@ export async function GET() {
         .order('created_at', { ascending: false });
 
     if (error) {
-        console.error("Fetch templates error:", error.message, error.details);
+        console.error("Fetch templates error:", error.message);
+        // If the table doesn't exist yet, return an empty array instead of 500
+        if (error.code === 'PGRST204' || error.code === 'PGRST205' || error.message.includes('relation "customizer_templates" does not exist')) {
+            return NextResponse.json([]);
+        }
         return NextResponse.json({ message: "Failed to fetch templates", error: error.message }, { status: 500 });
     }
 
@@ -26,7 +30,14 @@ export async function POST(request) {
             .single();
 
         if (error) {
-            console.error("Create template error:", error.message, error.details);
+            console.error("Create template error:", error.message);
+            // Check if table is missing
+            if (error.code === 'PGRST204' || error.code === 'PGRST205' || error.message.includes('relation "customizer_templates" does not exist')) {
+                return NextResponse.json({
+                    message: "Database Setup Required: The 'customizer_templates' table does not exist. Please run the SQL setup script in your Supabase dashboard.",
+                    error: error.message
+                }, { status: 500 });
+            }
             return NextResponse.json({ message: "Failed to create template", error: error.message }, { status: 500 });
         }
 

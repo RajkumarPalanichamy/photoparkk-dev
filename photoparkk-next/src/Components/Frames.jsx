@@ -33,24 +33,34 @@ const Frames = () => {
                 // Fetching all frame types to display in the inventory
                 const types = ['acrylic', 'canvas', 'backlight'];
                 const productPromises = types.map(async (type) => {
-                    const res = await axiosInstance.get(`frames/${type}`);
-                    return res.data.map(item => ({ ...item, type }));
+                    try {
+                        const res = await axiosInstance.get(`frames/${type}`);
+                        return (res.data || []).map(item => ({ ...item, type }));
+                    } catch (err) {
+                        console.error(`Failed to fetch ${type} frames:`, err);
+                        return [];
+                    }
                 });
 
                 // Fetching WhatsApp templates
-                const templatePromise = axiosInstance.get('customizer-templates');
+                const templatePromise = axiosInstance.get('customizer-templates')
+                    .then(res => res.data || [])
+                    .catch(err => {
+                        console.error("Failed to fetch customizer templates:", err);
+                        return [];
+                    });
 
-                const [productResults, templateRes] = await Promise.all([
+                const [productResults, templatesData] = await Promise.all([
                     Promise.all(productPromises),
                     templatePromise
                 ]);
 
                 const mergedProducts = productResults.flat();
                 setProducts(mergedProducts);
-                setTemplates(templateRes.data);
+                setTemplates(templatesData);
                 setLoading(false);
             } catch (error) {
-                console.error("Failed to fetch data:", error);
+                console.error("Critical error in fetchData:", error);
                 setProducts([]);
                 setTemplates([]);
                 setLoading(false);
@@ -227,7 +237,7 @@ const Frames = () => {
                                 return (
                                     <Link
                                         key={product.id || index}
-                                        href={`/shop/${product.type}/${product.shape.toLowerCase()}`}
+                                        href={`/shop/${product.type}/${(product.shape || 'portrait').toLowerCase()}`}
                                         className="group relative"
                                     >
                                         {/* Volumetric Hover Shadow */}

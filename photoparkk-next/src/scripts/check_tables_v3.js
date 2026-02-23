@@ -2,24 +2,28 @@
 const { createClient } = require('@supabase/supabase-js');
 const dotenv = require('dotenv');
 const path = require('path');
+const fs = require('fs');
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
 async function check() {
     const tables = ['acrylic_customize', 'canvas_customize', 'backlight_customize', 'customizer_templates', 'products'];
+    let results = "TABLE CHECK RESULTS:\n";
     for (const table of tables) {
-        console.log(`Checking table: ${table}...`);
+        results += `Checking ${table}... `;
         try {
             const { data, error } = await supabase.from(table).select('*').limit(1);
             if (error) {
-                console.log(`RESULT:${table}:ERROR:${error.code}:${error.message}`);
+                results += `ERROR: ${error.code} - ${error.message}\n`;
             } else {
-                console.log(`RESULT:${table}:SUCCESS`);
+                results += `SUCCESS: Found ${data.length} records\n`;
             }
         } catch (e) {
-            console.log(`RESULT:${table}:EXCEPTION:${e.message}`);
+            results += `EXCEPTION: ${e.message}\n`;
         }
     }
+    fs.writeFileSync('table_check_v3.txt', results);
+    console.log("Check complete. Results written to table_check_v3.txt");
 }
 check();
