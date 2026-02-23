@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Check, Sun, Zap, Lightbulb } from "lucide-react";
+import { ArrowRight, Check, Sun, Zap, Lightbulb, ShieldCheck, Sparkles, Clock, Layers } from "lucide-react";
 
 // ─── Shape Data ───────────────────────────────────────────────────────────────
 const shapeData = [
@@ -11,7 +11,7 @@ const shapeData = [
         tag: "Most Popular",
         subtitle: "3 : 4 Ratio",
         description: "Elegant vertical format perfect for solo portraits and cherished memories.",
-        route: "/shop/backlight/portrait",
+        route: "/shop/backlight/portrait/size",
         img: "/assets/frontend_assets/BacklightPhotoFrames/BacklightPortrait.jpeg",
         shape: "portrait",
     },
@@ -20,7 +20,7 @@ const shapeData = [
         tag: "Best Seller",
         subtitle: "4 : 3 Ratio",
         description: "Captivating horizontal view ideal for landscapes, group photos, and scenic vistas.",
-        route: "/shop/backlight/landscape",
+        route: "/shop/backlight/landscape/size",
         img: "/assets/frontend_assets/BacklightPhotoFrames/LandScape.jpeg",
         shape: "landscape",
     },
@@ -29,454 +29,146 @@ const shapeData = [
         tag: "Classic",
         subtitle: "1 : 1 Ratio",
         description: "The timeless balanced format for social media favorites and modern decor.",
-        route: "/shop/backlight/square",
+        route: "/shop/backlight/square/size",
         img: "/assets/frontend_assets/BacklightPhotoFrames/Square.jpeg",
         shape: "square",
     },
 ];
 
 const guarantees = [
-    "Uniformed LED backlight distribution",
-    "Brilliant HD resolution with deep blacks",
-    "Energy-efficient low voltage power supply",
-    "Ships in 4–6 business days",
+    { icon: <ShieldCheck className="w-4 h-4" />, text: "Uniform LED distribution" },
+    { icon: <Sparkles className="w-4 h-4" />, text: "Brilliant HD resolution" },
+    { icon: <Zap className="w-4 h-4" />, text: "Energy-efficient supply" },
+    { icon: <Clock className="w-4 h-4" />, text: "Ships in 4–6 business days" },
 ];
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
 const BacklightShop = () => {
     const router = useRouter();
 
     return (
-        <>
-            <style>{`
-                /* ── ALL STYLES SCOPED UNDER .backlight-page ── */
-                .backlight-page {
-                    font-family: 'Poppins', sans-serif;
-                    background: #FAF8F4;
-                    color: #1d1d1f;
-                    min-height: 100vh;
-                }
+        <div className="min-h-screen bg-slate-950 font-sans selection:bg-amber-500/10 selection:text-amber-500">
+            {/* ═══ CINEMATIC HERO SECTION ═══ */}
+            <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-slate-950 pt-[100px]">
+                {/* Immersive Background */}
+                <img
+                    src="/assets/frontend_assets/BacklightPhotoFrames/BacklightBanner.jpeg"
+                    alt="Backlight Backdrop"
+                    className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-screen"
+                />
 
-                /* ── Hero ── */
-                .backlight-page .bp-hero {
-                    position: relative;
-                    width: 100%;
-                    min-height: 78vh;
-                    background: linear-gradient(160deg, #0a0f1e 0%, #1a1a2e 55%, #0a0a1a 100%);
-                    display: flex;
-                    align-items: center;
-                    overflow: hidden;
-                }
-                .backlight-page .bp-hero-bg-img {
-                    position: absolute; inset: 0; width: 100%; height: 100%;
-                    object-fit: cover; object-position: center 30%;
-                    opacity: 0.3;
-                    filter: saturate(0.8) brightness(0.8);
-                }
-                .backlight-page .bp-hero-overlay {
-                    position: absolute; inset: 0;
-                    background: radial-gradient(circle at 70% 30%, rgba(255, 215, 0, 0.15) 0%, transparent 60%),
-                                linear-gradient(to right, rgba(10,15,30,0.95) 0%, rgba(10,15,30,0.6) 55%, rgba(10,15,30,0.2) 100%);
-                }
-                .backlight-page .bp-hero-content {
-                    position: relative; z-index: 2;
-                    max-width: 1260px; margin: 0 auto;
-                    padding: 80px 48px;
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 48px;
-                    align-items: center;
-                    width: 100%;
-                }
-                .backlight-page .bp-hero-eyebrow {
-                    display: inline-flex; align-items: center; gap: 10px;
-                    margin-bottom: 24px;
-                }
-                .backlight-page .bp-hero-eyebrow-line {
-                    width: 40px; height: 1px;
-                    background: linear-gradient(90deg, #fbbf24, #f59e0b);
-                }
-                .backlight-page .bp-hero-eyebrow-text {
-                    font-size: 11px; letter-spacing: 3.5px; text-transform: uppercase;
-                    color: #fbbf24; font-weight: 500;
-                }
-                .backlight-page .bp-hero-h1 {
-                    font-family: 'Poppins', sans-serif;
-                    font-size: clamp(2.4rem, 5.5vw, 4.4rem);
-                    font-weight: 700; line-height: 1.08;
-                    color: #f5f5f7; letter-spacing: -0.5px;
-                    margin-bottom: 20px;
-                }
-                .backlight-page .bp-hero-h1 em { font-style: normal; color: #fbbf24; text-shadow: 0 0 20px rgba(251, 191, 36, 0.4); }
-                .backlight-page .bp-hero-p {
-                    font-size: 15px; line-height: 1.85;
-                    color: rgba(245,245,247,0.7);
-                    font-weight: 300; max-width: 440px;
-                    margin-bottom: 40px;
-                }
-                .backlight-page .bp-hero-cta {
-                    display: inline-flex; align-items: center; gap: 12px;
-                    padding: 14px 32px;
-                    background: #0071e3;
-                    color: #fff; font-size: 13px; font-weight: 600;
-                    letter-spacing: 1.2px; text-transform: uppercase;
-                    border: none; border-radius: 6px; cursor: pointer;
-                    transition: all 0.3s;
-                    text-decoration: none;
-                    box-shadow: 0 4px 20px rgba(0,113,227,0.4);
-                }
-                .backlight-page .bp-hero-cta:hover {
-                    background: #0077ed;
-                    transform: translateY(-2px);
-                    box-shadow: 0 8px 30px rgba(0,113,227,0.5);
-                }
-                .backlight-page .bp-hero-right {
-                    display: flex; flex-direction: column; gap: 12px;
-                    align-items: flex-end;
-                }
-                .backlight-page .bp-hero-tag {
-                    background: rgba(251, 191, 36, 0.15);
-                    border: 1px solid rgba(251, 191, 36, 0.35);
-                    border-radius: 4px;
-                    padding: 4px 12px;
-                    font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
-                    color: #fbbf24; align-self: flex-start;
-                    margin-bottom: 8px;
-                }
-                .backlight-page .bp-hero-features {
-                    list-style: none;
-                    display: flex; flex-direction: column; gap: 10px;
-                    width: 100%;
-                    padding: 0; margin: 0;
-                }
-                .backlight-page .bp-hero-feature-item {
-                    display: flex; align-items: center; gap: 10px;
-                    font-size: 13px; color: rgba(245,245,247,0.75); font-weight: 300;
-                }
-                .backlight-page .bp-hero-feature-dot {
-                    width: 4px; height: 4px; border-radius: 50%;
-                    background: #fbbf24; flex-shrink: 0;
-                    box-shadow: 0 0 8px #fbbf24;
-                }
+                {/* Dynamic Lighting Overlays */}
+                <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent z-10" />
+                <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-amber-500/10 rounded-full blur-[120px] animate-pulse pointer-events-none" />
 
-                /* ── Steps Bar ── */
-                .backlight-page .bp-steps-bar {
-                    background: #fff;
-                    border-bottom: 1px solid #e5e5e5;
-                    padding: 0 48px;
-                }
-                .backlight-page .bp-steps-inner {
-                    max-width: 1260px; margin: 0 auto;
-                    display: flex; align-items: stretch;
-                }
-                .backlight-page .bp-step-item {
-                    display: flex; align-items: center; gap: 14px;
-                    padding: 22px 0; flex: 1;
-                    border-right: 1px solid #e5e5e5;
-                    position: relative;
-                }
-                .backlight-page .bp-step-item:last-child { border-right: none; padding-right: 0; }
-                .backlight-page .bp-step-item:not(:first-child) { padding-left: 36px; }
-                .backlight-page .bp-step-num {
-                    width: 36px; height: 36px; border-radius: 50%;
-                    display: flex; align-items: center; justify-content: center;
-                    font-size: 12px; font-weight: 600; flex-shrink: 0;
-                }
-                .backlight-page .bp-step-num.active { background: #0071e3; color: #fff; }
-                .backlight-page .bp-step-num.inactive { background: #f5f5f5; color: #a3a3a3; }
-                .backlight-page .bp-step-text-label {
-                    font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 600;
-                }
-                .backlight-page .bp-step-text-label.active { color: #1d1d1f; }
-                .backlight-page .bp-step-text-label.inactive { color: #a3a3a3; }
-                .backlight-page .bp-step-text-sub { font-size: 11px; color: #a3a3a3; font-weight: 300; }
-
-                /* ── Section: Choose Shape ── */
-                .backlight-page .bp-choose-section {
-                    max-width: 1260px;
-                    margin: 0 auto;
-                    padding: 80px 48px 100px;
-                }
-                .backlight-page .bp-section-header {
-                    display: flex; align-items: flex-end; justify-content: space-between;
-                    margin-bottom: 56px;
-                    gap: 24px;
-                }
-                .backlight-page .bp-section-eyebrow {
-                    display: inline-block;
-                    font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
-                    color: #0071e3; font-weight: 600; margin-bottom: 12px;
-                }
-                .backlight-page .bp-section-h2 {
-                    font-family: 'Poppins', sans-serif;
-                    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
-                    font-weight: 700; color: #1d1d1f; line-height: 1.2;
-                    letter-spacing: -0.5px;
-                }
-                .backlight-page .bp-section-h2 em { font-style: normal; color: #0071e3; }
-                .backlight-page .bp-section-divider {
-                    flex-shrink: 0;
-                    height: 1px; width: 80px;
-                    background: linear-gradient(90deg, #0071e3, transparent);
-                    margin-bottom: 6px;
-                }
-
-                /* ── Cards Grid ── */
-                .backlight-page .bp-cards-grid {
-                    display: grid;
-                    grid-template-columns: repeat(3, 1fr);
-                    gap: 28px;
-                }
-                @media (max-width: 1024px) {
-                    .backlight-page .bp-cards-grid { grid-template-columns: repeat(2, 1fr); }
-                }
-                @media (max-width: 640px) {
-                    .backlight-page .bp-cards-grid { grid-template-columns: 1fr; }
-                    .backlight-page .bp-hero-content { grid-template-columns: 1fr; padding: 60px 24px; }
-                    .backlight-page .bp-hero-right { display: none; }
-                    .backlight-page .bp-choose-section { padding: 56px 24px 80px; }
-                    .backlight-page .bp-section-header { flex-direction: column; align-items: flex-start; }
-                    .backlight-page .bp-steps-bar { padding: 0 24px; }
-                }
-
-                /* ── Card ── */
-                .backlight-page .bp-shape-card {
-                    background: #fff;
-                    border-radius: 16px;
-                    border: 1px solid #e5e5e5;
-                    overflow: hidden;
-                    cursor: pointer;
-                    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-                    display: flex; flex-direction: column;
-                }
-                .backlight-page .bp-shape-card:hover {
-                    border-color: #0071e3;
-                    transform: translateY(-8px);
-                    box-shadow: 0 24px 60px rgba(0,113,227,0.15), 0 4px 20px rgba(0,0,0,0.06);
-                }
-                .backlight-page .bp-card-image-area {
-                    position: relative;
-                    height: 220px;
-                    background: #f5f5f7;
-                    display: flex; align-items: center; justify-content: center;
-                    overflow: hidden;
-                }
-                .backlight-page .bp-card-image-bg {
-                    position: absolute; inset: 0;
-                    background: linear-gradient(160deg, #f5f5f7 0%, #e8eaf0 100%);
-                }
-                .backlight-page .bp-card-tag {
-                    position: absolute; top: 14px; left: 14px; z-index: 5;
-                    background: #0071e3; color: #fff;
-                    font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
-                    font-weight: 600; padding: 4px 10px; border-radius: 4px;
-                }
-                .backlight-page .bp-card-image-wrap {
-                    position: relative; z-index: 2;
-                    transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-                    filter: drop-shadow(0 12px 32px rgba(0,0,0,0.18));
-                }
-                .backlight-page .bp-shape-card:hover .bp-card-image-wrap { transform: scale(1.05); }
-                .backlight-page .bp-card-img {
-                    display: block; object-fit: cover;
-                    transition: transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
-                    border: 2px solid #000;
-                }
-                .backlight-page .bp-shape-card:hover .bp-card-img { transform: scale(1.06); }
-                .backlight-page .bp-card-gloss {
-                    position: absolute; inset: 0; z-index: 3; pointer-events: none;
-                    background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.0) 50%, rgba(255,251,235,0.1) 100%);
-                }
-                .backlight-page .bp-card-body {
-                    padding: 24px 26px 26px;
-                    flex: 1; display: flex; flex-direction: column;
-                    gap: 10px;
-                }
-                .backlight-page .bp-card-header-row {
-                    display: flex; align-items: center; justify-content: space-between;
-                }
-                .backlight-page .bp-card-name {
-                    font-family: 'Poppins', sans-serif;
-                    font-size: 17px; font-weight: 600; color: #1d1d1f;
-                    letter-spacing: -0.2px;
-                }
-                .backlight-page .bp-card-subtitle {
-                    font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
-                    color: #0071e3; font-weight: 600;
-                    background: #e6f2ff; border: 1px solid #bfdbfe;
-                    padding: 3px 8px; border-radius: 4px;
-                }
-                .backlight-page .bp-card-desc {
-                    font-size: 12.5px; color: #737373; line-height: 1.7; font-weight: 300;
-                }
-                .backlight-page .bp-card-footer {
-                    display: flex; align-items: center; justify-content: space-between;
-                    margin-top: 6px; padding-top: 16px;
-                    border-top: 1px solid #f5f5f5;
-                }
-                .backlight-page .bp-card-cta-text {
-                    font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
-                    font-weight: 600; color: #0071e3;
-                }
-                .backlight-page .bp-card-arrow {
-                    width: 32px; height: 32px; border-radius: 50%;
-                    background: #e6f2ff; border: 1px solid #bfdbfe;
-                    display: flex; align-items: center; justify-content: center;
-                    transition: all 0.3s;
-                }
-                .backlight-page .bp-shape-card:hover .bp-card-arrow {
-                    background: #0071e3; border-color: #0071e3;
-                }
-
-                /* ── Guarantee Strip ── */
-                .backlight-page .bp-guarantee-strip {
-                    background: linear-gradient(135deg, #1d1d1f 0%, #2d2d2f 100%);
-                    padding: 40px 48px;
-                }
-                .backlight-page .bp-guarantee-inner {
-                    max-width: 1260px; margin: 0 auto;
-                    display: flex; align-items: center; justify-content: space-between;
-                    flex-wrap: wrap; gap: 20px;
-                }
-                .backlight-page .bp-guarantee-title {
-                    font-family: 'Poppins', sans-serif;
-                    font-size: 15px; font-weight: 600; color: #f5f5f7;
-                    letter-spacing: 0.2px;
-                }
-                .backlight-page .bp-guarantee-items {
-                    display: flex; flex-wrap: wrap; gap: 24px;
-                }
-                .backlight-page .bp-guarantee-item {
-                    display: flex; align-items: center; gap: 8px;
-                    font-size: 12px; color: rgba(245,245,247,0.65); font-weight: 300;
-                }
-                .backlight-page .bp-guarantee-check {
-                    width: 18px; height: 18px; border-radius: 50%;
-                    background: rgba(0,113,227,0.25); border: 1px solid rgba(0,113,227,0.5);
-                    display: flex; align-items: center; justify-content: center;
-                    flex-shrink: 0;
-                }
-            `}</style>
-
-            <div className="backlight-page">
-
-                {/* ── HERO ─────────────────────────────────────────────── */}
-                <section className="bp-hero">
-                    <img
-                        src="/assets/frontend_assets/BacklightPhotoFrames/BacklightBanner.jpeg"
-                        alt="Backlight Header Backdrop"
-                        className="bp-hero-bg-img"
-                    />
-                    <div className="bp-hero-overlay" />
-
-                    <div className="bp-hero-content">
-                        <div>
-                            <div className="bp-hero-eyebrow">
-                                <div className="bp-hero-eyebrow-line" />
-                                <span className="bp-hero-eyebrow-text">Illuminated Collection</span>
-                            </div>
-
-                            <h1 className="bp-hero-h1">
-                                Every Detail,<br />
-                                <em>Glow</em>ing with<br />
-                                Life.
-                            </h1>
-
-                            <p className="bp-hero-p">
-                                Transform your photos into radiant masterpieces. Our premium
-                                LED backlight frames bring unmatched depth, vibrance, and warmth to your home.
-                            </p>
-
-                            <button
-                                className="bp-hero-cta"
-                                onClick={() => {
-                                    document.getElementById('shapes')?.scrollIntoView({ behavior: 'smooth' });
-                                }}
-                            >
-                                Start Designing
-                                <ArrowRight size={16} />
-                            </button>
+                <div className="max-w-7xl mx-auto px-6 relative z-20 w-full grid md:grid-cols-2 gap-16 items-center py-20">
+                    <div className="space-y-10 animate-in fade-in slide-in-from-left-10 duration-1000">
+                        <div className="flex items-center gap-3">
+                            <div className="h-[1px] w-12 bg-amber-500 shadow-[0_0_10px_#f59e0b]" />
+                            <span className="text-[11px] font-black text-amber-400 uppercase tracking-[0.4em]">The Illuminated Series</span>
                         </div>
 
-                        <div className="bp-hero-right">
-                            <div className="bp-hero-tag">Premium LED Tech</div>
-                            <ul className="bp-hero-features">
+                        <div className="space-y-4">
+                            <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter leading-[0.85]">
+                                Capturing <br /> <span className="text-amber-500 italic font-medium drop-shadow-[0_0_30px_rgba(245,158,11,0.3)]">The Glow</span>
+                            </h1>
+                        </div>
+
+                        <p className="text-slate-400 text-lg font-medium max-w-md leading-relaxed border-l-2 border-slate-800 pl-6">
+                            Beyond standard prints. Our edge-lit LED technology breathes life into your photos, creating a cinematic focal point that illuminates your space.
+                        </p>
+
+                        <button
+                            onClick={() => document.getElementById('shapes')?.scrollIntoView({ behavior: 'smooth' })}
+                            className="bg-amber-600 hover:bg-amber-500 text-black px-12 py-6 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-2xl shadow-amber-500/20 flex items-center gap-4 group"
+                        >
+                            Experience the Light
+                            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                        </button>
+                    </div>
+
+                    <div className="hidden md:flex flex-col items-end space-y-6">
+                        <div className="bg-white/5 backdrop-blur-3xl border border-white/10 p-10 rounded-[48px] max-w-sm shadow-2xl relative overflow-hidden group">
+                            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent pointer-events-none" />
+                            <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest block mb-8">Photon Architecture</span>
+                            <ul className="space-y-6">
                                 {[
-                                    { icon: <Sun size={14} />, text: "Edge-lit LED technology for even glow" },
-                                    { icon: <Zap size={14} />, text: "High-contrast fabric print surfaces" },
-                                    { icon: <Lightbulb size={14} />, text: "Energy-efficient & long-lasting bulbs" },
-                                    { icon: <Check size={14} />, text: "Slim-profile design, easy wall mounting" },
-                                ].map((feat, i) => (
-                                    <li key={i} className="bp-hero-feature-item">
-                                        <div className="bp-hero-feature-dot" />
-                                        {feat.text}
+                                    { icon: <Sun className="w-5 h-5" />, t: "Edge-lit Diffusion Core" },
+                                    { icon: <Zap className="w-5 h-5" />, t: "High-Contrast Backlit Fabric" },
+                                    { icon: <Lightbulb className="w-5 h-5" />, t: "50,000hr Archival LEDs" },
+                                ].map((item, i) => (
+                                    <li key={i} className="flex items-center gap-4 text-slate-300 text-sm font-bold tracking-tight">
+                                        <div className="text-amber-500">{item.icon}</div>
+                                        {item.t}
                                     </li>
                                 ))}
                             </ul>
                         </div>
                     </div>
-                </section>
+                </div>
+            </section>
 
-                {/* ── STEPS BAR ────────────────────────────────────────── */}
-                <div className="bp-steps-bar">
-                    <div className="bp-steps-inner">
+            {/* ═══ PROCESS ARCHITECTURE ═══ */}
+            <div className="max-w-7xl mx-auto px-6 relative z-30 -mt-20">
+                <div className="bg-slate-900/50 backdrop-blur-2xl border border-white/5 rounded-[40px] shadow-2xl overflow-hidden">
+                    <div className="flex flex-wrap md:flex-nowrap divide-x divide-white/5">
                         {[
-                            { num: "01", label: "Choose Shape", sub: "Select your format", active: true },
-                            { num: "02", label: "Upload & Customize", sub: "Add your photo", active: false },
-                            { num: "03", label: "Place Order", sub: "Select size & checkout", active: false },
-                        ].map((step, i) => (
-                            <div key={i} className="bp-step-item">
-                                <div className={`bp-step-num ${step.active ? "active" : "inactive"}`}>
-                                    {step.num}
-                                </div>
+                            { n: "01", label: "Geometry", sub: "Shape Selection", active: true },
+                            { n: "02", label: "Content", sub: "Visual Upload", active: false },
+                            { n: "03", label: "Output", sub: "Size & Checkout", active: false },
+                        ].map((s, i) => (
+                            <div key={i} className="flex-1 py-10 px-10 flex items-center gap-6">
+                                <span className={`text-3xl font-black ${s.active ? 'text-amber-500 shadow-[0_0_20px_#f59e0b]' : 'text-slate-800'}`}>{s.n}</span>
                                 <div>
-                                    <div className={`bp-step-text-label ${step.active ? "active" : "inactive"}`}>
-                                        {step.label}
-                                    </div>
-                                    <div className="bp-step-text-sub">{step.sub}</div>
+                                    <div className={`text-[10px] font-black uppercase tracking-[0.2em] ${s.active ? 'text-white' : 'text-slate-500'}`}>{s.label}</div>
+                                    <div className="text-xs text-slate-500 font-medium">{s.sub}</div>
                                 </div>
                             </div>
                         ))}
                     </div>
                 </div>
+            </div>
 
-                {/* ── CHOOSE SHAPE ──────────────────────────────────────── */}
-                <section id="shapes" className="bp-choose-section">
-                    <div className="bp-section-header">
-                        <div>
-                            <span className="bp-section-eyebrow">Step 01 / 03</span>
-                            <h2 className="bp-section-h2">
-                                Pick Your <em>Backlight Shape</em>
-                            </h2>
-                        </div>
-                        <div className="bp-section-divider" />
+            {/* ═══ CATEGORY SELECTOR ═══ */}
+            <section id="shapes" className="py-32 max-w-7xl mx-auto px-6">
+                <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-10">
+                    <div className="space-y-4">
+                        <span className="text-[11px] font-black text-amber-500 uppercase tracking-[0.4em]">Shape Engineering</span>
+                        <h2 className="text-5xl md:text-6xl font-black text-white tracking-tighter leading-tight">
+                            Define Your <span className="text-slate-800 font-medium">Silhouette</span>
+                        </h2>
                     </div>
+                    <p className="text-slate-500 font-medium text-sm max-w-xs md:text-right leading-relaxed">
+                        Curated aspect ratios designed to maximize visual impact across various architectural spaces.
+                    </p>
+                </div>
 
-                    <div className="bp-cards-grid">
-                        {shapeData.map((item, i) => (
-                            <ShapeCard key={i} data={item} onClick={() => router.push(item.route)} />
-                        ))}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+                    {shapeData.map((item, i) => (
+                        <ShapeCard key={i} data={item} onClick={() => router.push(item.route)} />
+                    ))}
+                </div>
+            </section>
+
+            {/* ═══ THE LIGHTING PROMISE ═══ */}
+            <div className="bg-white py-24 px-6 overflow-hidden relative">
+                <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-16 relative z-10">
+                    <div className="space-y-4">
+                        <h3 className="text-[11px] font-black text-amber-600 uppercase tracking-[0.4em]">The Photoparkk Vow</h3>
+                        <p className="text-slate-950 text-4xl font-black tracking-tighter">Superior Illumination <br /> Standards</p>
                     </div>
-                </section>
-
-                {/* ── GUARANTEE STRIP ───────────────────────────────────── */}
-                <div className="bp-guarantee-strip">
-                    <div className="bp-guarantee-inner">
-                        <span className="bp-guarantee-title">Our Lighting Promise</span>
-                        <div className="bp-guarantee-items">
-                            {guarantees.map((g, i) => (
-                                <div key={i} className="bp-guarantee-item">
-                                    <div className="bp-guarantee-check">
-                                        <Check size={10} color="#fbbf24" strokeWidth={3} />
-                                    </div>
-                                    {g}
+                    <div className="grid grid-cols-2 gap-8 w-full lg:w-auto">
+                        {guarantees.map((g, i) => (
+                            <div key={i} className="flex items-center gap-5 text-slate-900 group p-6 bg-slate-50 rounded-[32px] border border-slate-100 hover:border-amber-600 transition-all duration-300">
+                                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-amber-600 shadow-sm group-hover:bg-amber-600 group-hover:text-white transition-all">
+                                    {g.icon}
                                 </div>
-                            ))}
-                        </div>
+                                <span className="text-[10px] font-black uppercase tracking-widest">{g.text}</span>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
-        </>
+        </div>
     );
 };
 
@@ -485,49 +177,61 @@ function ShapeCard({ data, onClick }) {
     const [hovered, setHovered] = useState(false);
     const { name, tag, subtitle, description, img, shape } = data;
 
-    const getImageStyle = () => {
-        switch (shape) {
-            case "portrait":
-                return { width: "120px", height: "160px" };
-            case "landscape":
-                return { width: "180px", height: "135px" };
-            case "square":
-                return { width: "140px", height: "140px" };
-            default:
-                return { width: "150px", height: "150px" };
-        }
-    };
-
     return (
         <div
-            className="bp-shape-card"
             onClick={onClick}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
+            className="group relative bg-slate-900/30 rounded-[48px] border border-white/5 overflow-hidden cursor-pointer transition-all duration-700 hover:shadow-[0_48px_96px_rgba(0,0,0,0.4)] hover:-translate-y-4 hover:border-amber-500/20"
         >
-            <div className="bp-card-image-area">
-                <div className="bp-card-image-bg" />
-                <div className="bp-card-tag">{tag}</div>
-                <div className="bp-card-image-wrap">
+            {/* Visual Area */}
+            <div className="relative aspect-[4/5] bg-slate-900 flex items-center justify-center p-12 overflow-hidden">
+                {/* Status Badge */}
+                <div className="absolute top-8 left-8 z-30">
+                    <span className="bg-amber-500/10 backdrop-blur-xl px-5 py-2.5 rounded-2xl text-[10px] font-black text-amber-400 uppercase tracking-[0.2em] border border-amber-500/20">
+                        {tag}
+                    </span>
+                </div>
+
+                {/* The Product Display */}
+                <div className="relative z-10 transition-all duration-1000 group-hover:scale-110">
+                    {/* Glowing Aura behind frame */}
+                    <div className="absolute inset-0 bg-amber-500/20 blur-[60px] opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+
                     <img
                         src={img}
                         alt={name}
-                        className="bp-card-img"
-                        style={getImageStyle()}
+                        className={`relative z-20 object-cover shadow-[0_30px_60px_rgba(0,0,0,0.5)] border-4 border-slate-950 transition-all duration-1000 ${shape === 'portrait' ? 'w-[140px] h-[190px]' :
+                                shape === 'landscape' ? 'w-[200px] h-[150px]' :
+                                    'w-[170px] h-[170px]'
+                            }`}
                     />
-                    <div className="bp-card-gloss" style={getImageStyle()} />
+
+                    {/* Surface Sheen */}
+                    <div className="absolute inset-0 z-30 bg-gradient-to-tr from-white/10 via-transparent to-white/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                 </div>
+
+                {/* Background Texture */}
+                <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] pointer-events-none" />
             </div>
-            <div className="bp-card-body">
-                <div className="bp-card-header-row">
-                    <span className="bp-card-name">{name}</span>
-                    <span className="bp-card-subtitle">{subtitle}</span>
+
+            {/* Metadata Body */}
+            <div className="p-10 space-y-6 bg-slate-900/80 backdrop-blur-md relative z-20">
+                <div className="flex items-center justify-between">
+                    <h3 className="text-3xl font-black text-white tracking-tighter">{name}</h3>
+                    <span className="text-[10px] font-black text-slate-500 border border-slate-800 px-4 py-1.5 rounded-full uppercase tracking-widest">
+                        {subtitle}
+                    </span>
                 </div>
-                <p className="bp-card-desc">{description}</p>
-                <div className="bp-card-footer">
-                    <span className="bp-card-cta-text">Enter Studio</span>
-                    <div className="bp-card-arrow">
-                        <ArrowRight size={14} color={hovered ? "#fff" : "#0071e3"} />
+
+                <p className="text-slate-400 text-sm leading-relaxed font-bold tracking-tight">
+                    {description}
+                </p>
+
+                <div className="pt-8 border-t border-white/5 flex items-center justify-between">
+                    <span className="text-[10px] font-black text-amber-500 uppercase tracking-[0.3em] opacity-0 group-hover:opacity-100 transition-all -translate-x-4 group-hover:translate-x-0">Enter Studio</span>
+                    <div className="w-14 h-14 bg-slate-800 border border-white/5 rounded-[24px] flex items-center justify-center text-white group-hover:bg-amber-600 group-hover:text-black group-hover:border-amber-600 transition-all duration-500 shadow-xl shadow-black/20">
+                        <ArrowRight size={22} className="transition-transform group-hover:translate-x-0.5" />
                     </div>
                 </div>
             </div>

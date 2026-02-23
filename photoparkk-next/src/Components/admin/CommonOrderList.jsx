@@ -33,13 +33,14 @@ const getOrderDetails = (order) => {
         thickness: item.thickness,
         amount: parseFloat(order.amount || 0),
         status: order.status || 'Pending',
-        customerName: delivery.name || "N/A", // Use name directly from delivery_details
+        customerName: delivery.name || "N/A",
         email: delivery.email || "N/A",
         phone: delivery.phone || "N/A",
         address: delivery.address || "N/A",
         pincode: delivery.pincode || "",
         orderId: order.id,
-        createdAt: order.created_at
+        createdAt: order.created_at,
+        customizationDetails: item.customizationDetails || null
     };
 };
 
@@ -169,7 +170,7 @@ const CommonOrderList = () => {
                         <button
                             key={opt.value}
                             onClick={() => setFilter(opt.value)}
-                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${filter === opt.value ? 'bg-primary text-white' : 'hover:bg-neutral-100 text-neutral-600'}`}
+                            className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${filter === opt.value ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'hover:bg-slate-50 text-slate-600'}`}
                         >
                             {opt.label}
                         </button>
@@ -179,57 +180,78 @@ const CommonOrderList = () => {
             </div>
 
             {/* List */}
-            <div className="space-y-4">
+            <div className="space-y-6">
                 {orders.length === 0 ? (
-                    <div className="text-center p-12 bg-white rounded-xl border border-neutral-200 text-neutral-500">
-                        <ShoppingBag className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                        No orders found based on current filters.
+                    <div className="text-center p-20 bg-white rounded-3xl border border-neutral-100 text-neutral-400 shadow-sm">
+                        <ShoppingBag className="w-16 h-16 mx-auto mb-4 opacity-10" />
+                        <p className="text-sm font-medium tracking-wide">No orders found in this collection.</p>
                     </div>
                 ) : (
                     orders.map(orderRaw => {
                         const order = getOrderDetails(orderRaw);
                         const status = getStatusConfig(order.status);
+                        const isBacklight = orderRaw.product_type?.toLowerCase().includes('backlight') || orderRaw.productType?.toLowerCase().includes('backlight');
 
                         return (
-                            <div key={order.orderId} className="bg-white border border-neutral-200 rounded-xl p-6 transition-shadow hover:shadow-md">
-                                <div className="flex flex-col md:flex-row justify-between gap-6">
+                            <div key={order.orderId} className={`bg-white border ${isBacklight ? 'border-blue-100 shadow-blue-500/5' : 'border-slate-100'} rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group relative overflow-hidden`}>
+                                {isBacklight && (
+                                    <div className="absolute top-0 right-0 w-24 h-24 -mr-8 -mt-8 bg-blue-50 rounded-full blur-2xl opacity-50 group-hover:opacity-100 transition-opacity" />
+                                )}
+                                <div className="flex flex-col md:flex-row justify-between gap-8 relative z-10">
                                     {/* Left Info */}
-                                    <div className="flex gap-4">
-                                        <div className="w-20 h-20 bg-neutral-100 rounded-lg flex items-center justify-center overflow-hidden shrink-0">
-                                            {order.image ? (
-                                                <img src={order.image} alt={order.title} className="w-full h-full object-cover" />
-                                            ) : (
-                                                <ImageIcon className="text-neutral-300" />
-                                            )}
-                                        </div>
-                                        <div>
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <h3 className="font-semibold text-secondary">{order.title}</h3>
-                                                <span className={`text-xs px-2 py-0.5 rounded-full ${status.bg} ${status.text}`}>{status.label}</span>
+                                    <div className="flex gap-6">
+                                        <div className="relative group/img">
+                                            <div className="w-24 h-24 bg-slate-50 rounded-xl flex items-center justify-center overflow-hidden shrink-0 shadow-inner border border-slate-100">
+                                                {order.image ? (
+                                                    <img src={order.image} alt={order.title} className="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-110" />
+                                                ) : (
+                                                    <ImageIcon className="text-slate-200 w-8 h-8" />
+                                                )}
                                             </div>
-                                            <p className="text-sm text-neutral-500">Qty: {order.quantity} • {order.size ? `Size: ${order.size}` : ''}</p>
-                                            <p className="text-sm text-neutral-500 mt-1">Customer: {order.customerName}</p>
-                                            <p className="text-xs text-neutral-400 mt-1">ID: {order.orderId.slice(0, 8)}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <div className="flex items-center gap-3 mb-1.5">
+                                                <h3 className="font-bold text-lg text-slate-900 group-hover:text-blue-600 transition-colors">{order.title}</h3>
+                                                <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full ${status.bg} ${status.text} border shadow-sm`}>{status.label}</span>
+                                            </div>
+                                            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500 font-bold">
+                                                <span className="flex items-center gap-1.5 text-blue-600/70"><Package className="w-3 h-3" /> Qty: {order.quantity}</span>
+                                                {order.size && <span className="flex items-center gap-1.5">Size: {order.size}</span>}
+                                                <span className="text-slate-200">|</span>
+                                                <span className="text-slate-900 font-black">ID: {order.orderId.slice(0, 8).toUpperCase()}</span>
+                                            </div>
+                                            <div className="pt-3 flex items-center gap-3 border-t border-slate-50 mt-3">
+                                                <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-[10px] font-bold text-blue-600 border border-slate-100 shadow-sm">
+                                                    {order.customerName.charAt(0)}
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs font-bold text-slate-900 leading-none">{order.customerName}</p>
+                                                    <p className="text-[10px] text-slate-400 mt-1">{order.email}</p>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
                                     {/* Right Actions */}
-                                    <div className="flex flex-col items-end gap-3 justify-between">
-                                        <div className="text-right">
-                                            <div className="text-lg font-bold text-primary">₹{order.amount}</div>
-                                            <div className="text-xs text-neutral-400">{new Date(order.createdAt).toLocaleDateString()}</div>
+                                    <div className="flex flex-col items-end justify-between gap-4 text-right">
+                                        <div className="space-y-1">
+                                            <div className="text-2xl font-black text-slate-900 tracking-tight leading-none">₹{order.amount}</div>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{new Date(order.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                                         </div>
-                                        <div className="flex gap-2">
-                                            <button onClick={() => { setSelectedOrder(orderRaw); setShowDetailsModal(true); }} className="p-2 hover:bg-neutral-100 rounded-lg text-neutral-600" title="View Details">
-                                                <Eye className="w-4 h-4" />
+                                        <div className="flex items-center gap-2">
+                                            <button onClick={() => { setSelectedOrder(orderRaw); setShowDetailsModal(true); }} className="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-bold transition-all border border-slate-100">
+                                                <Eye className="w-3.5 h-3.5" /> View
                                             </button>
-                                            <button onClick={() => handleDeleteOrder(order.orderId)} className="p-2 hover:bg-red-50 rounded-lg text-red-500" title="Delete">
+                                            <button onClick={() => handleDeleteOrder(order.orderId)} className="p-2.5 hover:bg-red-50 text-red-500 rounded-xl transition-all border border-transparent hover:border-red-100">
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
+
+                                            <div className="h-4 w-[1px] bg-slate-100 mx-1" />
+
                                             <select
                                                 value={order.status}
                                                 onChange={(e) => handleStatusChange(order.orderId, e.target.value)}
-                                                className="text-xs border border-neutral-300 rounded px-2 py-1 outline-none focus:border-primary"
+                                                className="text-xs font-bold bg-blue-600 text-white rounded-xl px-4 py-2 outline-none focus:ring-4 ring-blue-500/10 cursor-pointer appearance-none border-none transition-all hover:bg-blue-700 shadow-md shadow-blue-500/10"
                                             >
                                                 <option value="Pending">Pending</option>
                                                 <option value="Shipped">Shipped</option>
@@ -290,7 +312,35 @@ const CommonOrderList = () => {
                                                     <p className="text-sm text-neutral-600">Quantity: {det.quantity}</p>
                                                     <p className="text-sm text-neutral-600">Size: {det.size || 'Standard'}</p>
                                                     <p className="text-sm text-neutral-600">Thickness: {det.thickness || 'Standard'}</p>
-                                                    <p className="text-lg font-bold text-primary mt-2">Total: ₹{det.amount}</p>
+
+                                                    {det.customizationDetails && (
+                                                        <div className="mt-4 p-4 bg-blue-50/50 rounded-2xl border border-blue-100 shadow-sm">
+                                                            <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-3">Customization Specs</p>
+                                                            <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-xs">
+                                                                {det.customizationDetails.lightMode && (
+                                                                    <div className="flex flex-col gap-0.5"><span className="text-slate-400 font-bold uppercase tracking-tighter">Light Mode</span><span className="font-bold text-slate-900">{det.customizationDetails.lightMode}</span></div>
+                                                                )}
+                                                                {det.customizationDetails.powerType && (
+                                                                    <div className="flex flex-col gap-0.5"><span className="text-slate-400 font-bold uppercase tracking-tighter">Power Type</span><span className="font-bold text-slate-900">{det.customizationDetails.powerType}</span></div>
+                                                                )}
+                                                                {det.customizationDetails.ledBrightness !== undefined && (
+                                                                    <div className="flex flex-col gap-0.5"><span className="text-slate-400 font-bold uppercase tracking-tighter">Intensity</span><span className="font-bold text-slate-900">{Math.round(det.customizationDetails.ledBrightness * 100)}%</span></div>
+                                                                )}
+                                                            </div>
+                                                            {det.customizationDetails.smartUpgrades && det.customizationDetails.smartUpgrades.length > 0 && (
+                                                                <div className="mt-3 pt-3 border-t border-blue-100/50">
+                                                                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">Upgrades</p>
+                                                                    <div className="flex flex-wrap gap-1.5">
+                                                                        {det.customizationDetails.smartUpgrades.map(up => (
+                                                                            <span key={up} className="text-[10px] bg-white text-blue-600 px-2.5 py-1 rounded-lg font-black border border-blue-100 shadow-sm">{up}</span>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+
+                                                    <p className="text-2xl font-black text-slate-900 mt-4 tracking-tight">Total: ₹{det.amount}</p>
                                                 </div>
                                             </div>
                                         </div>

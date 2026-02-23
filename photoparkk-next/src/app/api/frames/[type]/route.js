@@ -32,7 +32,11 @@ export async function GET(request, { params }) {
     const { data, error } = await query.order('created_at', { ascending: false });
 
     if (error) {
-        console.error("Fetch frames error:", error);
+        console.error(`Fetch frames error for ${type}:`, error.message);
+        // If the table doesn't exist yet, return an empty array instead of 500
+        if (error.code === 'PGRST204' || error.code === 'PGRST205' || error.message.includes('relation') && error.message.includes('does not exist')) {
+            return NextResponse.json([]);
+        }
         return NextResponse.json({ message: "Failed to fetch frames" }, { status: 500 });
     }
 

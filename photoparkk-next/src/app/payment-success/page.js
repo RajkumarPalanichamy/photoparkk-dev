@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle2, ArrowRight, Package, Home } from 'lucide-react';
-import { useWindowSize } from 'react-use'; // Optional confusion or install separate package?
 // I will not use confetti for now to avoid dependency hell, just clean UI.
 
 const PaymentSuccess = () => {
@@ -14,38 +13,46 @@ const PaymentSuccess = () => {
     const orderId = searchParams.get('razorpay_order_id');
 
     return (
-        <div className="min-h-screen bg-neutral-50 flex items-center justify-center pt-[100px] px-4">
-            <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center border border-success/20">
-                <div className="w-20 h-20 bg-success-light rounded-full flex items-center justify-center mx-auto mb-6">
-                    <CheckCircle2 className="w-10 h-10 text-success" />
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center pt-[120px] pb-20 px-4 relative overflow-hidden">
+            {/* Background elements */}
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-100/30 rounded-full blur-3xl -mr-64 -mt-64" />
+            <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-50/50 rounded-full blur-3xl -ml-64 -mb-64" />
+
+            <div className="bg-white/80 backdrop-blur-xl rounded-[40px] shadow-2xl p-10 max-w-lg w-full text-center border border-white relative z-10">
+                <div className="w-24 h-24 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl shadow-blue-500/40 relative">
+                    <div className="absolute inset-0 rounded-full animate-ping bg-blue-600/20" />
+                    <CheckCircle2 className="w-12 h-12 text-white" />
                 </div>
 
-                <h1 className="text-3xl font-bold text-secondary mb-2">Payment Successful!</h1>
-                <p className="text-neutral-600 mb-6">
-                    Thank you for your purchase. Your order has been placed successfully.
+                <h1 className="text-4xl font-black text-slate-900 mb-3 tracking-tight">System Confirmation</h1>
+                <p className="text-slate-500 font-medium mb-10 leading-relaxed text-lg">
+                    Transaction processed successfully. Your order is now being queued for production.
                 </p>
 
-                <div className="bg-neutral-50 rounded-xl p-4 mb-8 text-sm">
-                    <div className="flex justify-between mb-2">
-                        <span className="text-neutral-500">Payment ID</span>
-                        <span className="font-semibold text-secondary font-mono">{paymentId}</span>
-                    </div>
-                    {orderId && (
-                        <div className="flex justify-between">
-                            <span className="text-neutral-500">Order ID</span>
-                            <span className="font-semibold text-secondary font-mono">{orderId}</span>
+                <div className="bg-white rounded-3xl border border-slate-100 p-6 mb-10 text-left shadow-inner">
+                    <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-4">Transaction Protocol</p>
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-center bg-slate-50/50 p-3 rounded-xl border border-slate-50">
+                            <span className="text-xs font-bold text-slate-400">Payment ID</span>
+                            <span className="font-mono text-xs font-black text-slate-900 border-l border-slate-200 pl-3 ml-3 overflow-hidden text-ellipsis whitespace-nowrap">{paymentId}</span>
                         </div>
-                    )}
+                        {orderId && (
+                            <div className="flex justify-between items-center bg-slate-50/50 p-3 rounded-xl border border-slate-50">
+                                <span className="text-xs font-bold text-slate-400">Network ID</span>
+                                <span className="font-mono text-xs font-black text-slate-900 border-l border-slate-200 pl-3 ml-3 overflow-hidden text-ellipsis whitespace-nowrap">{orderId}</span>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
-                <div className="flex flex-col gap-3">
-                    <Link href="/my-orders" className="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2">
+                <div className="grid grid-cols-1 gap-3">
+                    <Link href="/my-orders" className="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all hover:bg-blue-700 shadow-lg shadow-blue-500/25 flex items-center justify-center gap-3">
                         <Package className="w-5 h-5" />
-                        View My Orders
+                        Access My Orders
                     </Link>
-                    <Link href="/" className="w-full bg-white border-2 border-neutral-200 hover:border-primary text-neutral-700 hover:text-primary py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2">
+                    <Link href="/" className="w-full bg-slate-50 text-slate-600 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all hover:bg-slate-100 flex items-center justify-center gap-3">
                         <Home className="w-5 h-5" />
-                        Back to Home
+                        Dashboard
                     </Link>
                 </div>
             </div>

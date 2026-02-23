@@ -175,6 +175,10 @@ const CommonCheckout = () => {
                 await initializePayment(orderData, form);
             }
         } catch (error) {
+            if (error.message === "PAYMENT_CANCELLED") {
+                console.log("User cancelled payment flow");
+                return;
+            }
             console.error("Payment failed:", error);
             toast.error(error.message || "Payment failed");
         } finally {

@@ -1,4 +1,5 @@
 import axiosInstance from "./axiosInstance";
+import { toast } from "react-toastify";
 
 // Load Razorpay script
 const loadRazorpayScript = () => {
@@ -79,7 +80,7 @@ export const initializePayment = async (orderData, userDetails) => {
     const Razorpay = await loadRazorpayScript();
 
     const options = {
-      key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_eh4eCol0GXNXUS",
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_eh4eCol0GXNXUS",
       amount: orderData.amount,
       currency: orderData.currency || "INR",
       name: "PhotoPark",
@@ -103,7 +104,7 @@ export const initializePayment = async (orderData, userDetails) => {
               if (orderPayload.productType === "frame") {
                 // Frame orders go to frameorders endpoint
                 const orderResponse = await axiosInstance.post(
-                  "/frameorders/create",
+                  "/frameorders",
                   orderPayload
                 );
                 console.log(
@@ -137,9 +138,15 @@ export const initializePayment = async (orderData, userDetails) => {
                   JSON.stringify(deliveryDetails)
                 );
 
+                // Override Content-Type to allow browser to set boundary for FormData
                 const orderResponse = await axiosInstance.post(
                   "/orders",
-                  formData
+                  formData,
+                  {
+                    headers: {
+                      'Content-Type': 'multipart/form-data',
+                    }
+                  }
                 );
                 console.log("✅ Order saved successfully:", orderResponse.data);
               }
@@ -148,7 +155,11 @@ export const initializePayment = async (orderData, userDetails) => {
                 "❌ Error saving order:",
                 orderError.response?.data || orderError.message
               );
-              // Don't throw here, continue with verification
+              // ALERT THE USER - this is the "HIDDEN ERROR"
+              const errMsg = orderError.response?.data?.message || orderError.message || "Failed to save order record";
+              alert(`⚠️ PAYMENT SUCCESSFUL BUT ORDER RECORDING FAILED: ${errMsg}. Please take a screenshot of your payment ID and contact support.`);
+              // Don't redirect on such a critical data error
+              return;
             }
           }
 
@@ -216,7 +227,7 @@ export const initializePayment = async (orderData, userDetails) => {
           console.log("Payment modal closed by user");
           if (!paymentResolved && rejectPayment) {
             paymentResolved = true;
-            rejectPayment(new Error("Payment cancelled by user"));
+            rejectPayment(new Error("PAYMENT_CANCELLED"));
           }
         },
       },

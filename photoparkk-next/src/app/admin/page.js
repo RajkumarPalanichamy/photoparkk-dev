@@ -81,38 +81,38 @@ const AdminDashboard = () => {
             icon: ShoppingBag,
             label: "Total Orders",
             value: loading ? "..." : numberFormatter.format(stats.totalOrders),
-            color: "bg-blue-500",
+            color: "text-blue-600 bg-blue-50",
             link: "/admin/orders",
-            ctaLabel: "View orders",
+            ctaLabel: "View Order Hub",
         },
         {
             icon: Package,
             label: "Total Products",
             value: loading ? "..." : numberFormatter.format(stats.totalProducts),
-            color: "bg-green-500",
+            color: "text-indigo-600 bg-indigo-50",
             link: "/admin/products",
-            ctaLabel: "Manage catalog",
+            ctaLabel: "Studio Catalog",
         },
         {
             icon: Frame,
             label: "Total Frames",
             value: loading ? "..." : numberFormatter.format(stats.totalFrames),
-            color: "bg-indigo-500",
+            color: "text-sky-600 bg-sky-50",
             link: "/admin/frames",
-            ctaLabel: "Customize frames",
+            ctaLabel: "Curation Lab",
         },
         {
             icon: BarChart3,
-            label: "Total Revenue",
+            label: "Net Revenue",
             value: loading ? "..." : "₹" + numberFormatter.format(stats.totalRevenue),
-            color: "bg-purple-500",
+            color: "text-emerald-600 bg-emerald-50",
             link: "/admin/orders",
-            ctaLabel: "Analyze sales",
+            ctaLabel: "Fiscal Overview",
         },
     ];
 
     const orderBreakdownData = {
-        labels: ["Common Orders", "Frame Orders", "New Arrivals"],
+        labels: ["Bespoke Orders", "Frame Studio", "Masterpiece Series"],
         datasets: [
             {
                 label: "Orders",
@@ -122,11 +122,11 @@ const AdminDashboard = () => {
                     breakdown.newArrivals || 0,
                 ],
                 backgroundColor: [
-                    "rgba(59, 130, 246, 0.8)",
-                    "rgba(139, 92, 246, 0.8)",
-                    "rgba(16, 185, 129, 0.8)",
+                    "#2563eb", // blue-600
+                    "#64748b", // slate-500
+                    "#0ea5e9", // sky-500
                 ],
-                borderRadius: 8,
+                borderRadius: 4,
                 borderSkipped: false,
             },
         ],
@@ -137,42 +137,62 @@ const AdminDashboard = () => {
         maintainAspectRatio: false,
         plugins: {
             legend: {
-                position: "bottom",
+                display: false,
             },
             tooltip: {
+                backgroundColor: "#ffffff",
+                titleColor: "#0f172a",
+                bodyColor: "#64748b",
+                borderColor: "#e2e8f0",
+                borderWidth: 1,
+                padding: 12,
+                titleFont: { family: 'Inter', size: 14, weight: 'bold' },
+                bodyFont: { family: 'Inter', size: 12 },
                 callbacks: {
-                    label: (context) => `${context.label}: ${context.formattedValue} orders`,
+                    label: (context) => `${context.label}: ${context.formattedValue} shipments`,
                 },
             },
         },
         scales: {
             y: {
                 beginAtZero: true,
-                ticks: { precision: 0 },
+                ticks: { precision: 0, font: { family: 'Poppins' } },
+                grid: { color: "rgba(0,0,0,0.03)" }
             },
+            x: {
+                grid: { display: false },
+                ticks: { font: { family: 'Poppins' } }
+            }
         },
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="space-y-8">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-secondary">Admin Dashboard</h1>
-                    <p className="text-neutral-500 text-sm">Welcome back, get an overview of your store.</p>
+                    <h1 className="text-3xl font-bold text-slate-900 tracking-tight">System Dashboard</h1>
+                    <p className="text-slate-500 text-sm mt-1">Operational overview and business intelligence.</p>
                 </div>
 
-                <button
-                    onClick={fetchDashboardStats}
-                    disabled={loading}
-                    className="flex items-center gap-2 bg-white border border-neutral-200 hover:bg-neutral-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
-                >
-                    {loading ? <Loader2 className="w-4 h-4 animate-spin text-neutral-400" /> : "Refresh Data"}
-                </button>
+                <div className="flex items-center gap-3">
+                    <div className="bg-white border border-slate-200 px-4 py-2 rounded-xl flex items-center gap-2 shadow-sm">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                        <span className="text-xs font-bold text-slate-600">LIVE SYNC</span>
+                    </div>
+                    <button
+                        onClick={fetchDashboardStats}
+                        disabled={loading}
+                        className="flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-md shadow-blue-500/10 active:scale-95"
+                    >
+                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Update Data"}
+                    </button>
+                </div>
             </div>
 
             {error && (
-                <div className="bg-red-50 text-red-600 p-4 rounded-lg border border-red-100 flex items-center gap-2">
-                    <span className="font-semibold">Error:</span> {error}
+                <div className="bg-red-50 text-red-600 p-4 rounded-xl border border-red-100 flex items-center gap-3 animate-shake">
+                    <div className="w-2 h-2 bg-red-600 rounded-full" />
+                    <span className="font-semibold text-sm">{error}</span>
                 </div>
             )}
 
@@ -181,18 +201,18 @@ const AdminDashboard = () => {
                 {statCards.map((stat, i) => {
                     const Icon = stat.icon;
                     return (
-                        <div key={i} className="bg-white p-6 rounded-2xl border border-neutral-100 shadow-sm flex flex-col justify-between h-full hover:shadow-md transition-shadow">
-                            <div className="flex justify-between items-start mb-4">
+                        <div key={i} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between h-full hover:shadow-lg hover:border-blue-100 transition-all duration-300 group">
+                            <div className="flex justify-between items-start mb-6">
                                 <div>
-                                    <p className="text-neutral-500 text-sm font-medium mb-1">{stat.label}</p>
-                                    <h3 className="text-2xl font-bold text-secondary">{stat.value}</h3>
+                                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">{stat.label}</p>
+                                    <h3 className="text-3xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{stat.value}</h3>
                                 </div>
-                                <div className={`p-3 rounded-xl ${stat.color} bg-opacity-10`}>
-                                    <Icon className={`w-6 h-6 ${stat.color.replace('bg-', 'text-')}`} />
+                                <div className={`p-4 rounded-xl ${stat.color} transition-all duration-300 group-hover:scale-110 shadow-sm`}>
+                                    <Icon className="w-6 h-6" />
                                 </div>
                             </div>
-                            <Link href={stat.link} className="text-sm font-semibold text-primary hover:text-primary-hover flex items-center gap-1 mt-auto">
-                                {stat.ctaLabel} <ArrowUpRight className="w-3 h-3" />
+                            <Link href={stat.link} className="text-xs font-bold text-slate-400 hover:text-blue-600 flex items-center gap-1.5 mt-auto transition-colors">
+                                {stat.ctaLabel} <ArrowUpRight className="w-3 h-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                             </Link>
                         </div>
                     )
@@ -200,14 +220,22 @@ const AdminDashboard = () => {
             </div>
 
             {/* Charts Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-white p-6 rounded-2xl border border-neutral-100 shadow-sm min-h-[400px]">
-                    <h3 className="text-lg font-bold text-secondary mb-1">Order Distribution</h3>
-                    <p className="text-sm text-neutral-500 mb-6">Breakdown of orders by category</p>
-                    <div className="h-64 md:h-80 w-full">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2 bg-white p-8 rounded-3xl border border-slate-100 shadow-sm min-h-[440px]">
+                    <div className="flex justify-between items-start mb-8">
+                        <div>
+                            <h3 className="text-xl font-bold text-slate-900">Distribution Analysis</h3>
+                            <p className="text-slate-400 text-xs mt-1">Operational volume by product category</p>
+                        </div>
+                        <div className="flex gap-2">
+                            <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-blue-600" /><span className="text-[10px] font-bold text-slate-500 uppercase">Primary</span></div>
+                            <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-slate-400" /><span className="text-[10px] font-bold text-slate-500 uppercase">Secondary</span></div>
+                        </div>
+                    </div>
+                    <div className="h-72 w-full">
                         {loading ? (
                             <div className="flex items-center justify-center h-full">
-                                <Loader2 className="w-8 h-8 animate-spin text-neutral-300" />
+                                <Loader2 className="w-8 h-8 animate-spin text-amber-200" />
                             </div>
                         ) : (
                             <Bar data={orderBreakdownData} options={orderChartOptions} />
@@ -215,18 +243,20 @@ const AdminDashboard = () => {
                     </div>
                 </div>
 
-                {/* Simple Insights or Recent Activity Panel */}
-                <div className="bg-white p-6 rounded-2xl border border-neutral-100 shadow-sm flex flex-col justify-center items-center text-center">
-                    <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                        <BarChart3 className="w-8 h-8 text-primary" />
+                <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-lg flex flex-col justify-center items-center text-center overflow-hidden relative group">
+                    <div className="absolute inset-0 bg-gradient-to-tr from-blue-50 to-transparent pointer-events-none" />
+                    <div className="relative z-10">
+                        <div className="w-20 h-20 bg-blue-600 text-white rounded-2xl flex items-center justify-center mb-6 mx-auto shadow-lg shadow-blue-500/20 group-hover:rotate-12 transition-transform duration-500">
+                            <BarChart3 className="w-10 h-10" />
+                        </div>
+                        <h3 className="text-2xl font-bold text-slate-900 mb-3 tracking-tight">Growth Insight</h3>
+                        <p className="text-slate-500 text-sm max-w-xs mb-8 leading-relaxed">
+                            Primary collections are driving growth with <span className="text-blue-600 font-bold">{breakdown.newArrivals} new items</span> successfully launched this month.
+                        </p>
+                        <Link href="/admin/orders" className="inline-block w-full bg-blue-600 text-white px-8 py-3.5 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20 active:scale-95">
+                            Audit Performance
+                        </Link>
                     </div>
-                    <h3 className="text-xl font-bold text-secondary mb-2">Growth Insights</h3>
-                    <p className="text-neutral-500 max-w-xs mb-6">
-                        Your new arrivals are gaining traction with {breakdown.newArrivals} orders recently.
-                    </p>
-                    <Link href="/admin/orders" className="bg-primary text-white px-6 py-2 rounded-lg font-medium hover:bg-primary-hover transition-colors">
-                        View detailed reports
-                    </Link>
                 </div>
             </div>
         </div>

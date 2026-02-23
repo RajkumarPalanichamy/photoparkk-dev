@@ -189,7 +189,6 @@ const Framescheckout = () => {
       } else {
         try {
           const orderData = await createPaymentOrder(paymentData);
-          // Pass orderPayload to initializePayment
           orderData.orderPayload = orderPayload;
           await initializePayment(orderData, {
             name: fullName,
@@ -198,6 +197,10 @@ const Framescheckout = () => {
             address,
           });
         } catch (paymentError) {
+          if (paymentError.message === "PAYMENT_CANCELLED") {
+            console.log('Payment cancelled by user');
+            return;
+          }
           console.error('❌ Payment initialization failed:', paymentError);
           alert('❌ Payment initialization failed. Please try again.');
           return;
@@ -240,17 +243,17 @@ const Framescheckout = () => {
           </div>
           <div className="mb-6 flex justify-center">
             <div className={`inline-block border-[10px] rounded-2xl p-1 bg-white shadow-sm ${color.toLowerCase() === 'black' ? 'border-black' :
-                color.toLowerCase() === 'white' ? 'border-neutral-300' :
-                  color.toLowerCase() === 'brown' ? 'border-warning' :
-                    color.toLowerCase() === 'gold' ? 'border-yellow-500' :
-                      color.toLowerCase() === 'silver' ? 'border-neutral-neutral-400' :
-                        color.toLowerCase() === 'blue' ? 'border-primary' :
-                          color.toLowerCase() === 'red' ? 'border-error' :
-                            color.toLowerCase() === 'green' ? 'border-success' :
-                              color.toLowerCase() === 'purple' ? 'border-primary' :
-                                color.toLowerCase() === 'pink' ? 'border-primary' :
-                                  color.toLowerCase() === 'orange' ? 'border-primary' :
-                                    'border-neutral-300'
+              color.toLowerCase() === 'white' ? 'border-neutral-300' :
+                color.toLowerCase() === 'brown' ? 'border-warning' :
+                  color.toLowerCase() === 'gold' ? 'border-yellow-500' :
+                    color.toLowerCase() === 'silver' ? 'border-neutral-neutral-400' :
+                      color.toLowerCase() === 'blue' ? 'border-primary' :
+                        color.toLowerCase() === 'red' ? 'border-error' :
+                          color.toLowerCase() === 'green' ? 'border-success' :
+                            color.toLowerCase() === 'purple' ? 'border-primary' :
+                              color.toLowerCase() === 'pink' ? 'border-primary' :
+                                color.toLowerCase() === 'orange' ? 'border-primary' :
+                                  'border-neutral-300'
               }`}>
               <img
                 src={userImageUrl}

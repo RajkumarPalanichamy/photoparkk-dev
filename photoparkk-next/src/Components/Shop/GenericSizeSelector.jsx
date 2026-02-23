@@ -425,7 +425,7 @@ const GenericSizeSelector = ({ type, shape }) => {
     }
 
     return (
-        <div className="bg-white min-h-screen pt-[100px] pb-12">
+        <div className="bg-white min-h-screen pt-[100px] pb-12 font-sans selection:bg-blue-600/10 selection:text-blue-600 text-secondary">
             <svg width="0" height="0" className="absolute pointer-events-none">
                 <defs>
                     <clipPath id="love-clip-preview" clipPathUnits="objectBoundingBox">
@@ -590,48 +590,62 @@ const GenericSizeSelector = ({ type, shape }) => {
                     </div>
 
                     {/* Right: Configuration Form */}
-                    <div className="lg:col-span-5 space-y-6">
-                        <div className="bg-white rounded-3xl shadow-xl border border-neutral-100 overflow-hidden">
-                            <div className="p-6 md:p-8 space-y-8">
+                    <div className="lg:col-span-5 space-y-8 animate-in fade-in slide-in-from-right-10 duration-1000">
+                        <div className="bg-white rounded-[40px] shadow-2xl shadow-slate-900/5 border border-slate-100 overflow-hidden">
+                            <div className="p-8 md:p-12 space-y-10">
 
                                 {/* Size Section */}
-                                <div>
-                                    <div className="flex items-center justify-between mb-3">
-                                        <h3 className="font-bold text-secondary flex items-center gap-2"><Ruler className="w-5 h-5 text-primary" /> Size Options</h3>
+                                <div className="space-y-6">
+                                    <div className="flex items-center justify-between border-b border-slate-50 pb-4">
+                                        <h3 className="text-[11px] font-extrabold text-slate-400 uppercase tracking-[0.3em] flex items-center gap-3">
+                                            <Ruler className="w-5 h-5 text-blue-600" /> Size Configuration
+                                        </h3>
+                                        {selectedSize && (
+                                            <span className="text-[10px] font-extrabold text-blue-600 bg-blue-50 px-3 py-1 rounded-full uppercase tracking-widest">
+                                                {selectedSize.label} Selected
+                                            </span>
+                                        )}
                                     </div>
-                                    <div className="grid grid-cols-2 gap-3">
+                                    <div className="grid grid-cols-2 gap-4">
                                         {availableSizes.map((size, idx) => (
                                             <button
                                                 key={idx}
                                                 onClick={() => setSelectedSize(size)}
-                                                className={`p-3 rounded-xl border text-left transition-all relative ${selectedSize?.label === size.label ? 'border-primary bg-primary/5 shadow-md ring-1 ring-primary' : 'border-neutral-200 hover:border-neutral-300 hover:shadow-sm'}`}
+                                                className={`p-5 rounded-[24px] border text-left transition-all relative group ${selectedSize?.label === size.label ? 'border-blue-600 bg-blue-50/30' : 'border-slate-100 hover:border-blue-200 bg-slate-50/50'}`}
                                             >
-                                                <div className="font-bold text-secondary text-sm">{size.label}</div>
-                                                <div className="text-xs text-neutral-500 mt-1 font-medium">₹{size.price}</div>
-                                                {selectedSize?.label === size.label && <CheckCircle2 className="absolute top-2 right-2 w-4 h-4 text-primary" />}
+                                                <div className="font-bold text-slate-900 text-sm tracking-tight">{size.label}</div>
+                                                <div className="text-xs text-slate-500 mt-2 font-bold">₹{size.price}</div>
+                                                {selectedSize?.label === size.label && (
+                                                    <div className="absolute top-4 right-4 animate-in zoom-in duration-300">
+                                                        <CheckCircle2 className="w-5 h-5 text-blue-600" />
+                                                    </div>
+                                                )}
+                                                <div className={`absolute inset-0 rounded-[24px] border-2 border-blue-600 transition-opacity pointer-events-none ${selectedSize?.label === size.label ? 'opacity-100' : 'opacity-0'}`} />
                                             </button>
                                         ))}
                                     </div>
                                 </div>
 
                                 {/* Thickness Section */}
-                                <div>
-                                    <div className="flex items-center justify-between mb-3">
-                                        <h3 className="font-bold text-secondary flex items-center gap-2"><Layers className="w-5 h-5 text-primary" /> Material Thickness</h3>
+                                <div className="space-y-6">
+                                    <div className="flex items-center justify-between border-b border-slate-50 pb-4">
+                                        <h3 className="text-[11px] font-extrabold text-slate-400 uppercase tracking-[0.3em] flex items-center gap-3">
+                                            <Layers className="w-5 h-5 text-blue-600" /> Architectural Depth
+                                        </h3>
                                     </div>
                                     <div className="space-y-3">
                                         {THICKNESS_OPTIONS.map((opt, idx) => (
                                             <div
                                                 key={idx}
                                                 onClick={() => setSelectedThickness(opt)}
-                                                className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${selectedThickness.value === opt.value ? 'border-primary bg-primary/5 shadow-inner' : 'border-neutral-200 hover:border-neutral-300'}`}
+                                                className={`flex items-center justify-between p-6 rounded-[24px] border cursor-pointer transition-all group ${selectedThickness.value === opt.value ? 'border-blue-600 bg-blue-50/30' : 'border-slate-100 hover:border-blue-200 bg-slate-50/50'}`}
                                             >
-                                                <div>
-                                                    <div className="font-semibold text-sm text-secondary">{opt.label}</div>
-                                                    <div className="text-xs text-neutral-400">{opt.desc}</div>
+                                                <div className="space-y-1">
+                                                    <div className="font-bold text-sm text-slate-900 tracking-tight">{opt.label}</div>
+                                                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{opt.desc}</div>
                                                 </div>
-                                                <div className="text-sm font-medium text-primary">
-                                                    {opt.price === 0 ? 'Included' : `+ ₹${opt.price}`}
+                                                <div className="text-sm font-bold text-blue-600">
+                                                    {opt.price === 0 ? 'STANDARD' : `+ ₹${opt.price}`}
                                                 </div>
                                             </div>
                                         ))}
@@ -639,47 +653,46 @@ const GenericSizeSelector = ({ type, shape }) => {
                                 </div>
 
                                 {/* Edge Finish Section */}
-                                <div>
-                                    <div className="flex items-center justify-between mb-3">
-                                        <h3 className="font-bold text-secondary flex items-center gap-2"><Scissors className="w-5 h-5 text-primary" /> Edge Finish</h3>
+                                <div className="space-y-6">
+                                    <div className="flex items-center justify-between border-b border-slate-50 pb-4">
+                                        <h3 className="text-[11px] font-extrabold text-slate-400 uppercase tracking-[0.3em] flex items-center gap-3">
+                                            <Scissors className="w-5 h-5 text-blue-600" /> Edge Artistry
+                                        </h3>
                                     </div>
-                                    <div className="flex flex-wrap gap-2">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                         {EDGE_OPTIONS.map((opt, idx) => (
                                             <button
                                                 key={idx}
                                                 onClick={() => setSelectedEdge(opt)}
-                                                className={`flex-1 min-w-[100px] py-3 px-4 rounded-xl border text-sm font-medium transition-all ${selectedEdge.value === opt.value ? 'border-secondary bg-secondary text-white shadow-lg' : 'border-neutral-200 text-neutral-600 hover:bg-neutral-50 hover:border-neutral-300'}`}
+                                                className={`py-5 px-6 rounded-[24px] border text-xs font-bold uppercase tracking-widest transition-all ${selectedEdge.value === opt.value ? 'bg-slate-900 text-white border-slate-900 shadow-xl' : 'border-slate-100 text-slate-400 hover:bg-slate-50'}`}
                                             >
                                                 {opt.label}
-                                                <div className="text-[10px] opacity-70 font-normal mt-0.5">{opt.price === 0 ? 'Standard' : `+ ₹${opt.price}`}</div>
+                                                <div className={`text-[9px] font-bold mt-1.5 ${selectedEdge.value === opt.value ? 'text-blue-400' : 'text-slate-300'}`}>
+                                                    {opt.price === 0 ? 'Standard' : `+ ₹${opt.price}`}
+                                                </div>
                                             </button>
                                         ))}
                                     </div>
                                 </div>
 
                                 {/* Frame Color Section */}
-                                <div>
-                                    <div className="flex items-center justify-between mb-3">
-                                        <h3 className="font-bold text-secondary flex items-center gap-2">
-                                            <Frame className="w-5 h-5 text-primary" /> Frame Color
+                                <div className="space-y-6">
+                                    <div className="flex items-center justify-between border-b border-slate-50 pb-4">
+                                        <h3 className="text-[11px] font-extrabold text-slate-400 uppercase tracking-[0.3em] flex items-center gap-3">
+                                            <Frame className="w-5 h-5 text-blue-600" /> Framework Style
                                         </h3>
-                                        {frameType === 'custom' && (
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-4 h-4 rounded-full border border-neutral-200" style={{ backgroundColor: selectedColor }}></div>
-                                                <span className="text-xs font-semibold text-neutral-500 uppercase">{selectedColor}</span>
-                                            </div>
-                                        )}
                                     </div>
 
-                                    <div className="bg-neutral-50 p-4 rounded-2xl border border-neutral-100 space-y-4">
+                                    <div className="bg-slate-50 p-4 rounded-[32px] border border-slate-100 space-y-6">
                                         {/* Toggle */}
-                                        <div className="flex gap-2 p-1 bg-white rounded-xl border border-neutral-200">
+                                        <div className="flex gap-2 p-1.5 bg-white rounded-2xl border border-slate-100 shadow-sm">
                                             {FRAME_ICONS.map((opt) => (
                                                 <button
                                                     key={opt.value}
                                                     onClick={() => setFrameType(opt.value)}
-                                                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${frameType === opt.value ? 'bg-primary text-white shadow-md' : 'text-neutral-500 hover:bg-neutral-50'}`}
+                                                    className={`flex-1 flex items-center justify-center gap-3 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${frameType === opt.value ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
                                                 >
+                                                    {opt.icon && React.cloneElement(opt.icon, { className: `w-4 h-4 ${frameType === opt.value ? 'text-white' : 'text-slate-300'}` })}
                                                     {opt.label}
                                                 </button>
                                             ))}
@@ -687,27 +700,31 @@ const GenericSizeSelector = ({ type, shape }) => {
 
                                         {/* Color Picker */}
                                         {frameType === 'custom' && (
-                                            <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                                                <div className="flex justify-center">
-                                                    <HexColorPicker color={selectedColor} onChange={setSelectedColor} style={{ width: '100%', height: '150px' }} />
+                                            <div className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                                                <div className="flex justify-center p-2 bg-white rounded-[24px] border border-slate-100 shadow-sm">
+                                                    <HexColorPicker color={selectedColor} onChange={setSelectedColor} style={{ width: '100%', height: '140px' }} />
                                                 </div>
 
-                                                <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-neutral-200 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
-                                                    <div className="w-6 h-6 rounded-md border border-neutral-200 shrink-0" style={{ backgroundColor: selectedColor }}></div>
-                                                    <span className="text-neutral-400 font-medium">#</span>
-                                                    <input
-                                                        type="text"
-                                                        value={selectedColor.replace('#', '')}
-                                                        onChange={(e) => {
-                                                            const val = e.target.value;
-                                                            if (/^[0-9A-Fa-f]{0,6}$/.test(val)) {
-                                                                setSelectedColor(`#${val}`);
-                                                            }
-                                                        }}
-                                                        className="w-full text-sm font-medium text-secondary outline-none uppercase tracking-wide"
-                                                        placeholder="HEX Code"
-                                                        maxLength={6}
-                                                    />
+                                                <div className="flex items-center gap-4 bg-white p-4 rounded-2xl border border-slate-100 focus-within:ring-2 focus-within:ring-blue-600/20 transition-all shadow-sm">
+                                                    <div className="w-10 h-10 rounded-xl border border-slate-100 shrink-0" style={{ backgroundColor: selectedColor }}></div>
+                                                    <div className="flex-1 space-y-0.5">
+                                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Selected Tone</span>
+                                                        <div className="flex items-center gap-1 font-bold text-slate-900 tracking-widest uppercase">
+                                                            <span className="opacity-30">#</span>
+                                                            <input
+                                                                type="text"
+                                                                value={selectedColor.replace('#', '')}
+                                                                onChange={(e) => {
+                                                                    const val = e.target.value;
+                                                                    if (/^[0-9A-Fa-f]{0,6}$/.test(val)) {
+                                                                        setSelectedColor(`#${val}`);
+                                                                    }
+                                                                }}
+                                                                className="w-full bg-transparent outline-none"
+                                                                maxLength={6}
+                                                            />
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         )}
@@ -715,27 +732,23 @@ const GenericSizeSelector = ({ type, shape }) => {
                                 </div>
 
                                 {/* Backlight Section */}
-                                {type === 'backlight' && (
-                                    <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-500">
-                                        <div className="flex items-center justify-between mb-3">
-                                            <h3 className="font-bold text-secondary flex items-center gap-2">
-                                                <Sparkles className="w-5 h-5 text-primary" /> LED Brightness
+                                {type === 'backlight' && frameType === 'backlight' && (
+                                    <div className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-700">
+                                        <div className="flex items-center justify-between border-b border-slate-50 pb-4">
+                                            <h3 className="text-[11px] font-extrabold text-slate-400 uppercase tracking-[0.3em] flex items-center gap-3">
+                                                <Sparkles className="w-5 h-5 text-blue-600" /> Light Atmosphere
                                             </h3>
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-4 h-4 rounded-full border border-neutral-200" style={{ backgroundColor: backlightColor }}></div>
-                                                <span className="text-xs font-semibold text-neutral-500 uppercase">Lit</span>
-                                            </div>
                                         </div>
 
-                                        <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-100 space-y-6">
-                                            <div className="flex justify-center">
-                                                <HexColorPicker color={backlightColor} onChange={setBacklightColor} style={{ width: '100%', height: '150px' }} />
+                                        <div className="bg-slate-900 rounded-[32px] p-8 space-y-8 shadow-inner border border-slate-800">
+                                            <div className="flex justify-center p-2 bg-white/5 rounded-[24px] border border-white/5 shadow-inner">
+                                                <HexColorPicker color={backlightColor} onChange={setBacklightColor} style={{ width: '100%', height: '140px' }} />
                                             </div>
 
-                                            <div className="space-y-3">
-                                                <div className="flex justify-between text-xs font-bold text-neutral-500 uppercase">
-                                                    <span>Light Intensity</span>
-                                                    <span>{Math.round(backlightIntensity * 100)}%</span>
+                                            <div className="space-y-5">
+                                                <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                                    <span>Beam Intensity</span>
+                                                    <span className="text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded-md">{Math.round(backlightIntensity * 100)}%</span>
                                                 </div>
                                                 <input
                                                     type="range"
@@ -744,16 +757,16 @@ const GenericSizeSelector = ({ type, shape }) => {
                                                     step="0.1"
                                                     value={backlightIntensity}
                                                     onChange={(e) => setBacklightIntensity(parseFloat(e.target.value))}
-                                                    className="w-full h-2 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-primary"
+                                                    className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-600"
                                                 />
                                             </div>
 
-                                            <div className="grid grid-cols-5 gap-2">
+                                            <div className="grid grid-cols-5 gap-3">
                                                 {['#ffffff', '#0ea5e9', '#f43f5e', '#eab308', '#22c55e'].map((c) => (
                                                     <button
                                                         key={c}
                                                         onClick={() => setBacklightColor(c)}
-                                                        className={`h-8 rounded-lg border-2 transition-transform hover:scale-110 ${backlightColor === c ? 'border-primary ring-2 ring-primary/20' : 'border-transparent'}`}
+                                                        className={`h-10 rounded-xl border-2 transition-all hover:scale-110 ${backlightColor === c ? 'border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)]' : 'border-slate-800'}`}
                                                         style={{ backgroundColor: c }}
                                                     />
                                                 ))}
@@ -762,36 +775,59 @@ const GenericSizeSelector = ({ type, shape }) => {
                                     </div>
                                 )}
 
-                                {/* Quantity & Total */}
-                                <div className="pt-6 border-t border-neutral-100 space-y-4">
+                                {/* Final Purchase Matrix */}
+                                <div className="pt-10 border-t border-slate-50 space-y-8">
                                     <div className="flex items-center justify-between">
-                                        <span className="font-medium text-neutral-600">Quantity</span>
-                                        <div className="flex items-center border border-neutral-200 rounded-lg">
-                                            <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="px-3 py-1 hover:bg-neutral-50">-</button>
-                                            <span className="px-3 font-semibold text-sm">{quantity}</span>
-                                            <button onClick={() => setQuantity(quantity + 1)} className="px-3 py-1 hover:bg-neutral-50">+</button>
+                                        <div className="space-y-1">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Order Volume</span>
+                                            <div className="flex items-center gap-4 bg-slate-50 p-1.5 rounded-2xl border border-slate-100">
+                                                <button
+                                                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                                    className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-slate-900 border border-transparent hover:border-slate-200 transition-all rounded-xl font-bold text-lg"
+                                                >
+                                                    −
+                                                </button>
+                                                <span className="w-8 text-center font-bold text-sm text-slate-900">{quantity}</span>
+                                                <button
+                                                    onClick={() => setQuantity(quantity + 1)}
+                                                    className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-slate-900 border border-transparent hover:border-slate-200 transition-all rounded-xl font-bold text-lg"
+                                                >
+                                                    +
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <div className="flex items-end justify-between">
-                                        <div className="text-sm text-neutral-500">Total Price</div>
-                                        <div className="text-3xl font-bold text-primary">₹{totalPrice}</div>
+                                        <div className="text-right space-y-1">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Elite Valuation</span>
+                                            <div className="text-4xl font-extrabold text-slate-950 tracking-tighter">₹{totalPrice.toLocaleString()}</div>
+                                        </div>
                                     </div>
 
                                     <button
                                         onClick={handleAddToCart}
                                         disabled={loading || !selectedSize}
-                                        className="w-full bg-primary hover:bg-primary-hover text-white py-4 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
+                                        className="relative w-full overflow-hidden group rounded-[24px]"
                                     >
-                                        {loading ? <Loader2 className="animate-spin" /> : <ShoppingCart className="w-5 h-5" />}
-                                        Add To Cart
+                                        <div className="absolute inset-0 bg-blue-600 transition-all group-hover:bg-blue-700" />
+                                        <div className="relative py-6 flex items-center justify-center gap-4 text-white">
+                                            {loading ? <Loader2 className="animate-spin" /> : <ShoppingCart className="w-5 h-5 shadow-2xl" />}
+                                            <span className="font-extrabold text-xs uppercase tracking-[0.25em]">Initialise Checkout</span>
+                                            <ArrowRight size={18} className="translate-x-0 group-hover:translate-x-1.5 transition-transform" />
+                                        </div>
+                                        <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                                     </button>
 
-                                    <p className="text-xs text-center text-neutral-400">
-                                        By adding to cart, you confirm your design settings.
-                                    </p>
+                                    <div className="flex items-center justify-center gap-6 pt-4">
+                                        <div className="flex items-center gap-2">
+                                            <Lock size={12} className="text-slate-400" />
+                                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.1em]">PCI Secured</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <Truck size={12} className="text-slate-400" />
+                                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.1em]">Global Priority</span>
+                                        </div>
+                                    </div>
                                 </div>
-
                             </div>
                         </div>
                     </div>

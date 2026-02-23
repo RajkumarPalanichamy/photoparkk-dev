@@ -185,19 +185,18 @@ const CommonCheckout = () => {
         };
 
         const orderData = await createPaymentOrder(paymentData);
+        // Attach the payload so the success handler in paymentUtils can save the order to DB
+        orderData.orderPayload = paymentData;
+
         // Note: initializePayment opens Razorpay modal and handles payment
         // Navigation will be handled by payment success handler in paymentUtils
         try {
           await initializePayment(orderData, form);
         } catch (paymentError) {
-          // Handle payment cancellation or initialization errors
-          if (paymentError.message === "Payment cancelled by user") {
-            // User closed the modal - don't show error, just reset loading
+          if (paymentError.message === "PAYMENT_CANCELLED") {
             console.log("Payment cancelled by user");
-            setPaymentLoading(false);
-            return; // Exit early, don't show error
+            return;
           }
-          // Re-throw other errors to be caught by outer catch
           throw paymentError;
         }
       }
@@ -478,19 +477,17 @@ const CommonCheckout = () => {
                   <button
                     type="button"
                     onClick={() => setPaymentMethod("ONLINE")}
-                    className={`p-5 rounded-xl border-2 transition-all duration-300 ${
-                      paymentMethod === "ONLINE"
-                        ? "border-primary bg-primary-light shadow-lg scale-105"
-                        : "border-neutral-300 hover:border-primary-light hover:bg-neutral-50"
-                    }`}
+                    className={`p-5 rounded-xl border-2 transition-all duration-300 ${paymentMethod === "ONLINE"
+                      ? "border-primary bg-primary-light shadow-lg scale-105"
+                      : "border-neutral-300 hover:border-primary-light hover:bg-neutral-50"
+                      }`}
                   >
                     <div className="flex items-center gap-3">
                       <div
-                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                          paymentMethod === "ONLINE"
-                            ? "border-primary bg-primary-light0"
-                            : "border-neutral-300"
-                        }`}
+                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === "ONLINE"
+                          ? "border-primary bg-primary-light0"
+                          : "border-neutral-300"
+                          }`}
                       >
                         {paymentMethod === "ONLINE" && (
                           <div className="w-2 h-2 rounded-full bg-white" />

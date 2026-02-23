@@ -1,0 +1,37 @@
+{
+  "id": "47b26b37-b6ad-4993-8b07-05f03a520d02",
+  "title": "Square Canvas Frame",
+  "content": "Modern Square Canvas Print.",
+  "image": "/assets/frontend_assets/About/machine4.jpg",
+  "uploaded_image_url": null,
+  "rating": 5,
+  "thickness": "Wooden Stretch",
+  "sizes": [
+    {
+      "label": "8x8",
+      "price": 299,
+      "width": 8,
+      "height": 8,
+      "original": 499
+    },
+    {
+      "label": "12x12",
+      "price": 549,
+      "width": 12,
+      "height": 12,
+      "original": 749
+    },
+    {
+      "label": "16x16",
+      "price": 849,
+      "width": 16,
+      "height": 16,
+      "original": 1149
+    }
+  ],
+  "stock": "In Stock",
+  "quantity": 1,
+  "shape": "square",
+  "created_at": "2026-02-18T17:25:28.800429+00:00",
+  "updated_at": "2026-02-18T17:25:28.800429+00:00"
+}
