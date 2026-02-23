@@ -14,6 +14,10 @@ export default function Home() {
     <div className="relative">
       <LandingPage />
 
+
+      {/* Full Inventory Under Hero Showcase */}
+      <ProductListing />
+
       {/* Featured Overview */}
       <OurCollection />
 
@@ -27,8 +31,6 @@ export default function Home() {
         accentColor="text-blue-600"
       />
 
-      {/* Full Inventory Under Hero Showcase */}
-      <ProductListing />
 
       {/* Secondary Detailed Sections */}
       <CategoryShowcase
