@@ -30,38 +30,14 @@ const Frames = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Fetching all frame types to display in the inventory
-                const types = ['acrylic', 'canvas', 'backlight'];
-                const productPromises = types.map(async (type) => {
-                    try {
-                        const res = await axiosInstance.get(`frames/${type}`);
-                        return (res.data || []).map(item => ({ ...item, type }));
-                    } catch (err) {
-                        console.error(`Failed to fetch ${type} frames:`, err);
-                        return [];
-                    }
-                });
-
-                // Fetching WhatsApp templates
-                const templatePromise = axiosInstance.get('customizer-templates')
-                    .then(res => res.data || [])
-                    .catch(err => {
-                        console.error("Failed to fetch customizer templates:", err);
-                        return [];
-                    });
-
-                const [productResults, templatesData] = await Promise.all([
-                    Promise.all(productPromises),
-                    templatePromise
-                ]);
-
-                const mergedProducts = productResults.flat();
-                setProducts(mergedProducts);
-                setTemplates(templatesData);
+                setLoading(true);
+                // Fetching only customizer templates as per user request
+                const res = await axiosInstance.get('customizer-templates');
+                setTemplates(res.data || []);
+                setProducts([]); // Clear any automatic products
                 setLoading(false);
             } catch (error) {
                 console.error("Critical error in fetchData:", error);
-                setProducts([]);
                 setTemplates([]);
                 setLoading(false);
             }
@@ -134,7 +110,7 @@ const Frames = () => {
 
                     {/* Meta Tabs */}
                     <div className="flex items-center gap-4 overflow-x-auto pb-6 no-scrollbar">
-                        {["all", "acrylic", "canvas", "backlight", "templates"].map((tab) => (
+                        {["all", "templates"].map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
@@ -143,7 +119,7 @@ const Frames = () => {
                                     : "bg-white/5 text-slate-500 border-white/5 hover:border-blue-500/40 hover:text-blue-400"
                                     }`}
                             >
-                                [{tab}]
+                                {tab === "all" ? "IMAGE" : tab}
                             </button>
                         ))}
                     </div>

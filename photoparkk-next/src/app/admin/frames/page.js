@@ -9,7 +9,6 @@ const AdminFramesPage = () => {
         { title: "Acrylic Customizer", text: "Configure crystal-clear acrylic preservation options.", href: "/admin/products?tab=acrylic", color: "text-blue-600", bg: "bg-blue-50" },
         { title: "Canvas Customizer", text: "Matrix management for premium textured canvas products.", href: "/admin/products?tab=canvas", color: "text-indigo-600", bg: "bg-indigo-50" },
         { title: "Backlight Customizer", text: "Illuminated frame customization and logic control.", href: "/admin/products?tab=backlight", color: "text-azure-600", bg: "bg-blue-50/50" },
-        { title: "WhatsApp Templates", text: "Manage ready-to-order templates for direct WhatsApp sales.", href: "/admin/frames/templates", color: "text-green-600", bg: "bg-green-50" },
     ];
 
     return (

@@ -58,7 +58,7 @@ const AdminLayout = ({ children }) => {
         { icon: ShoppingBag, label: "Orders", path: "/admin/orders" },
         { icon: Package, label: "Products", path: "/admin/products" },
         { icon: Frame, label: "Customizer", path: "/admin/frames" },
-        { icon: MessageCircle, label: "WhatsApp Templates", path: "/admin/frames/templates" },
+        { icon: LayoutDashboard, label: "Customizer Templates", path: "/admin/frames/templates" },
     ];
 
     const isActive = (path) => {
