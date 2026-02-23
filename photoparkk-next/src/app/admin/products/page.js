@@ -34,8 +34,8 @@ const ProductsContent = () => {
     const CANVAS_FIELDS = ['title', 'content', 'image', 'shape', 'sizes', 'thickness', 'stock'];
     const CANVAS_JSON = ['sizes'];
 
-    const BACKLIGHT_FIELDS = ['title', 'content', 'image', 'shape', 'sizes', 'thickness', 'luxury_configs', 'stock'];
-    const BACKLIGHT_JSON = ['sizes', 'thickness', 'luxury_configs'];
+    const BACKLIGHT_FIELDS = ['title', 'content', 'image', 'shape', 'sizes', 'thickness', 'stock'];
+    const BACKLIGHT_JSON = ['sizes', 'thickness'];
 
     return (
         <div className="w-full space-y-8">

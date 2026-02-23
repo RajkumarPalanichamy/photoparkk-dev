@@ -43,7 +43,8 @@ export async function PUT(request, { params }) {
             .single();
 
         if (error) {
-            return NextResponse.json({ message: "Update failed" }, { status: 500 });
+            console.error("Supabase update error:", error);
+            return NextResponse.json({ message: "Update failed", details: error.message }, { status: 500 });
         }
 
         return NextResponse.json(data);
