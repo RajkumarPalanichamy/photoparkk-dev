@@ -234,140 +234,138 @@ const ProductManager = ({
 
             {showModal && (
                 <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
-                        <form onSubmit={handleSubmit} className="flex flex-col h-full">
-                            <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center flex-shrink-0">
-                                <h3 className="font-black text-xl text-slate-900">{editingProduct ? "Revise Portfolio Item" : "New Portfolio Addition"}</h3>
-                                <button type="button" onClick={() => setShowModal(false)} className="p-2 hover:bg-slate-50 rounded-full transition-colors"><X className="w-6 h-6 text-slate-400" /></button>
-                            </div>
+                    <form onSubmit={handleSubmit} className="bg-white rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col" style={{ maxHeight: '90vh' }}>
+                        <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center flex-none">
+                            <h3 className="font-black text-xl text-slate-900">{editingProduct ? "Revise Portfolio Item" : "New Portfolio Addition"}</h3>
+                            <button type="button" onClick={() => setShowModal(false)} className="p-2 hover:bg-slate-50 rounded-full transition-colors"><X className="w-6 h-6 text-slate-400" /></button>
+                        </div>
 
-                            <div className="p-8 space-y-6 overflow-y-auto flex-grow">
-                                {has('title') && (
-                                    <div>
-                                        <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Item Designation</label>
-                                        <input required type="text" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} className="w-full border border-slate-200 rounded-xl p-3 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 outline-none transition-all font-bold text-slate-900" />
-                                    </div>
-                                )}
+                        <div className="p-8 space-y-6 overflow-y-auto flex-1 min-h-0">
+                            {has('title') && (
+                                <div>
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Item Designation</label>
+                                    <input required type="text" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} className="w-full border border-slate-200 rounded-xl p-3 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 outline-none transition-all font-bold text-slate-900" />
+                                </div>
+                            )}
 
-                                {has('content') && (
-                                    <div>
-                                        <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Client-Facing Brief</label>
-                                        <textarea required value={formData.content} onChange={e => setFormData({ ...formData, content: e.target.value })} className="w-full border border-slate-200 rounded-xl p-3 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 outline-none h-32 transition-all font-medium text-slate-700" />
-                                    </div>
-                                )}
+                            {has('content') && (
+                                <div>
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Client-Facing Brief</label>
+                                    <textarea required value={formData.content} onChange={e => setFormData({ ...formData, content: e.target.value })} className="w-full border border-slate-200 rounded-xl p-3 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 outline-none h-32 transition-all font-medium text-slate-700" />
+                                </div>
+                            )}
 
-                                {has('description') && (
-                                    <div>
-                                        <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Description</label>
-                                        <textarea required value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} className="w-full border border-slate-200 rounded-xl p-3 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 outline-none h-32 transition-all font-medium text-slate-700" />
-                                    </div>
-                                )}
+                            {has('description') && (
+                                <div>
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Description</label>
+                                    <textarea required value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} className="w-full border border-slate-200 rounded-xl p-3 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 outline-none h-32 transition-all font-medium text-slate-700" />
+                                </div>
+                            )}
 
-                                {has('image') && (
-                                    <div className="space-y-3">
-                                        <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Asset URL or Upload</label>
-                                        <div className="flex gap-3">
+                            {has('image') && (
+                                <div className="space-y-3">
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Asset URL or Upload</label>
+                                    <div className="flex gap-3">
+                                        <input
+                                            required
+                                            type="text"
+                                            value={formData.image}
+                                            onChange={e => setFormData({ ...formData, image: e.target.value })}
+                                            className="flex-1 border border-slate-200 rounded-xl p-3 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 outline-none transition-all text-sm font-mono"
+                                            placeholder="https://..."
+                                        />
+                                        <div className="relative">
                                             <input
-                                                required
-                                                type="text"
-                                                value={formData.image}
-                                                onChange={e => setFormData({ ...formData, image: e.target.value })}
-                                                className="flex-1 border border-slate-200 rounded-xl p-3 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 outline-none transition-all text-sm font-mono"
-                                                placeholder="https://..."
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={async (e) => {
+                                                    const file = e.target.files[0];
+                                                    if (!file) return;
+
+                                                    const upFormData = new FormData();
+                                                    upFormData.append("image", file);
+
+                                                    toast.info("Uploading asset...");
+                                                    try {
+                                                        const res = await axiosInstance.post("upload-image", upFormData, {
+                                                            headers: { "Content-Type": "multipart/form-data" },
+                                                        });
+                                                        setFormData({ ...formData, image: res.data.imageUrl });
+                                                        toast.success("Asset integrated!");
+                                                    } catch (err) {
+                                                        console.error(err);
+                                                        const errMsg = err.response?.data?.message || "Upload failed";
+                                                        toast.error(errMsg);
+                                                    }
+                                                }}
+                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                             />
-                                            <div className="relative">
-                                                <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    onChange={async (e) => {
-                                                        const file = e.target.files[0];
-                                                        if (!file) return;
-
-                                                        const upFormData = new FormData();
-                                                        upFormData.append("image", file);
-
-                                                        toast.info("Uploading asset...");
-                                                        try {
-                                                            const res = await axiosInstance.post("upload-image", upFormData, {
-                                                                headers: { "Content-Type": "multipart/form-data" },
-                                                            });
-                                                            setFormData({ ...formData, image: res.data.imageUrl });
-                                                            toast.success("Asset integrated!");
-                                                        } catch (err) {
-                                                            console.error(err);
-                                                            const errMsg = err.response?.data?.message || "Upload failed";
-                                                            toast.error(errMsg);
-                                                        }
-                                                    }}
-                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                                />
-                                                <button type="button" className="px-6 py-3 bg-slate-900 text-white hover:bg-black rounded-xl text-xs font-black transition-all">
-                                                    CHOOSE
-                                                </button>
-                                            </div>
+                                            <button type="button" className="px-6 py-3 bg-slate-900 text-white hover:bg-black rounded-xl text-xs font-black transition-all">
+                                                CHOOSE
+                                            </button>
                                         </div>
-                                        {formData.image && (
-                                            <div className="mt-4 w-40 h-40 border-2 border-slate-100 rounded-2xl overflow-hidden bg-slate-50 shadow-inner group">
-                                                <img src={formData.image} alt="Preview" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                                            </div>
-                                        )}
                                     </div>
-                                )}
-
-                                <div className="grid grid-cols-2 gap-6">
-                                    {has('thickness') && (
-                                        <div>
-                                            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Dimensions (JSON)</label>
-                                            {isJson('thickness') ? (
-                                                <input type="text" value={jsonInputs.thickness} onChange={e => setJsonInputs({ ...jsonInputs, thickness: e.target.value })} className="w-full border border-slate-200 rounded-xl p-3 focus:ring-4 focus:ring-blue-500/10 font-mono text-xs" />
-                                            ) : (
-                                                <input type="text" value={formData.thickness} onChange={e => setFormData({ ...formData, thickness: e.target.value })} className="w-full border border-slate-200 rounded-xl p-3 focus:ring-4 focus:ring-blue-500/10 outline-none font-bold" />
-                                            )}
-                                        </div>
-                                    )}
-                                    {has('shape') && (
-                                        <div>
-                                            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Architectural Shape</label>
-                                            <input type="text" value={formData.shape} onChange={e => setFormData({ ...formData, shape: e.target.value })} className="w-full border border-slate-200 rounded-xl p-3 focus:ring-4 focus:ring-blue-500/10 outline-none font-bold" />
-                                        </div>
-                                    )}
-                                    {has('stock') && (
-                                        <div>
-                                            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Project Availability</label>
-                                            <select value={formData.stock} onChange={e => setFormData({ ...formData, stock: e.target.value })} className="w-full border border-slate-200 rounded-xl p-3 focus:ring-4 focus:ring-blue-500/10 outline-none font-bold appearance-none bg-white">
-                                                <option value="In Stock">In Stock</option>
-                                                <option value="Out of Stock">Out of Stock</option>
-                                            </select>
-                                        </div>
-                                    )}
-                                    {has('price') && (
-                                        <div>
-                                            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Price (Optional)</label>
-                                            <input type="number" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} className="w-full border border-slate-200 rounded-xl p-3 focus:ring-4 focus:ring-blue-500/10 outline-none font-bold" />
+                                    {formData.image && (
+                                        <div className="mt-4 w-40 h-40 border-2 border-slate-100 rounded-2xl overflow-hidden bg-slate-50 shadow-inner group">
+                                            <img src={formData.image} alt="Preview" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                         </div>
                                     )}
                                 </div>
+                            )}
 
-                                {has('sizes') && isJson('sizes') && (
+                            <div className="grid grid-cols-2 gap-6">
+                                {has('thickness') && (
                                     <div>
-                                        <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Pricing Matrix (JSON Config)</label>
-                                        <textarea
-                                            value={jsonInputs.sizes}
-                                            onChange={e => setJsonInputs({ ...jsonInputs, sizes: e.target.value })}
-                                            className="w-full border border-slate-200 rounded-xl p-4 font-mono text-xs h-40 bg-slate-50 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
-                                        />
+                                        <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Dimensions (JSON)</label>
+                                        {isJson('thickness') ? (
+                                            <input type="text" value={jsonInputs.thickness} onChange={e => setJsonInputs({ ...jsonInputs, thickness: e.target.value })} className="w-full border border-slate-200 rounded-xl p-3 focus:ring-4 focus:ring-blue-500/10 font-mono text-xs" />
+                                        ) : (
+                                            <input type="text" value={formData.thickness} onChange={e => setFormData({ ...formData, thickness: e.target.value })} className="w-full border border-slate-200 rounded-xl p-3 focus:ring-4 focus:ring-blue-500/10 outline-none font-bold" />
+                                        )}
+                                    </div>
+                                )}
+                                {has('shape') && (
+                                    <div>
+                                        <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Architectural Shape</label>
+                                        <input type="text" value={formData.shape} onChange={e => setFormData({ ...formData, shape: e.target.value })} className="w-full border border-slate-200 rounded-xl p-3 focus:ring-4 focus:ring-blue-500/10 outline-none font-bold" />
+                                    </div>
+                                )}
+                                {has('stock') && (
+                                    <div>
+                                        <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Project Availability</label>
+                                        <select value={formData.stock} onChange={e => setFormData({ ...formData, stock: e.target.value })} className="w-full border border-slate-200 rounded-xl p-3 focus:ring-4 focus:ring-blue-500/10 outline-none font-bold appearance-none bg-white">
+                                            <option value="In Stock">In Stock</option>
+                                            <option value="Out of Stock">Out of Stock</option>
+                                        </select>
+                                    </div>
+                                )}
+                                {has('price') && (
+                                    <div>
+                                        <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Price (Optional)</label>
+                                        <input type="number" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} className="w-full border border-slate-200 rounded-xl p-3 focus:ring-4 focus:ring-blue-500/10 outline-none font-bold" />
                                     </div>
                                 )}
                             </div>
 
-                            <div className="px-8 py-6 border-t border-slate-100 bg-slate-50 flex justify-end gap-3 flex-shrink-0">
-                                <button type="button" onClick={() => setShowModal(false)} className="px-6 py-3 text-slate-600 font-bold hover:text-slate-900 transition-colors">Discard</button>
-                                <button type="submit" className="px-8 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 flex items-center gap-2 font-black shadow-lg shadow-blue-500/20 transition-all">
-                                    <Save className="w-5 h-5" /> PERSIST DATA
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                            {has('sizes') && isJson('sizes') && (
+                                <div>
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Pricing Matrix (JSON Config)</label>
+                                    <textarea
+                                        value={jsonInputs.sizes}
+                                        onChange={e => setJsonInputs({ ...jsonInputs, sizes: e.target.value })}
+                                        className="w-full border border-slate-200 rounded-xl p-4 font-mono text-xs h-40 bg-slate-50 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+                                    />
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="px-8 py-6 border-t border-slate-100 bg-slate-50 flex justify-end gap-3 flex-shrink-0">
+                            <button type="button" onClick={() => setShowModal(false)} className="px-6 py-3 text-slate-600 font-bold hover:text-slate-900 transition-colors">Discard</button>
+                            <button type="submit" className="px-8 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 flex items-center gap-2 font-black shadow-lg shadow-blue-500/20 transition-all">
+                                <Save className="w-5 h-5" /> PERSIST DATA
+                            </button>
+                        </div>
+                    </form>
                 </div>
             )}
         </div>

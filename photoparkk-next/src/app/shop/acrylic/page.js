@@ -1,66 +1,9 @@
 'use client';
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Check, Sparkles, Layers, ShieldCheck, Clock, Box } from "lucide-react";
-
-// ─── Shape Data ───────────────────────────────────────────────────────────────
-const shapeData = [
-    {
-        name: "Portrait",
-        tag: "Most Popular",
-        subtitle: "3 : 4 Ratio",
-        description: "Perfect for solo portraits, couple shots & staircase walls.",
-        route: "/shop/acrylic/portrait/edit",
-        img: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=700&q=90&auto=format&fit=crop",
-        shape: "portrait",
-    },
-    {
-        name: "Landscape",
-        tag: "Best Seller",
-        subtitle: "4 : 3 Ratio",
-        description: "Ideal for scenic destinations, events & living room feature walls.",
-        route: "/shop/acrylic/landscape/edit",
-        img: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&q=90&auto=format&fit=crop",
-        shape: "landscape",
-    },
-    {
-        name: "Square",
-        tag: "Classic",
-        subtitle: "1 : 1 Ratio",
-        description: "Timeless square format for any photo — social media favourite.",
-        route: "/shop/acrylic/square/edit",
-        img: "https://images.unsplash.com/photo-1529634806980-85c3dd6d34ac?w=700&q=90&auto=format&fit=crop",
-        shape: "square",
-    },
-    {
-        name: "Love Heart",
-        tag: "Romantic",
-        subtitle: "Heart Shape",
-        description: "A heartfelt keepsake for anniversaries, weddings & gifting.",
-        route: "/shop/acrylic/love/edit",
-        img: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=700&q=90&auto=format&fit=crop",
-        shape: "love",
-    },
-    {
-        name: "Hexagon",
-        tag: "Modern",
-        subtitle: "Hex Shape",
-        description: "Create stunning geometric galleries on any wall.",
-        route: "/shop/acrylic/hexagon/edit",
-        img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=700&q=90&auto=format&fit=crop",
-        shape: "hexagon",
-    },
-    {
-        name: "Round",
-        tag: "Minimal",
-        subtitle: "Circle Shape",
-        description: "Soft, elegant circles that bring warmth to any interior.",
-        route: "/shop/acrylic/round/edit",
-        img: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=700&q=90&auto=format&fit=crop",
-        shape: "round",
-    },
-];
+import axiosInstance from '@/utils/axiosInstance';
 
 const guarantees = [
     { icon: <ShieldCheck className="w-4 h-4" />, text: "Crystal-clear UV-grade acrylic" },
@@ -71,6 +14,34 @@ const guarantees = [
 
 export default function AcrylicShop() {
     const router = useRouter();
+    const [shapeData, setShapeData] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                setLoading(true);
+                const res = await axiosInstance.get('frames/acrylic');
+                // Format the API response to match the existing shapeData structure
+                const formattedData = (res.data || []).map(product => ({
+                    name: product.title || "Acrylic Shape",
+                    tag: product.shape === "portrait" ? "Most Popular" : "Classic",
+                    subtitle: product.shape ? `${product.shape} Shape` : "Standard Ratio",
+                    description: product.description || "Premium acrylic photo frame.",
+                    route: `/shop/acrylic/${(product.shape || 'portrait').toLowerCase()}/edit`,
+                    img: product.image || "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=700&q=90&auto=format&fit=crop",
+                    shape: (product.shape || 'portrait').toLowerCase(),
+                }));
+                setShapeData(formattedData);
+            } catch (error) {
+                console.error("Failed to fetch acrylic frames:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProducts();
+    }, []);
 
     return (
         <div className="min-h-screen bg-[#F0F4F8] font-sans selection:bg-blue-600/10 selection:text-blue-600">
@@ -160,15 +131,26 @@ export default function AcrylicShop() {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {shapeData.map((shape, idx) => (
-                        <ShapeCard
-                            key={idx}
-                            shape={shape}
-                            onClick={() => router.push(shape.route)}
-                        />
-                    ))}
-                </div>
+                {loading ? (
+                    <div className="flex flex-col items-center justify-center py-20">
+                        <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+                        <p className="text-slate-400 font-medium animate-pulse">Initializing Interface...</p>
+                    </div>
+                ) : shapeData.length === 0 ? (
+                    <div className="text-center py-20 bg-white rounded-3xl shadow-sm border border-slate-100 max-w-2xl mx-auto">
+                        <p className="text-slate-500 mb-8 max-w-md mx-auto">No products found in this category right now.</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {shapeData.map((shape, idx) => (
+                            <ShapeCard
+                                key={idx}
+                                shape={shape}
+                                onClick={() => router.push(shape.route)}
+                            />
+                        ))}
+                    </div>
+                )}
             </section>
 
             {/* ═══ LUXURY GUARANTEE ═══ */}

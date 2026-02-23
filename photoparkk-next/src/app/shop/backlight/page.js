@@ -1,39 +1,10 @@
 'use client';
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Check, Sun, Zap, Lightbulb, ShieldCheck, Sparkles, Clock, Layers } from "lucide-react";
 
-// ─── Shape Data ───────────────────────────────────────────────────────────────
-const shapeData = [
-    {
-        name: "Portrait",
-        tag: "Most Popular",
-        subtitle: "3 : 4 Ratio",
-        description: "Elegant vertical format perfect for solo portraits and cherished memories.",
-        route: "/shop/backlight/portrait/size",
-        img: "/assets/frontend_assets/BacklightPhotoFrames/BacklightPortrait.jpeg",
-        shape: "portrait",
-    },
-    {
-        name: "Landscape",
-        tag: "Best Seller",
-        subtitle: "4 : 3 Ratio",
-        description: "Captivating horizontal view ideal for landscapes, group photos, and scenic vistas.",
-        route: "/shop/backlight/landscape/size",
-        img: "/assets/frontend_assets/BacklightPhotoFrames/LandScape.jpeg",
-        shape: "landscape",
-    },
-    {
-        name: "Square",
-        tag: "Classic",
-        subtitle: "1 : 1 Ratio",
-        description: "The timeless balanced format for social media favorites and modern decor.",
-        route: "/shop/backlight/square/size",
-        img: "/assets/frontend_assets/BacklightPhotoFrames/Square.jpeg",
-        shape: "square",
-    },
-];
+import axiosInstance from '@/utils/axiosInstance';
 
 const guarantees = [
     { icon: <ShieldCheck className="w-4 h-4" />, text: "Uniform LED distribution" },
@@ -44,6 +15,34 @@ const guarantees = [
 
 const BacklightShop = () => {
     const router = useRouter();
+    const [shapeData, setShapeData] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                setLoading(true);
+                const res = await axiosInstance.get('frames/backlight');
+                // Format the API response to match the existing shapeData structure
+                const formattedData = (res.data || []).map(product => ({
+                    name: product.title || "Backlight Shape",
+                    tag: product.shape === "portrait" ? "Most Popular" : "Classic",
+                    subtitle: product.shape ? `${product.shape} Shape` : "Standard Ratio",
+                    description: product.description || "Premium edge-lit LED frame.",
+                    route: `/shop/backlight/${(product.shape || 'portrait').toLowerCase()}/size`,
+                    img: product.image || "/assets/frontend_assets/BacklightPhotoFrames/BacklightPortrait.jpeg",
+                    shape: (product.shape || 'portrait').toLowerCase(),
+                }));
+                setShapeData(formattedData);
+            } catch (error) {
+                console.error("Failed to fetch backlight frames:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProducts();
+    }, []);
 
     return (
         <div className="min-h-screen bg-[#F0F4F8] font-sans selection:bg-blue-600/10 selection:text-blue-600">
@@ -142,11 +141,22 @@ const BacklightShop = () => {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {shapeData.map((item, i) => (
-                        <ShapeCard key={i} data={item} onClick={() => router.push(item.route)} />
-                    ))}
-                </div>
+                {loading ? (
+                    <div className="flex flex-col items-center justify-center py-20">
+                        <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+                        <p className="text-slate-400 font-medium animate-pulse">Initializing Interface...</p>
+                    </div>
+                ) : shapeData.length === 0 ? (
+                    <div className="text-center py-20 bg-white rounded-3xl shadow-sm border border-slate-100 max-w-2xl mx-auto">
+                        <p className="text-slate-500 mb-8 max-w-md mx-auto">No products found in this category right now.</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {shapeData.map((item, i) => (
+                            <ShapeCard key={i} data={item} onClick={() => router.push(item.route)} />
+                        ))}
+                    </div>
+                )}
             </section>
 
             {/* ═══ THE LIGHTING PROMISE ═══ */}
