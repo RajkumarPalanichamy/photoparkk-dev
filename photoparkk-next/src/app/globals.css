@@ -32,7 +32,7 @@
   --color-warning: #ff9500;
   --color-warning-light: #fff3cd;
   /* Fonts */
-  --font-sans: var(--font-poppins), system-ui, sans-serif;
+  --font-sans: var(--font-outfit), system-ui, sans-serif;
 }
 
 a.active hr {
@@ -40,8 +40,8 @@ a.active hr {
 }
 
 body {
-  background-color: #FAF8F4;
-  font-family: var(--font-poppins), sans-serif;
+  background-color: #ffffff;
+  font-family: var(--font-outfit), sans-serif;
 }
 
 html,
@@ -58,6 +58,16 @@ body {
 
   50% {
     opacity: 0.3;
+  }
+}
+
+@keyframes scan {
+  0% {
+    transform: translateY(-100%);
+  }
+
+  100% {
+    transform: translateY(1000%);
   }
 }
 

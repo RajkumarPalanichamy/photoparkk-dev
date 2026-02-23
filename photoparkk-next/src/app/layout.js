@@ -1,14 +1,13 @@
-import { Poppins } from 'next/font/google';
+import { Outfit } from 'next/font/google';
 import "./globals.css";
 import Navbar from '@/Components/Navbar';
 import Footer from '@/Components/Footer';
 import ClientProviders from '@/Components/ClientProviders';
 
-const poppins = Poppins({
-  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
+const outfit = Outfit({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-poppins',
+  variable: '--font-outfit',
 });
 
 export const metadata = {
@@ -19,7 +18,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${poppins.variable} font-sans antialiased text-secondary bg-white`}>
+      <body className={`${outfit.variable} font-sans antialiased text-secondary bg-white`}>
         <ClientProviders>
           <div className="flex flex-col min-h-screen">
             <Navbar />

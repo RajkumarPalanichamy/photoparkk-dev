@@ -1,253 +1,246 @@
 'use client';
 
-import React, { useEffect, useState } from "react";
-import Link from "next/link";
-import axiosInstance from "@/utils/axiosInstance";
-import {
-    Package,
-    Loader2,
-    Search,
-    Sparkles,
-    ArrowRight,
-    Filter,
-    Layers,
-    Sun,
-    Image as ImageIcon,
-    ChevronRight,
-    ShoppingBag
-} from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowRight, ArrowUpRight, Plus, Search, Package } from 'lucide-react';
+import axiosInstance from '@/utils/axiosInstance';
 
+/**
+ * Products Page - The "Editorial Mosaic" Edition
+ * Adapted for the Products Page from the previous Home Page design.
+ * Features the asymmetric staggered grid and vertical nav index, 
+ * now with integrated search functionality for the full gallery.
+ */
 const Products = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState('all');
     const [searchQuery, setSearchQuery] = useState("");
-    const [activeTab, setActiveTab] = useState("all");
 
     useEffect(() => {
-        const fetchAllProducts = async () => {
+        const fetchAllData = async () => {
             try {
                 const types = ['acrylic', 'canvas', 'backlight'];
-                const promises = types.map(async (type) => {
-                    const res = await axiosInstance.get(`frames/${type}`);
-                    return res.data.map(item => ({ ...item, type }));
+                const productPromises = types.map(async (type) => {
+                    try {
+                        const res = await axiosInstance.get(`frames/${type}`);
+                        return (res.data || []).map(item => ({ ...item, type }));
+                    } catch (err) {
+                        return [];
+                    }
                 });
 
-                const results = await Promise.all(promises);
-                const merged = results.flat();
-                setProducts(merged);
+                // Products page usually only shows frames, templates are on home/distinctive
+                const results = await Promise.all(productPromises);
+                setProducts(results.flat());
                 setLoading(false);
             } catch (error) {
-                console.error("Failed to fetch products:", error);
-                setProducts([]);
                 setLoading(false);
             }
         };
-
-        fetchAllProducts();
+        fetchAllData();
     }, []);
 
-    const filteredProducts = products.filter((product) => {
-        const matchesSearch = product.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            product.type?.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesTab = activeTab === "all" || product.type === activeTab;
+    const categories = [
+        { id: 'all', label: 'Full Archive', index: '01' },
+        { id: 'acrylic', label: 'Acrylic Series', index: '02' },
+        { id: 'canvas', label: 'Canvas Series', index: '03' },
+        { id: 'backlight', label: 'Backlight Series', index: '04' }
+    ];
+
+    const filteredItems = products.filter((item) => {
+        const matchesSearch = item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.type?.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesTab = activeTab === "all" || item.type === activeTab;
         return matchesSearch && matchesTab;
     });
 
     return (
-        <div className="min-h-screen bg-slate-50/50 pt-[120px] pb-24 px-4 font-sans selection:bg-blue-600/10 selection:text-blue-600">
-            {/* Background Aesthetic Elements */}
-            <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10 font-sans text-secondary">
-                <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-100/20 rounded-full blur-[120px] -mr-64 -mt-64" />
-                <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-slate-200/30 rounded-full blur-[120px] -ml-64 -mb-64" />
-            </div>
+        <div className="min-h-screen bg-[#F0F2F5] pt-4 pb-24 font-sans relative overflow-hidden">
+            {/* Subtle light accents */}
+            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-100/40 rounded-full blur-[120px] pointer-events-none" />
 
-            <div className="max-w-7xl mx-auto">
-                {/* ═══ HERO / HEADER SECTION ═══ */}
-                <div className="relative mb-16">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
-                        <div className="max-w-2xl">
-                            <div className="flex items-center gap-2 mb-4">
-                                <span className="h-[1px] w-8 bg-blue-600"></span>
-                                <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.4em]">Masterpiece Archive</span>
-                            </div>
-                            <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tighter leading-none mb-6">
-                                Curated <br /> Collection
-                            </h1>
-                            <p className="text-slate-500 font-medium text-lg leading-relaxed max-w-lg">
-                                Engineering the intersection of visual memory and luxury architecture. Premium frames designed for the modern aesthetic.
-                            </p>
-                        </div>
+            <div className="max-w-[1700px] mx-auto px-6 lg:px-12">
 
-                        {/* Search & Stats Bar */}
-                        <div className="flex flex-col gap-4 w-full md:w-auto">
-                            <div className="relative group">
-                                <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
-                                <input
-                                    type="text"
-                                    placeholder="Inventory Search..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full md:w-[320px] pl-14 pr-6 py-4 bg-white border border-slate-200 rounded-3xl outline-none focus:border-blue-600/30 focus:ring-4 focus:ring-blue-600/5 transition-all text-slate-900 font-medium shadow-sm hover:border-slate-300 placeholder:text-slate-300"
-                                />
-                            </div>
-                        </div>
+                {/* ═══ PREMIUM SATIN STUDIO HEADER ═══ */}
+                <div className="relative mb-6 group rounded-[2.5rem] overflow-hidden border border-white bg-white shadow-[0_20px_50px_-15px_rgba(30,58,138,0.08)]">
+                    {/* Atmospheric Background Layer */}
+                    <div className="absolute inset-0 opacity-[0.25] pointer-events-none overflow-hidden">
+                        <img
+                            src="/interior-wall.jpg"
+                            alt="Background Atmosphere"
+                            className="w-full h-full object-cover transition-transform duration-[20s] scale-105 group-hover:scale-110"
+                        />
                     </div>
 
-                    {/* Navigation Tabs */}
-                    <div className="flex items-center gap-2 overflow-x-auto pb-4 no-scrollbar border-b border-slate-100">
-                        {["all", "acrylic", "canvas", "backlight"].map((tab) => (
-                            <button
-                                key={tab}
-                                onClick={() => setActiveTab(tab)}
-                                className={`px-6 py-2.5 rounded-full text-[11px] font-black uppercase tracking-[0.2em] transition-all whitespace-nowrap ${activeTab === tab
-                                    ? "bg-slate-900 text-white shadow-xl shadow-slate-900/10 scale-105"
-                                    : "bg-transparent text-slate-400 hover:text-slate-900"
-                                    }`}
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10 py-12 px-14">
+                        {/* Left side: Editorial Typography */}
+                        <div className="lg:col-span-7">
+                            <motion.div
+                                initial={{ opacity: 0, x: -25 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 0.8 }}
+                                className="flex flex-col items-start"
                             >
-                                {tab}
-                            </button>
-                        ))}
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="w-8 h-[2px] bg-blue-600 rounded-full" />
+                                    <span className="text-[10px] font-black uppercase tracking-[0.6em] text-blue-600">Archival Series</span>
+                                </div>
+
+                                <h1 className="text-5xl md:text-[7rem] font-black text-[#0A1D37] tracking-tighter mb-8 leading-[0.8]">
+                                    Masterpiece <br />
+                                    <span className="text-blue-600 italic font-light">Inventory.</span>
+                                </h1>
+
+                                <p className="text-lg text-neutral-500 font-medium max-w-lg leading-relaxed border-l-4 border-blue-600 pl-8 py-2 bg-white/40 backdrop-blur-sm rounded-r-xl">
+                                    Engineering the intersection of visual memory & luxury architecture.
+                                </p>
+                            </motion.div>
+                        </div>
+
+                        {/* Right side: Search & Vertical Hub */}
+                        <div className="lg:col-span-5 lg:flex lg:justify-end">
+                            <div className="flex flex-col w-full lg:max-w-[380px] bg-white/60 backdrop-blur-2xl rounded-3xl p-8 border border-white/80 shadow-xl shadow-blue-900/5">
+                                {/* Compact Search Bar */}
+                                <div className="relative group w-full mb-8">
+                                    <Search className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-600" />
+                                    <input
+                                        type="text"
+                                        placeholder="SEARCH THE CATALOG..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="w-full pl-8 pr-4 py-4 bg-transparent border-b-2 border-neutral-100 outline-none focus:border-blue-600 transition-all text-[#0A1D37] font-black uppercase text-[10px] tracking-widest placeholder:text-neutral-400"
+                                    />
+                                </div>
+
+                                {/* Premium Categorization Hub */}
+                                <div className="flex flex-col gap-2">
+                                    {categories.map((cat, idx) => (
+                                        <button
+                                            key={cat.id}
+                                            onClick={() => setActiveTab(cat.id)}
+                                            className={`group flex items-center justify-between px-6 py-4.5 rounded-2xl transition-all duration-400 relative ${activeTab === cat.id
+                                                ? 'bg-white shadow-xl shadow-blue-900/5 ring-1 ring-blue-100 scale-[1.02] z-10'
+                                                : 'text-neutral-400 hover:bg-white/50 hover:text-blue-600'
+                                                }`}
+                                        >
+                                            <div className="flex items-center gap-6">
+                                                <span className={`text-[10px] font-black ${activeTab === cat.id ? 'text-blue-600' : 'text-neutral-200'
+                                                    }`}>
+                                                    0{idx + 1}
+                                                </span>
+                                                <span className={`text-[12px] font-black uppercase tracking-[0.1em] transition-colors ${activeTab === cat.id ? 'text-[#0A1D37]' : ''
+                                                    }`}>
+                                                    {cat.label}
+                                                </span>
+                                            </div>
+                                            {activeTab === cat.id && (
+                                                <motion.div
+                                                    layoutId="selectionIndicator"
+                                                    className="w-2.5 h-2.5 bg-blue-600 rounded-full shadow-[0_0_12px_rgba(37,99,235,0.4)]"
+                                                />
+                                            )}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
+                {/* ═══ STAGGERED MOSAIC GALLERY ═══ */}
                 {loading ? (
-                    <div className="flex flex-col justify-center items-center h-[50vh] gap-6">
-                        <div className="relative">
-                            <div className="w-16 h-16 border-4 border-blue-600/10 border-t-blue-600 rounded-full animate-spin" />
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <ShoppingBag className="w-6 h-6 text-blue-600/40" />
-                            </div>
-                        </div>
-                        <p className="text-slate-400 font-black uppercase tracking-[0.3em] text-[10px]">Accessing Database</p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+                        {[1, 2, 3].map(i => <div key={i} className="aspect-[3/4] bg-neutral-50 rounded-2xl animate-pulse" />)}
                     </div>
-                ) : filteredProducts.length === 0 ? (
-                    <div className="bg-white/60 backdrop-blur-xl rounded-[40px] border border-white shadow-2xl p-20 text-center max-w-2xl mx-auto">
-                        <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-8 text-slate-200">
-                            <Package className="w-10 h-10" />
-                        </div>
-                        <h3 className="text-2xl font-black text-slate-900 mb-4 tracking-tight uppercase">Protocol: Not Found</h3>
-                        <p className="text-slate-500 font-medium mb-10 leading-relaxed">
-                            The requested assets could not be located in our current inventory. Adjust your parameters or contact the concierge.
-                        </p>
-                        <button
-                            onClick={() => { setSearchQuery(""); setActiveTab("all"); }}
-                            className="bg-slate-900 text-white px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-slate-900/20"
-                        >
-                            Reset Parameters
-                        </button>
+                ) : filteredItems.length === 0 ? (
+                    <div className="py-40 text-center">
+                        <Package className="w-12 h-12 text-neutral-100 mx-auto mb-8" />
+                        <h4 className="text-xl font-bold text-[#0A1D37] mb-4">No matching assets found</h4>
+                        <button onClick={() => { setSearchQuery(""); setActiveTab("all"); }} className="text-blue-600 font-bold uppercase tracking-widest text-[10px] border-b border-blue-600 pb-1">Reset Filters</button>
                     </div>
                 ) : (
-                    <>
-                        <div className="mb-10 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Available Assets</span>
-                                <span className="px-3 py-1 bg-white border border-slate-100 rounded-full text-[10px] font-black text-blue-600">
-                                    {filteredProducts.length}
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* ═══ PRODUCTS GRID ═══ */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 gap-y-16">
-                            {filteredProducts.map((product, index) => {
-                                const firstSize = product.sizes && product.sizes.length > 0 ? product.sizes[0] : null;
-                                const isBacklight = product.type === "backlight";
-
-                                return (
-                                    <Link
-                                        key={product.id || index}
-                                        href={`/shop/${product.type}/${product.shape.toLowerCase()}`}
-                                        className="group relative flex flex-col h-full"
-                                    >
-                                        {/* Luxury Badge - Floating */}
-                                        <div className="absolute -top-4 -right-4 z-20 opacity-0 group-hover:opacity-100 transition-all duration-500 scale-75 group-hover:scale-100 rotate-12 group-hover:rotate-0">
-                                            <div className="bg-blue-600 text-white w-20 h-20 rounded-full flex flex-col items-center justify-center shadow-2xl shadow-blue-500/40 border-4 border-white">
-                                                <span className="text-[8px] font-black uppercase tracking-tighter">Premium</span>
-                                                <Sparkles className="w-4 h-4" />
-                                            </div>
-                                        </div>
-
-                                        {/* Image Container with Custom Shadow & Border Architecture */}
-                                        <div className="relative aspect-[4/5] bg-white rounded-[40px] overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.04)] border border-slate-100 transition-all duration-700 group-hover:shadow-[0_40px_80px_rgba(0,0,0,0.12)] group-hover:-translate-y-4 group-hover:border-blue-600/20">
-                                            {/* Category Tag Overlay */}
-                                            <div className="absolute top-6 left-6 z-10 flex flex-col gap-2">
-                                                <div className="bg-white/80 backdrop-blur-xl border border-white/50 px-4 py-2 rounded-2xl shadow-xl flex items-center gap-2">
-                                                    {isBacklight ? <Sun className="w-3 h-3 text-amber-500" /> : <Layers className="w-3 h-3 text-blue-600" />}
-                                                    <span className="text-[9px] font-black text-slate-900 uppercase tracking-widest">{product.type}</span>
-                                                </div>
-                                            </div>
-
-                                            <img
-                                                src={product.image || "/api/placeholder/800/800"}
-                                                alt={product.title}
-                                                className="w-full h-full object-cover transition-all duration-1000 group-hover:scale-110"
-                                            />
-
-                                            {/* Hover Action Gradient Overlay */}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-8">
-                                                <div className="flex items-center gap-2 text-white font-black uppercase text-[10px] tracking-[0.3em] translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                                                    Configure Details <ArrowRight className="w-3 h-3 text-blue-400" />
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Info Section */}
-                                        <div className="pt-8 px-2 flex flex-col flex-1">
-                                            <div className="flex items-center gap-2 mb-3">
-                                                <span className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">{product.shape}</span>
-                                                <div className="w-1 h-1 bg-slate-200 rounded-full" />
-                                                <span className="text-[9px] font-black text-blue-600/40 uppercase tracking-[0.2em]">{product.type} Series</span>
-                                            </div>
-
-                                            <h3 className="text-xl font-bold text-slate-900 mb-4 tracking-tight leading-7 line-clamp-2 min-h-[3.5rem] group-hover:text-blue-600 transition-colors">
-                                                {product.title}
-                                            </h3>
-
-                                            <div className="flex items-center justify-between mt-auto">
-                                                {firstSize ? (
-                                                    <div className="flex flex-col">
-                                                        <span className="text-[9px] font-black text-slate-300 uppercase tracking-[0.1em] mb-1">Entry Price</span>
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-2xl font-black text-slate-900 tracking-tighter">
-                                                                ₹{firstSize.price.toLocaleString()}
-                                                            </span>
-                                                            {firstSize.original && firstSize.original > firstSize.price && (
-                                                                <span className="text-slate-300 line-through text-xs font-bold">
-                                                                    ₹{firstSize.original.toLocaleString()}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <span className="text-slate-300 text-[10px] font-bold uppercase tracking-widest italic">
-                                                        Protocol Pending
-                                                    </span>
-                                                )}
-
-                                                <div className="w-12 h-12 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center group-hover:bg-blue-600 group-hover:border-blue-600 group-hover:text-white transition-all duration-500">
-                                                    <ChevronRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </Link>
-                                );
-                            })}
-                        </div>
-                    </>
+                    <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24 items-start">
+                        <AnimatePresence mode='popLayout'>
+                            {filteredItems.map((item, index) => (
+                                <StaggeredCard
+                                    key={item.id || index}
+                                    item={item}
+                                    index={index}
+                                />
+                            ))}
+                        </AnimatePresence>
+                    </motion.div>
                 )}
-            </div>
-
-            {/* Floating Navigation Prompt (Optional Aesthetic Feature) */}
-            <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
-                <div className="bg-slate-900/90 backdrop-blur-2xl text-white px-8 py-3 rounded-full text-[9px] font-black uppercase tracking-[0.3em] flex items-center gap-4 shadow-2xl shadow-slate-900/40 border border-slate-800">
-                    <span className="opacity-40">System Status: Optimal</span>
-                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                    <span className="opacity-40 whitespace-nowrap">Global Shipping Enabled</span>
-                </div>
             </div>
         </div>
     );
 };
 
-export default Products;
+const StaggeredCard = ({ item, index }) => {
+    const isEven = index % 2 === 0;
+    const firstSize = item.sizes && item.sizes.length > 0 ? item.sizes[0] : null;
+    const price = firstSize?.price;
+    const href = `/shop/${item.type}/${(item.shape || 'portrait').toLowerCase()}`;
 
+    return (
+        <motion.div
+            layout
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.8 }}
+            className={`group relative ${isEven ? 'md:mt-24' : ''}`}
+        >
+            <Link href={href} className="block overflow-hidden relative rounded-[2rem]">
+                {/* Clean Image Shell */}
+                <div className="relative aspect-[4/5] overflow-hidden bg-neutral-50 transition-all duration-1000 group-hover:translate-x-4">
+                    <img
+                        src={item.image || "/api/placeholder/800/1000"}
+                        alt={item.title}
+                        className="w-full h-full object-cover transition-transform duration-[3s] group-hover:scale-110"
+                    />
+
+                    {/* Minimal Border Label */}
+                    <div className="absolute top-8 left-8 bg-white/90 backdrop-blur-md px-5 py-2 rounded-full border border-blue-50 shadow-sm">
+                        <span className="text-[9px] font-bold text-blue-600 uppercase tracking-widest">{item.type}</span>
+                    </div>
+
+                    {/* Interactive White/Blue Overlay */}
+                    <div className="absolute inset-0 bg-blue-600/0 group-hover:bg-blue-600/10 transition-colors duration-700" />
+
+                    {/* Floating Bottom Link */}
+                    <div className="absolute bottom-8 left-8 opacity-0 group-hover:opacity-100 transition-all duration-700 translate-y-4 group-hover:translate-y-0">
+                        <div className="bg-white text-blue-600 p-4 rounded-full shadow-2xl flex items-center gap-3">
+                            <span className="text-[10px] font-black uppercase tracking-widest ml-2">Configure</span>
+                            <div className="bg-blue-600 text-white p-1 rounded-full">
+                                <Plus className="w-3 h-3" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Architectural Details */}
+                <div className="mt-8 px-4 flex justify-between items-start transition-transform duration-700 group-hover:-translate-x-2">
+                    <div className="max-w-[70%]">
+                        <h3 className="text-xl font-bold text-[#0A1D37] tracking-tight group-hover:text-blue-600 transition-colors leading-tight mb-2">
+                            {item.title}
+                        </h3>
+                        <p className="text-[10px] font-bold text-neutral-300 uppercase tracking-widest italic group-hover:text-blue-200 transition-colors">
+                            {item.shape} Architecture
+                        </p>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-xl font-bold text-[#0A1D37] tracking-tighter shrink-0">
+                            ₹{price?.toLocaleString() || '---'}
+                        </p>
+                        <span className="text-[9px] font-bold text-blue-100 uppercase tracking-widest block transform group-hover:-translate-x-1 transition-transform">Entry</span>
+                    </div>
+                </div>
+            </Link>
+        </motion.div>
+    );
+};
+
+export default Products;
