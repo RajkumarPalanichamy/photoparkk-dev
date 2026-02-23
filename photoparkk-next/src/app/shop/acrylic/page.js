@@ -73,7 +73,7 @@ export default function AcrylicShop() {
     const router = useRouter();
 
     return (
-        <div className="min-h-screen bg-white font-sans selection:bg-blue-600/10 selection:text-blue-600">
+        <div className="min-h-screen bg-[#F0F4F8] font-sans selection:bg-blue-600/10 selection:text-blue-600">
             {/* ═══ LUXURY HERO SECTION ═══ */}
             <section className="relative min-h-[85vh] flex items-center overflow-hidden bg-slate-900 pt-[100px]">
                 {/* Immersive Background */}
@@ -127,7 +127,7 @@ export default function AcrylicShop() {
             </section>
 
             {/* ═══ PROCESS STEPS ═══ */}
-            <div className="bg-white border-b border-slate-50 relative z-30 -mt-10 mx-6 rounded-[32px] shadow-2xl shadow-slate-900/10">
+            <div className="bg-white border border-blue-100 relative z-30 -mt-10 mx-6 rounded-[32px] shadow-2xl shadow-blue-900/8">
                 <div className="max-w-7xl mx-auto px-10 flex flex-wrap md:flex-nowrap divide-x divide-slate-50">
                     {[
                         { n: "01", label: "Format", sub: "Select Shape", active: true },
@@ -160,7 +160,7 @@ export default function AcrylicShop() {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                     {shapeData.map((shape, idx) => (
                         <ShapeCard
                             key={idx}
@@ -172,20 +172,19 @@ export default function AcrylicShop() {
             </section>
 
             {/* ═══ LUXURY GUARANTEE ═══ */}
-            <div className="bg-slate-900 py-16 px-6 overflow-hidden relative">
-                <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-600/10 rounded-full blur-[100px] -mr-48 -mt-48" />
-                <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-12 relative z-10">
-                    <div className="space-y-2">
-                        <h3 className="text-[11px] font-black text-blue-400 uppercase tracking-[0.4em]">The Photoparkk Vow</h3>
-                        <p className="text-white text-2xl font-bold tracking-tight">Executive Grade Assurance</p>
+            <div className="bg-white py-24 px-6 overflow-hidden relative">
+                <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-16 relative z-10">
+                    <div className="space-y-4">
+                        <h3 className="text-[11px] font-black text-blue-600 uppercase tracking-[0.4em]">The Photoparkk Vow</h3>
+                        <p className="text-slate-950 text-4xl font-black tracking-tighter leading-none">Executive Grade <br />Assurance</p>
                     </div>
-                    <div className="flex flex-wrap justify-center gap-10">
+                    <div className="grid grid-cols-2 gap-6 w-full lg:w-auto">
                         {guarantees.map((g, i) => (
-                            <div key={i} className="flex items-center gap-4 text-slate-400 group">
-                                <div className="w-10 h-10 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center text-blue-400 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                            <div key={i} className="flex items-center gap-5 text-slate-900 group p-6 bg-[#F0F4F8] rounded-2xl border border-blue-100 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300">
+                                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-blue-600 shadow-sm group-hover:bg-blue-600 group-hover:text-white transition-all">
                                     {g.icon}
                                 </div>
-                                <span className="text-xs font-black uppercase tracking-widest">{g.text}</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest">{g.text}</span>
                             </div>
                         ))}
                     </div>
@@ -203,10 +202,10 @@ function ShapeCard({ shape, onClick }) {
             onClick={onClick}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
-            className="group relative bg-white rounded-[40px] border border-slate-100 overflow-hidden cursor-pointer transition-all duration-700 hover:shadow-[0_40px_80px_rgba(0,0,0,0.1)] hover:-translate-y-4 hover:border-blue-600/20"
+            className="group relative bg-white rounded-2xl border border-blue-100 overflow-hidden cursor-pointer transition-all duration-500 shadow-[0_4px_20px_rgba(37,99,235,0.06)] hover:shadow-[0_16px_48px_rgba(37,99,235,0.14)] hover:-translate-y-1 hover:border-blue-200"
         >
             {/* Gloss Area */}
-            <div className="relative aspect-[4/3] bg-slate-50 flex items-center justify-center p-8 overflow-hidden">
+            <div className="relative aspect-[4/3] bg-blue-50/40 flex items-center justify-center p-8 overflow-hidden">
                 {/* Product Tag */}
                 <div className="absolute top-6 left-6 z-20">
                     <span className="bg-white/80 backdrop-blur-xl px-4 py-2 rounded-2xl text-[9px] font-black text-blue-600 uppercase tracking-[0.2em] shadow-xl border border-white/50">
@@ -234,9 +233,9 @@ function ShapeCard({ shape, onClick }) {
                     {shape.description}
                 </p>
 
-                <div className="pt-6 border-t border-slate-50 flex items-center justify-between">
+                <div className="pt-6 border-t border-blue-50 flex items-center justify-between">
                     <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] opacity-0 group-hover:opacity-100 transition-all -translate-x-4 group-hover:translate-x-0">Enter Studio</span>
-                    <div className="w-12 h-12 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-blue-600 group-hover:border-blue-600 group-hover:text-white transition-all duration-500">
+                    <div className="w-12 h-12 bg-blue-50 border border-blue-100 rounded-2xl flex items-center justify-center text-blue-400 group-hover:bg-blue-600 group-hover:border-blue-600 group-hover:text-white transition-all duration-500">
                         <ArrowRight size={18} className="transition-transform group-hover:translate-x-0.5" />
                     </div>
                 </div>

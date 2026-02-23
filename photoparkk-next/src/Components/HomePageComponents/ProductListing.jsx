@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ArrowRight, ShoppingBag, ChevronRight } from 'lucide-react';
+import { Search, ArrowRight, ShoppingBag } from 'lucide-react';
 import axiosInstance from '@/utils/axiosInstance';
 
 /**
@@ -94,9 +94,9 @@ const ProductListing = () => {
                             <span className="w-12 h-[1px] bg-primary/40 block" />
                         </div>
 
-                        <h2 className="text-6xl md:text-9xl font-black text-[#0A1D37] tracking-tighter mb-10 leading-[0.9]">
+                        <h2 className="text-6xl md:text-9xl font-black text-[#0A1D37] tracking-tighter mb-10 leading-[0.9] overflow-visible pr-4">
                             Distinctive <br />
-                            <span className="bg-gradient-to-r from-[#0A1D37] via-neutral-400 to-[#0A1D37] bg-clip-text text-transparent italic font-light">Artisan Frames</span>
+                            <span className="bg-gradient-to-r from-[#0A1D37] via-neutral-400 to-[#0A1D37] bg-clip-text text-transparent italic font-light pr-2">Artisan Frames</span>
                         </h2>
 
                         <p className="text-xl text-neutral-500 font-medium max-w-2xl leading-relaxed mb-16 px-4">
@@ -104,14 +104,14 @@ const ProductListing = () => {
                         </p>
 
                         {/* Centered Elite Nav Hub Underneath */}
-                        <div className="flex flex-wrap gap-3 p-1.5 bg-neutral-50/50 backdrop-blur-xl rounded-[2.5rem] border border-neutral-100/50 shadow-xl shadow-blue-500/5">
+                        <div className="flex flex-wrap gap-3 p-2 bg-white backdrop-blur-xl rounded-[2.5rem] border border-blue-100 shadow-xl shadow-blue-500/10 overflow-visible">
                             {categories.map((cat) => (
                                 <button
                                     key={cat.id}
                                     onClick={() => setActiveTab(cat.id)}
                                     className={`px-10 py-4 rounded-[2rem] text-[10px] font-black uppercase tracking-[0.3em] transition-all duration-700 ${activeTab === cat.id
-                                            ? "bg-[#0A1D37] text-white shadow-2xl shadow-navy/20 scale-105"
-                                            : "text-neutral-400 hover:text-[#0A1D37] hover:bg-white"
+                                        ? "bg-blue-600 text-white shadow-2xl shadow-blue-500/30"
+                                        : "text-blue-400 hover:text-blue-700 hover:bg-blue-50"
                                         }`}
                                 >
                                     {cat.label}
@@ -136,7 +136,7 @@ const ProductListing = () => {
                 ) : (
                     <motion.div
                         layout
-                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10 gap-y-20"
+                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
                     >
                         <AnimatePresence mode='popLayout'>
                             {filteredItems.map((item, index) => (
@@ -154,11 +154,11 @@ const ProductListing = () => {
                 <div className="mt-24 text-center">
                     <Link
                         href="/products"
-                        className="inline-flex items-center gap-6 text-[11px] font-black uppercase tracking-[0.5em] text-secondary group py-2"
+                        className="inline-flex items-center gap-4 bg-blue-600 text-white px-10 py-4 rounded-full text-[11px] font-black uppercase tracking-[0.3em] shadow-xl shadow-blue-500/20 hover:bg-blue-700 hover:shadow-2xl hover:shadow-blue-500/30 transition-all duration-500 group"
                     >
                         Explore the Mastery Archive
-                        <div className="w-12 h-12 rounded-full border border-neutral-100 flex items-center justify-center group-hover:bg-blue-600 group-hover:border-blue-600 transition-all duration-500">
-                            <ArrowRight className="w-4 h-4 group-hover:text-white transition-all transform group-hover:translate-x-1" />
+                        <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-all duration-500">
+                            <ArrowRight className="w-4 h-4 text-white transform group-hover:translate-x-1 transition-transform" />
                         </div>
                     </Link>
                 </div>
@@ -180,53 +180,54 @@ const ItemCard = ({ item, isTemplate }) => {
     return (
         <motion.div
             layout
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.5 }}
             className="group"
         >
-            <Tag href={href} {...extraProps} className="block relative">
-                {/* Visual Shell */}
-                <div className="relative aspect-[4/5] overflow-hidden rounded-[2.5rem] bg-white border border-neutral-100 shadow-[0_10px_30px_rgba(0,0,0,0.02)] transition-all duration-1000 group-hover:shadow-[0_40px_80px_rgba(0,102,255,0.08)] group-hover:-translate-y-4 group-hover:border-blue-100">
+            <Tag href={href} {...extraProps} className="block bg-white rounded-2xl overflow-hidden border border-blue-50 shadow-[0_4px_20px_rgba(37,99,235,0.06)] hover:shadow-[0_12px_40px_rgba(37,99,235,0.12)] hover:-translate-y-1 transition-all duration-500">
+                {/* Image Section */}
+                <div className="relative aspect-[4/5] overflow-hidden bg-blue-50/30">
                     <img
                         src={item.image || "/api/placeholder/800/1000"}
                         alt={item.title}
-                        className="w-full h-full object-cover transition-transform duration-[2s] ease-out group-hover:scale-105"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
 
-                    {/* Smooth Blue Tint Overlay */}
-                    <div className="absolute inset-0 bg-blue-900/0 group-hover:bg-blue-950/20 transition-colors duration-700 z-10" />
+                    {/* Category Badge */}
+                    <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3.5 py-1.5 rounded-full border border-blue-100 shadow-sm">
+                        <span className="text-[9px] font-bold text-blue-600 uppercase tracking-widest">
+                            {isTemplate ? 'Exclusive' : item.type}
+                        </span>
+                    </div>
 
-                    {/* Bottom Dynamic Pill */}
-                    <div className="absolute inset-x-0 bottom-10 flex justify-center translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-700 ease-out z-20">
-                        <div className="px-8 py-3.5 bg-white rounded-full flex items-center gap-3 text-blue-600 text-[11px] font-bold uppercase tracking-widest shadow-2xl">
-                            {isTemplate ? "Reserve" : "Configure"}
-                            <ArrowRight className="w-4 h-4" />
+                    {/* Hover Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-blue-900/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                    {/* Hover CTA */}
+                    <div className="absolute bottom-4 inset-x-4 opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-500">
+                        <div className="bg-blue-600 text-white py-3 rounded-xl text-center text-[11px] font-bold uppercase tracking-widest shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2">
+                            {isTemplate ? 'Reserve' : 'Configure'} <ArrowRight className="w-3.5 h-3.5" />
                         </div>
                     </div>
                 </div>
 
-                {/* Refined Detail Architecture */}
-                <div className="mt-8 px-1">
-                    <div className="flex justify-between items-baseline gap-4 mb-3">
-                        <h3 className="text-lg md:text-xl font-bold text-secondary tracking-tight group-hover:text-blue-600 transition-colors duration-500 truncate">
+                {/* Info Section */}
+                <div className="p-5">
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                        <h3 className="text-base font-bold text-[#0A1D37] tracking-tight group-hover:text-blue-600 transition-colors leading-snug line-clamp-2">
                             {item.title}
                         </h3>
-                        <p className="text-lg font-bold text-secondary tracking-tight shrink-0">
+                        <p className="text-lg font-black text-blue-600 shrink-0">
                             ₹{price?.toLocaleString() || '---'}
                         </p>
                     </div>
-
-                    <div className="flex items-center justify-between border-t border-neutral-50 pt-4">
-                        <div className="flex items-center gap-2">
-                            <span className="text-[9px] font-bold text-blue-600/60 uppercase tracking-widest">
-                                {isTemplate ? 'Exclusive' : item.type} / {item.shape || 'Series'}
-                            </span>
-                        </div>
-                        <div className="w-8 h-8 rounded-full bg-blue-50 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
-                            <ChevronRight className="w-4 h-4 text-blue-600" />
-                        </div>
+                    <div className="flex items-center justify-between pt-3 border-t border-blue-50">
+                        <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">
+                            {isTemplate ? 'Exclusive' : item.type} · {item.shape || 'Series'}
+                        </span>
+                        <ArrowRight className="w-4 h-4 text-blue-300 group-hover:text-blue-600 group-hover:translate-x-1 transition-all duration-300" />
                     </div>
                 </div>
             </Tag>

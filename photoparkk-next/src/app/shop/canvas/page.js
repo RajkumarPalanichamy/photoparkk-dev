@@ -46,7 +46,7 @@ export default function CanvasShop() {
     const router = useRouter();
 
     return (
-        <div className="min-h-screen bg-white font-sans selection:bg-blue-600/10 selection:text-blue-600">
+        <div className="min-h-screen bg-[#F0F4F8] font-sans selection:bg-blue-600/10 selection:text-blue-600">
             {/* ═══ ELEGANT HERO SECTION ═══ */}
             <section className="relative min-h-[85vh] flex items-center overflow-hidden bg-slate-900 pt-[100px]">
                 {/* Immersive Background */}
@@ -100,7 +100,7 @@ export default function CanvasShop() {
 
             {/* ═══ JOURNEY MAP ═══ */}
             <div className="max-w-7xl mx-auto px-6 relative z-30 -mt-10 mb-20">
-                <div className="bg-white border border-slate-100 rounded-[32px] shadow-2xl shadow-slate-900/5 overflow-hidden">
+                <div className="bg-white border border-blue-100 rounded-[32px] shadow-2xl shadow-blue-900/8 overflow-hidden">
                     <div className="flex flex-wrap md:flex-nowrap divide-x divide-slate-100 text-center md:text-left">
                         {[
                             { n: "01", label: "Format", sub: "Shape selection", active: true },
@@ -133,7 +133,7 @@ export default function CanvasShop() {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {shapeData.map((item, i) => (
                         <ShapeCard key={i} data={item} onClick={() => router.push(item.route)} />
                     ))}
@@ -172,10 +172,10 @@ function ShapeCard({ data, onClick }) {
             onClick={onClick}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
-            className="group relative bg-white rounded-[48px] border border-slate-100 overflow-hidden cursor-pointer transition-all duration-700 hover:shadow-[0_48px_80px_rgba(0,0,0,0.06)] hover:-translate-y-4 hover:border-blue-600/20"
+            className="group relative bg-white rounded-2xl border border-blue-100 overflow-hidden cursor-pointer transition-all duration-500 shadow-[0_4px_20px_rgba(37,99,235,0.06)] hover:shadow-[0_16px_48px_rgba(37,99,235,0.14)] hover:-translate-y-1 hover:border-blue-200"
         >
             {/* Texture Area */}
-            <div className="relative aspect-[4/5] bg-slate-50 flex items-center justify-center p-12 overflow-hidden">
+            <div className="relative aspect-[4/5] bg-blue-50/40 flex items-center justify-center p-12 overflow-hidden">
                 <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/canvas-orange.png')] pointer-events-none" />
 
                 {/* Premium Tag */}
@@ -191,8 +191,8 @@ function ShapeCard({ data, onClick }) {
                         src={img}
                         alt={name}
                         className={`relative z-20 object-cover rounded-sm transition-all duration-1000 ${shape === 'portrait' ? 'w-[150px] h-[200px]' :
-                                shape === 'landscape' ? 'w-[210px] h-[155px]' :
-                                    'w-[180px] h-[180px]'
+                            shape === 'landscape' ? 'w-[210px] h-[155px]' :
+                                'w-[180px] h-[180px]'
                             }`}
                     />
 
@@ -214,9 +214,9 @@ function ShapeCard({ data, onClick }) {
                     {description}
                 </p>
 
-                <div className="pt-8 border-t border-slate-50 flex items-center justify-between">
+                <div className="pt-8 border-t border-blue-50 flex items-center justify-between">
                     <span className="text-[10px] font-black text-slate-900 uppercase tracking-[0.3em] opacity-0 group-hover:opacity-100 transition-all -translate-x-4 group-hover:translate-x-0">Enter Studio</span>
-                    <div className="w-14 h-14 bg-slate-50 border border-slate-100 rounded-[24px] flex items-center justify-center text-slate-400 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all duration-500">
+                    <div className="w-14 h-14 bg-blue-50 border border-blue-100 rounded-[24px] flex items-center justify-center text-blue-400 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all duration-500">
                         <ArrowRight size={22} className="transition-transform group-hover:translate-x-0.5" />
                     </div>
                 </div>

@@ -32,7 +32,7 @@ const Footer = () => {
               </Link>
             </li>
             <li>
-              <Link href="/frames" className="hover:text-white">
+              <Link href="/customizer" className="hover:text-white">
                 Customize Frames
               </Link>
             </li>

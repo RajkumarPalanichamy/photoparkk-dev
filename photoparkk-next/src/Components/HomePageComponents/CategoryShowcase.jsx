@@ -23,19 +23,19 @@ const CategoryShowcase = ({
     const contentMap = {
         acrylic: {
             image: AcrylicImage,
-            link: '/frames/acrylic',
+            link: '/customizer',
             badge: 'Best Seller',
             tagline: 'Precision Engineering'
         },
         canvas: {
             image: CanvasImage,
-            link: '/frames/canvas',
+            link: '/customizer',
             badge: 'Trending',
             tagline: 'Artisanal Quality'
         },
         backlight: {
             image: BacklightImage,
-            link: '/frames/backlight',
+            link: '/customizer',
             badge: 'New Arrival',
             tagline: 'Cinematic Experience'
         },

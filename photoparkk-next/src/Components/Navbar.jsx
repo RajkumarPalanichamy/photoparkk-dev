@@ -198,7 +198,7 @@ const Navbar = () => {
               </div>
             </div>
 
-            <StyledNavLink href="/frames">Customizer</StyledNavLink>
+            <StyledNavLink href="/customizer">Customizer</StyledNavLink>
             <StyledNavLink href="/about">About</StyledNavLink>
             <StyledNavLink href="/contact">Contact</StyledNavLink>
             {isAdmin && (
@@ -384,8 +384,7 @@ const Navbar = () => {
           </div>
 
           {[
-            { label: "Customizer", path: "/frames" },
-            { label: "Customize", path: "/customize" },
+            { label: "Customizer", path: "/customizer" },
             { label: "About", path: "/about" },
             { label: "Contact", path: "/contact" }
           ].map((item) => (

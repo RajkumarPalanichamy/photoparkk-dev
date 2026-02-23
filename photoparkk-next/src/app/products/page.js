@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, ArrowUpRight, Plus, Search, Package } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Search, Package } from 'lucide-react';
 import axiosInstance from '@/utils/axiosInstance';
 
 /**
@@ -161,10 +161,10 @@ const Products = () => {
                         <button onClick={() => { setSearchQuery(""); setActiveTab("all"); }} className="text-blue-600 font-bold uppercase tracking-widest text-[10px] border-b border-blue-600 pb-1">Reset Filters</button>
                     </div>
                 ) : (
-                    <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24 items-start">
+                    <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                         <AnimatePresence mode='popLayout'>
                             {filteredItems.map((item, index) => (
-                                <StaggeredCard
+                                <ProductCard
                                     key={item.id || index}
                                     item={item}
                                     index={index}
@@ -178,8 +178,7 @@ const Products = () => {
     );
 };
 
-const StaggeredCard = ({ item, index }) => {
-    const isEven = index % 2 === 0;
+const ProductCard = ({ item, index }) => {
     const firstSize = item.sizes && item.sizes.length > 0 ? item.sizes[0] : null;
     const price = firstSize?.price;
     const href = `/shop/${item.type}/${(item.shape || 'portrait').toLowerCase()}`;
@@ -187,55 +186,52 @@ const StaggeredCard = ({ item, index }) => {
     return (
         <motion.div
             layout
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.8 }}
-            className={`group relative ${isEven ? 'md:mt-24' : ''}`}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.5, delay: index * 0.05 }}
+            className="group"
         >
-            <Link href={href} className="block overflow-hidden relative rounded-[2rem]">
-                {/* Clean Image Shell */}
-                <div className="relative aspect-[4/5] overflow-hidden bg-neutral-50 transition-all duration-1000 group-hover:translate-x-4">
+            <Link href={href} className="block bg-white rounded-2xl overflow-hidden border border-blue-50 shadow-[0_4px_20px_rgba(37,99,235,0.06)] hover:shadow-[0_12px_40px_rgba(37,99,235,0.12)] hover:-translate-y-1 transition-all duration-500">
+                {/* Image Section */}
+                <div className="relative aspect-[4/5] overflow-hidden bg-blue-50/30">
                     <img
                         src={item.image || "/api/placeholder/800/1000"}
                         alt={item.title}
-                        className="w-full h-full object-cover transition-transform duration-[3s] group-hover:scale-110"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
 
-                    {/* Minimal Border Label */}
-                    <div className="absolute top-8 left-8 bg-white/90 backdrop-blur-md px-5 py-2 rounded-full border border-blue-50 shadow-sm">
+                    {/* Category Badge */}
+                    <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3.5 py-1.5 rounded-full border border-blue-100 shadow-sm">
                         <span className="text-[9px] font-bold text-blue-600 uppercase tracking-widest">{item.type}</span>
                     </div>
 
-                    {/* Interactive White/Blue Overlay */}
-                    <div className="absolute inset-0 bg-blue-600/0 group-hover:bg-blue-600/10 transition-colors duration-700" />
+                    {/* Hover Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-blue-900/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                    {/* Floating Bottom Link */}
-                    <div className="absolute bottom-8 left-8 opacity-0 group-hover:opacity-100 transition-all duration-700 translate-y-4 group-hover:translate-y-0">
-                        <div className="bg-white text-blue-600 p-4 rounded-full shadow-2xl flex items-center gap-3">
-                            <span className="text-[10px] font-black uppercase tracking-widest ml-2">Configure</span>
-                            <div className="bg-blue-600 text-white p-1 rounded-full">
-                                <Plus className="w-3 h-3" />
-                            </div>
+                    {/* Hover CTA */}
+                    <div className="absolute bottom-4 inset-x-4 opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-500">
+                        <div className="bg-blue-600 text-white py-3 rounded-xl text-center text-[11px] font-bold uppercase tracking-widest shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2">
+                            Configure <ArrowUpRight className="w-3.5 h-3.5" />
                         </div>
                     </div>
                 </div>
 
-                {/* Architectural Details */}
-                <div className="mt-8 px-4 flex justify-between items-start transition-transform duration-700 group-hover:-translate-x-2">
-                    <div className="max-w-[70%]">
-                        <h3 className="text-xl font-bold text-[#0A1D37] tracking-tight group-hover:text-blue-600 transition-colors leading-tight mb-2">
+                {/* Info Section */}
+                <div className="p-5">
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                        <h3 className="text-base font-bold text-[#0A1D37] tracking-tight group-hover:text-blue-600 transition-colors leading-snug line-clamp-2">
                             {item.title}
                         </h3>
-                        <p className="text-[10px] font-bold text-neutral-300 uppercase tracking-widest italic group-hover:text-blue-200 transition-colors">
-                            {item.shape} Architecture
-                        </p>
-                    </div>
-                    <div className="text-right">
-                        <p className="text-xl font-bold text-[#0A1D37] tracking-tighter shrink-0">
+                        <p className="text-lg font-black text-blue-600 shrink-0">
                             ₹{price?.toLocaleString() || '---'}
                         </p>
-                        <span className="text-[9px] font-bold text-blue-100 uppercase tracking-widest block transform group-hover:-translate-x-1 transition-transform">Entry</span>
+                    </div>
+                    <div className="flex items-center justify-between pt-3 border-t border-blue-50">
+                        <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">
+                            {item.shape || 'Standard'} · {item.type}
+                        </span>
+                        <ArrowRight className="w-4 h-4 text-blue-300 group-hover:text-blue-600 group-hover:translate-x-1 transition-all duration-300" />
                     </div>
                 </div>
             </Link>
