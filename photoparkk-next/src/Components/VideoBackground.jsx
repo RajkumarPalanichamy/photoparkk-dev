@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react";
-const parkvideo = "/assets/frontend_assets/HomeSlides/photoparkk_Video.mp4";
+const parkvideo = "/assets/frontend_assets/HomeSlides/photoparkk.mp4";
 
 const VideoBackground = ({ isPlaying, isMuted }) => {
   const videoRef = useRef(null);
