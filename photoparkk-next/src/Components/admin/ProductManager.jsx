@@ -121,7 +121,14 @@ const ProductManager = ({
             // Clean payload to only allowed fields
             const cleanPayload = {};
             allowedFields.forEach(key => {
-                if (payload[key] !== undefined) cleanPayload[key] = payload[key];
+                if (payload[key] !== undefined) {
+                    // Convert empty strings for numeric fields to null to avoid database errors
+                    if (payload[key] === "" && ['price', 'quantity', 'rating'].includes(key)) {
+                        cleanPayload[key] = null;
+                    } else {
+                        cleanPayload[key] = payload[key];
+                    }
+                }
             });
 
             if (editingProduct) {
