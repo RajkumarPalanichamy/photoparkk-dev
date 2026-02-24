@@ -1,6 +1,7 @@
 
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
+import { sendEmail } from '@/lib/nodemailer';
 
 export async function GET(request) {
     try {
@@ -107,6 +108,47 @@ export async function POST(request) {
 
         // Delete from cart
         await supabase.from('cart_items').delete().eq('id', cartItemId);
+
+        // Send Order Confirmation Email
+        if (deliveryDetails.email) {
+            try {
+                const subject = `Order Confirmation - #${order.id}`;
+                const text = `
+                    Hi ${deliveryDetails.name},
+                    
+                    Thank you for your order!
+                    
+                    Order ID: #${order.id}
+                    Total Amount: ₹${amount}
+                    
+                    We are processing your order and will notify you once it's shipped.
+                `;
+                const html = `
+                    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+                        <h2 style="color: #4f46e5;">Order Confirmation</h2>
+                        <p>Hi <strong>${deliveryDetails.name}</strong>,</p>
+                        <p>Thank you for your order with Photo Parkk!</p>
+                        <div style="background: #f3f4f6; padding: 15px; border-radius: 8px;">
+                            <p><strong>Order ID:</strong> #${order.id}</p>
+                            <p><strong>Total Amount:</strong> ₹${amount}</p>
+                        </div>
+                        <p>We are processing your order and will notify you once it's shipped.</p>
+                        <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
+                        <p style="font-size: 12px; color: #6b7280;">This is an automated message, please do not reply.</p>
+                    </div>
+                `;
+
+                await sendEmail({
+                    to: deliveryDetails.email,
+                    subject,
+                    text,
+                    html
+                });
+            } catch (emailErr) {
+                console.error("Failed to send confirmation email:", emailErr);
+                // We don't fail the order if email fails
+            }
+        }
 
         return NextResponse.json({ message: "Order placed successfully", order });
 
