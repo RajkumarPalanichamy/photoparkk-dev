@@ -1,20 +1,61 @@
 import React, { useRef, useEffect, useState } from "react";
+import { Play, Pause, Volume2, VolumeX } from "lucide-react";
 
-const VideoSection = () => {
+/**
+ * Reusable VideoSection component for premium background videos
+ * @param {string} src - Path to the video file
+ * @param {string} poster - Placeholder image while video loads
+ * @param {boolean} autoPlay - Whether to start playing automatically
+ * @param {boolean} loop - Whether to loop the video
+ * @param {boolean} muted - Whether to start muted
+ * @param {number} overlayOpacity - Opacity of the dark overlay (0-1)
+ * @param {boolean} showControls - Whether to show play/mute controls
+ * @param {React.ReactNode} children - Content to overlay on the video
+ */
+const VideoSection = ({
+  src = "/assets/photoparkk.mp4",
+  poster = "",
+  autoPlay = true,
+  loop = true,
+  muted = true,
+  overlayOpacity = 0.5,
+  showControls = true,
+  children,
+  className = "h-full",
+}) => {
   const videoRef = useRef(null);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(autoPlay);
+  const [isMuted, setIsMuted] = useState(muted);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.play().catch(error => {
-          console.log("Video autoplay failed:", error);
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (isPlaying) {
+      const startVideo = () => {
+        video.play().catch((err) => {
+          console.warn("Initial video playback failed, retrying...", err);
+          // Some browsers need a user interaction or a small delay
+          setTimeout(() => {
+            video.play().catch(e => console.log("Final playback attempt failed:", e));
+          }, 1000);
         });
+      };
+
+      if (video.readyState >= 3) {
+        startVideo();
       } else {
-        videoRef.current.pause();
+        video.addEventListener('canplay', startVideo, { once: true });
       }
+    } else {
+      video.pause();
     }
+
+    return () => {
+      if (video) video.removeEventListener('canplay', () => { });
+    };
   }, [isPlaying]);
 
   useEffect(() => {
@@ -23,51 +64,87 @@ const VideoSection = () => {
     }
   }, [isMuted]);
 
+  const handleCanPlay = () => {
+    setIsLoading(false);
+  };
+
+  const handleError = (e) => {
+    console.error("Video error:", e);
+    setIsLoading(false);
+    setError("Failed to load video");
+  };
+
   return (
-    <div className="relative w-full h-full">
+    <div className={`relative w-full overflow-hidden ${className}`}>
+      {/* Loading Placeholder */}
+      {(isLoading || error) && (
+        <div className="absolute inset-0 bg-secondary flex items-center justify-center z-0">
+          {isLoading && !error && (
+            <div className="animate-pulse flex flex-col items-center">
+              <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+            </div>
+          )}
+          {error && <p className="text-white/50 text-sm">{error}</p>}
+        </div>
+      )}
+
+      {/* Video Element */}
       <video
         ref={videoRef}
-        autoPlay
-        loop
+        poster={poster}
+        autoPlay={autoPlay}
+        loop={loop}
         muted={isMuted}
         playsInline
-        className="absolute top-0 left-0 w-full h-full object-cover"
+        preload="auto"
+        onCanPlay={handleCanPlay}
+        onError={handleError}
+        className="absolute top-0 left-0 w-full h-full object-cover z-0"
       >
-        <source src='/assets/photoparkk.mp4' type="video/mp4" />
-        Your browser does not support the video tag.
+        <source src={src} type="video/mp4" />
+        {/* Fallback to GIF if video is not supported or fails */}
+        <img src="/assets/photoparkk.gif" alt="Fallback Background" className="w-full h-full object-cover" />
       </video>
 
+      {/* Dark Overlay */}
+      <div
+        className="absolute inset-0 z-10 pointer-events-none"
+        style={{ backgroundColor: `rgba(15, 23, 42, ${overlayOpacity})` }}
+      />
+
+      {/* Decorative Gradient Overlay */}
+      <div className="absolute inset-0 z-10 pointer-events-none bg-gradient-to-b from-transparent via-transparent to-bg-deep/40" />
+
+      {/* Content Overlay */}
+      {children && <div className="relative z-20 h-full">{children}</div>}
+
       {/* Video Controls */}
-      <div className="absolute top-4 right-4 z-20 flex gap-2">
-        <button
-          onClick={() => setIsPlaying(!isPlaying)}
-          className="bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-all backdrop-blur-sm"
-        >
-          {isPlaying ? (
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-            </svg>
-          ) : (
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z" />
-            </svg>
-          )}
-        </button>
-        <button
-          onClick={() => setIsMuted(!isMuted)}
-          className="bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-all backdrop-blur-sm"
-        >
-          {isMuted ? (
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z" />
-            </svg>
-          ) : (
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
-            </svg>
-          )}
-        </button>
-      </div>
+      {showControls && !error && (
+        <div className="absolute top-6 right-6 z-30 flex gap-3">
+          <button
+            onClick={() => setIsPlaying(!isPlaying)}
+            className="bg-white/10 hover:bg-white/20 text-white p-3 rounded-full backdrop-blur-md border border-white/20 transition-all active:scale-95 shadow-lg group pointer-events-auto"
+            title={isPlaying ? "Pause" : "Play"}
+          >
+            {isPlaying ? (
+              <Pause size={18} className="group-hover:scale-110 transition-transform" />
+            ) : (
+              <Play size={18} className="group-hover:scale-110 transition-transform" />
+            )}
+          </button>
+          <button
+            onClick={() => setIsMuted(!isMuted)}
+            className="bg-white/10 hover:bg-white/20 text-white p-3 rounded-full backdrop-blur-md border border-white/20 transition-all active:scale-95 shadow-lg group pointer-events-auto"
+            title={isMuted ? "Unmute" : "Mute"}
+          >
+            {isMuted ? (
+              <VolumeX size={18} className="group-hover:scale-110 transition-transform" />
+            ) : (
+              <Volume2 size={18} className="group-hover:scale-110 transition-transform" />
+            )}
+          </button>
+        </div>
+      )}
     </div>
   );
 };

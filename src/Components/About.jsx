@@ -1,18 +1,16 @@
 "use client";
-import React, { useState, useEffect, lazy, Suspense } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Play, Pause, Volume2, VolumeX, ChevronRight, ChevronLeft } from "lucide-react";
+import { ChevronRight, ChevronLeft } from "lucide-react";
+
 const machine1 = "/assets/frontend_assets/About/machine1.jpg";
 const machine2 = "/assets/frontend_assets/About/machine2.jpg";
 const machine3 = "/assets/frontend_assets/About/machine3.jpg";
 const machine4 = "/assets/frontend_assets/About/machine4.jpg";
 const machine5 = "/assets/frontend_assets/About/machine5.jpg";
 
-// Lazy load video component
-const VideoSection = lazy(() => import("./VideoSection"));
-
 const About = () => {
-  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const videoRef = useRef(null);
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const slides = [
@@ -49,11 +47,15 @@ const About = () => {
   ];
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsVideoLoaded(true);
-    }, 200);
-
-    return () => clearTimeout(timer);
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = true;
+    const playAttempt = video.play();
+    if (playAttempt !== undefined) {
+      playAttempt.catch(() => {
+        setTimeout(() => video.play().catch(() => { }), 500);
+      });
+    }
   }, []);
 
   const nextSlide = () => {
@@ -67,48 +69,45 @@ const About = () => {
   return (
     <div className="bg-neutral-50 min-h-screen">
       {/* Hero Video Section */}
-      <div className="relative w-full h-[70vh] overflow-hidden">
-        {/* Loading Placeholder */}
-        {!isVideoLoaded && (
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-white mx-auto mb-4"></div>
-              <p className="text-white text-lg font-medium">Loading...</p>
-            </div>
-          </div>
-        )}
+      <div className="relative w-full h-[55vh] sm:h-[65vh] md:h-[70vh] overflow-hidden bg-gray-900">
 
-        {/* Video Background */}
-        <Suspense fallback={
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black"></div>
-        }>
-          {isVideoLoaded && <VideoSection />}
-        </Suspense>
+        {/* ── VIDEO (z-0) ── */}
+        <video
+          ref={videoRef}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          className="absolute inset-0 w-full h-full object-cover z-0"
+        >
+          <source src="/assets/photoparkk.mp4" type="video/mp4" />
+        </video>
 
-        {/* Content Overlay */}
-        <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+        {/* ── OVERLAY (z-10) ── */}
+        <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />
 
-        {/* Hero Content */}
-        <div className="absolute inset-0 flex items-center justify-center z-10">
+        {/* ── HERO CONTENT (z-20) ── */}
+        <div className="absolute inset-0 flex items-center justify-center z-20 px-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="text-center text-white px-6 max-w-4xl"
+            className="text-center text-white max-w-4xl w-full"
           >
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold mb-4 md:mb-6 leading-tight">
               Advanced Machinery
               <span className="block text-primary">In Action</span>
             </h1>
-            <p className="text-xl md:text-2xl font-medium max-w-3xl mx-auto leading-relaxed">
-              Witness our state-of-the-art production process delivering precision-crafted frames with unmatched quality and innovation.
+            <p className="text-sm sm:text-xl md:text-2xl font-medium max-w-3xl mx-auto leading-relaxed opacity-90">
+              Witness our state-of-the-art production process delivering precision-crafted frames with unmatched quality.
             </p>
           </motion.div>
         </div>
 
         {/* Scroll Indicator */}
         <motion.div
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10"
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20"
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 2, repeat: Infinity }}
         >
@@ -139,16 +138,16 @@ const About = () => {
 
           {/* Slides Container */}
           <div className="relative">
-            {/* Navigation Buttons */}
+            {/* Navigation Buttons — sides on lg+, below card on mobile */}
             <button
               onClick={prevSlide}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-white bg-opacity-90 p-3 rounded-full shadow-lg hover:bg-opacity-100 transition-all"
+              className="hidden lg:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/90 p-3 rounded-full shadow-lg hover:bg-white transition-all"
             >
               <ChevronLeft size={24} className="text-neutral-700" />
             </button>
             <button
               onClick={nextSlide}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-white bg-opacity-90 p-3 rounded-full shadow-lg hover:bg-opacity-100 transition-all"
+              className="hidden lg:flex absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/90 p-3 rounded-full shadow-lg hover:bg-white transition-all"
             >
               <ChevronRight size={24} className="text-neutral-700" />
             </button>
@@ -163,7 +162,7 @@ const About = () => {
               className="grid grid-cols-1 lg:grid-cols-2 gap-0 overflow-hidden rounded-2xl shadow-2xl bg-white"
             >
               {/* Image Section */}
-              <div className="relative h-[400px] lg:h-[500px] overflow-hidden">
+              <div className="relative h-52 sm:h-[300px] lg:h-[500px] overflow-hidden">
                 <img
                   src={slides[currentSlide].image}
                   alt={slides[currentSlide].imageAlt}
@@ -207,6 +206,22 @@ const About = () => {
                 </motion.div>
               </div>
             </motion.div>
+
+            {/* Mobile nav buttons — shown only on small screens */}
+            <div className="flex lg:hidden justify-center gap-4 mt-4">
+              <button
+                onClick={prevSlide}
+                className="bg-white border border-neutral-200 p-3 rounded-full shadow-md hover:bg-neutral-100 transition-all"
+              >
+                <ChevronLeft size={20} className="text-neutral-700" />
+              </button>
+              <button
+                onClick={nextSlide}
+                className="bg-white border border-neutral-200 p-3 rounded-full shadow-md hover:bg-neutral-100 transition-all"
+              >
+                <ChevronRight size={20} className="text-neutral-700" />
+              </button>
+            </div>
           </div>
 
           {/* Additional Info Section */}
