@@ -5,8 +5,9 @@ import axiosInstance from "@/utils/axiosInstance";
 import {
     Search,
     LayoutGrid,
-    MessageCircle
 } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
+import { CONTACT_NUMBER_WITH_COUNTRY } from "@/constants/contact";
 
 /**
  * Customizer Component
@@ -97,7 +98,7 @@ const Customizer = () => {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {filteredTemplates.map((template, index) => {
-                            const whatsappUrl = `https://wa.me/919629674444?text=${encodeURIComponent(`Hi PhotoParkk, I'm interested in the template: *${template.title}*.\n\nImage: ${template.image}\n\nPrice: ₹${template.price || 'N/A'}`)}`;
+                            const whatsappUrl = `https://wa.me/${CONTACT_NUMBER_WITH_COUNTRY}?text=${encodeURIComponent(`Hi PhotoParkk, I'm interested in the template: *${template.title}*.\n\nImage: ${template.image}\n\nPrice: ₹${template.price || 'N/A'}`)}`;
 
                             return (
                                 <a
@@ -137,7 +138,7 @@ const Customizer = () => {
                                             </div>
 
                                             <div className="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all duration-300 shadow-sm">
-                                                <MessageCircle className="w-6 h-6" />
+                                                <FaWhatsapp className="w-6 h-6" />
                                             </div>
                                         </div>
                                     </div>

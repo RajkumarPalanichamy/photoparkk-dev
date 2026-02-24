@@ -16,11 +16,13 @@ import {
     FaPaperPlane,
     FaWhatsapp,
 } from "react-icons/fa";
+import {
+    CONTACT_DISPLAY_NUMBER,
+    CONTACT_TEL_LINK_WITH_COUNTRY,
+    CONTACT_WHATSAPP_LINK
+} from "@/constants/contact";
 
-// Contact constants/config
-const CONTACT_DISPLAY_NUMBER = "+91 99999 99999";
-const CONTACT_TEL_LINK_WITH_COUNTRY = "tel:+919999999999";
-const CONTACT_WHATSAPP_LINK = "https://wa.me/919999999999";
+
 
 const contact = "/assets/frontend_assets/Contact/Contact-banner-image.jpg";
 

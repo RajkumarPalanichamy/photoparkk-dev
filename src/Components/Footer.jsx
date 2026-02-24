@@ -7,6 +7,7 @@ import {
 } from "react-icons/fa";
 
 import Link from "next/link";
+import { CONTACT_DISPLAY_NUMBER, CONTACT_WHATSAPP_LINK } from "@/constants/contact";
 
 const Footer = () => {
   return (
@@ -75,7 +76,7 @@ const Footer = () => {
         <div>
           <h3 className="text-lg font-semibold mb-3">Get in Touch</h3>
           <p className="text-sm">Email: photoparkk.prints@gmail.com</p>
-          <p className="text-sm">Phone: +91 96296 74444</p>
+          <p className="text-sm">Phone: {CONTACT_DISPLAY_NUMBER}</p>
           <div className="flex gap-4 mt-4">
             <a
               href="https://www.instagram.com/photoparkk_?igsh=MWI3aGNmZDZ6NnFrOQ=="
@@ -87,7 +88,7 @@ const Footer = () => {
               <FaInstagram size={20} />
             </a>
             <a
-              href="https://wa.me/919629674444"
+              href={CONTACT_WHATSAPP_LINK}
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-white transition-colors"
