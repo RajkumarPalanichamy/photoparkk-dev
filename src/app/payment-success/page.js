@@ -1,14 +1,12 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import React, { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { CheckCircle2, ArrowRight, Package, Home } from 'lucide-react';
-// I will not use confetti for now to avoid dependency hell, just clean UI.
+import { CheckCircle2, Package, Home, Loader2 } from 'lucide-react';
 
-const PaymentSuccess = () => {
+const PaymentSuccessContent = () => {
     const searchParams = useSearchParams();
-    const router = useRouter();
     const paymentId = searchParams.get('razorpay_payment_id');
     const orderId = searchParams.get('razorpay_order_id');
 
@@ -57,6 +55,21 @@ const PaymentSuccess = () => {
                 </div>
             </div>
         </div>
+    );
+};
+
+const PaymentSuccess = () => {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-slate-50 pt-[120px]">
+                <div className="flex flex-col items-center gap-4">
+                    <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
+                    <p className="text-slate-500 font-bold uppercase tracking-widest text-sm">Verifying Session...</p>
+                </div>
+            </div>
+        }>
+            <PaymentSuccessContent />
+        </Suspense>
     );
 };
 
