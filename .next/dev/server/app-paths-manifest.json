@@ -1,6 +1,0 @@
-{
-  "/_not-found/page": "app/_not-found/page.js",
-  "/api/customizer-templates/route": "app/api/customizer-templates/route.js",
-  "/api/frames/[type]/route": "app/api/frames/[type]/route.js",
-  "/page": "app/page.js"
-}

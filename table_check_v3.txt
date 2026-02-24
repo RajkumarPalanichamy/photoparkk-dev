@@ -1,6 +1,0 @@
-TABLE CHECK RESULTS:
-Checking acrylic_customize... SUCCESS: Found 1 records
-Checking canvas_customize... SUCCESS: Found 1 records
-Checking backlight_customize... SUCCESS: Found 1 records
-Checking customizer_templates... ERROR: PGRST205 - Could not find the table 'public.customizer_templates' in the schema cache
-Checking products... ERROR: PGRST205 - Could not find the table 'public.products' in the schema cache
