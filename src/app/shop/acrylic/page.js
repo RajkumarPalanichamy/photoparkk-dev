@@ -6,10 +6,17 @@ import { ArrowRight, Check, Sparkles, Layers, ShieldCheck, Clock, Box } from "lu
 import axiosInstance from '@/utils/axiosInstance';
 
 const guarantees = [
+<<<<<<< HEAD
     { icon: <ShieldCheck className="w-5 h-5" />, text: "Crystal-clear UV-grade acrylic" },
     { icon: <Sparkles className="w-5 h-5" />, text: "Vibrant HD print quality" },
     { icon: <Box className="w-5 h-5" />, text: "Ready to hang hardware" },
     { icon: <Clock className="w-5 h-5" />, text: "Ships in 4–6 business days" },
+=======
+    { icon: <ShieldCheck className="w-4 h-4" />, text: "3mm Optical-Grade Acrylic" },
+    { icon: <Sparkles className="w-4 h-4" />, text: "Diamond-Polished Edges" },
+    { icon: <Box className="w-4 h-4" />, text: "Hidden Mounting System" },
+    { icon: <Clock className="w-4 h-4" />, text: "Ships in 4–6 business days" },
+>>>>>>> 28e678d3287376cb4ec8a59bd3e69fa194ddd056
 ];
 
 export default function AcrylicShop() {
@@ -154,6 +161,7 @@ export default function AcrylicShop() {
             </section>
 
             {/* ═══ LUXURY GUARANTEE ═══ */}
+<<<<<<< HEAD
             <div className="relative bg-slate-900 pt-24 pb-28 px-6 overflow-hidden">
                 {/* Background glow effects */}
                 <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
@@ -186,11 +194,45 @@ export default function AcrylicShop() {
                                     <p className="text-[9px] font-black text-blue-500 uppercase tracking-[0.2em] mb-1">Premium Standard</p>
                                     <p className="text-[11px] font-black text-white uppercase tracking-widest leading-snug">{g.text}</p>
                                 </div>
+=======
+            <section className="bg-slate-950 py-32 px-6 overflow-hidden relative">
+                {/* Architectural Background Elements */}
+                <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+
+                <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-16 relative z-10">
+                    <div className="space-y-8 text-center lg:text-left">
+                        <div className="space-y-4">
+                            <h3 className="text-[11px] font-black text-blue-500 uppercase tracking-[0.5em] flex items-center justify-center lg:justify-start gap-3">
+                                <div className="w-8 h-[1px] bg-blue-500/50" />
+                                The Visionary Depth
+                            </h3>
+                            <h2 className="text-white text-5xl md:text-7xl font-black tracking-tighter leading-none">
+                                Optical Grade <br />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400 font-medium italic">Mastery</span>
+                            </h2>
+                        </div>
+                        <p className="text-slate-400 text-lg font-medium max-w-sm mx-auto lg:mx-0 leading-relaxed font-sans">
+                            Unrivaled clarity through zero-distortion perspex. Our optical-grade acrylic frames create a stunning floating effect with impossible depth.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full lg:w-auto">
+                        {guarantees.map((g, i) => (
+                            <div key={i} className="flex items-center gap-6 p-8 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[32px] group hover:bg-white/10 transition-all duration-500 hover:-translate-y-1">
+                                <div className="w-16 h-16 bg-blue-600/20 rounded-2xl flex items-center justify-center text-blue-400 group-hover:bg-blue-600 group-hover:text-white transition-all duration-500 shadow-2xl">
+                                    {React.cloneElement(g.icon, { size: 24 })}
+                                </div>
+                                <div className="space-y-1 text-left">
+                                    <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest block font-mono">Premium Standard</span>
+                                    <span className="text-sm font-black text-white uppercase tracking-widest">{g.text}</span>
+                                </div>
+>>>>>>> 28e678d3287376cb4ec8a59bd3e69fa194ddd056
                             </div>
                         ))}
                     </div>
                 </div>
-            </div>
+            </section>
         </div>
     );
 }

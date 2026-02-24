@@ -6,9 +6,9 @@ import { ArrowRight, Check, Hammer, Palette, ShieldCheck, Clock, Box, Layers } f
 
 import axiosInstance from '@/utils/axiosInstance';
 const guarantees = [
-    { icon: <ShieldCheck className="w-4 h-4" />, text: "Gallery-grade cotton" },
+    { icon: <ShieldCheck className="w-4 h-4" />, text: "400gsm Premium Cotton" },
     { icon: <Palette className="w-4 h-4" />, text: "Archival-grade UV inks" },
-    { icon: <Hammer className="w-4 h-4" />, text: "Hand-stretched frames" },
+    { icon: <Hammer className="w-4 h-4" />, text: "Kiln-Dried Pine Wood" },
     { icon: <Clock className="w-4 h-4" />, text: "Ships in 4–6 business days" },
 ];
 
@@ -149,6 +149,7 @@ export default function CanvasShop() {
                 )}
             </section>
 
+<<<<<<< HEAD
             {/* ═══ EXECUTIVE GUARANTEE ═══ */}
             <div className="relative bg-slate-900 pt-24 pb-28 px-6 overflow-hidden">
                 <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
@@ -174,11 +175,46 @@ export default function CanvasShop() {
                                     <p className="text-[9px] font-black text-blue-500 uppercase tracking-[0.2em] mb-1">Premium Standard</p>
                                     <p className="text-[11px] font-black text-white uppercase tracking-widest leading-snug">{g.text}</p>
                                 </div>
+=======
+            {/* ═══ EXECUTIVE GRADE ASSURANCE ═══ */}
+            <section className="bg-slate-950 py-32 px-6 overflow-hidden relative">
+                {/* Architectural Background Elements */}
+                <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+
+                <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-16 relative z-10">
+                    <div className="space-y-8 text-center lg:text-left">
+                        <div className="space-y-4">
+                            <h3 className="text-[11px] font-black text-blue-500 uppercase tracking-[0.5em] flex items-center justify-center lg:justify-start gap-3">
+                                <div className="w-8 h-[1px] bg-blue-500/50" />
+                                The Heritage Craft
+                            </h3>
+                            <h2 className="text-white text-5xl md:text-7xl font-black tracking-tighter leading-none">
+                                Artisan Gallery <br />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400 font-medium italic">Mastery</span>
+                            </h2>
+                        </div>
+                        <p className="text-slate-400 text-lg font-medium max-w-sm mx-auto lg:mx-0 leading-relaxed font-sans">
+                            Timeless textures meet modern precision. Every canvas is hand-stretched and archival-treated to preserve your memories for a lifetime.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full lg:w-auto">
+                        {guarantees.map((g, i) => (
+                            <div key={i} className="flex items-center gap-6 p-8 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[32px] group hover:bg-white/10 transition-all duration-500 hover:-translate-y-1">
+                                <div className="w-16 h-16 bg-blue-600/20 rounded-2xl flex items-center justify-center text-blue-400 group-hover:bg-blue-600 group-hover:text-white transition-all duration-500 shadow-2xl">
+                                    {React.cloneElement(g.icon, { size: 24 })}
+                                </div>
+                                <div className="space-y-1 text-left">
+                                    <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest block font-mono">Premium Standard</span>
+                                    <span className="text-sm font-black text-white uppercase tracking-widest leading-tight">{g.text}</span>
+                                </div>
+>>>>>>> 28e678d3287376cb4ec8a59bd3e69fa194ddd056
                             </div>
                         ))}
                     </div>
                 </div>
-            </div>
+            </section>
         </div>
     );
 }

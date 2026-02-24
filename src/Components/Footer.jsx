@@ -11,7 +11,11 @@ import { CONTACT_DISPLAY_NUMBER, CONTACT_WHATSAPP_LINK } from "@/constants/conta
 
 const Footer = () => {
   return (
+<<<<<<< HEAD
     <footer className="bg-secondary text-neutral-300 pt-12 pb-6 px-6">
+=======
+    <footer className="bg-slate-950 text-neutral-300 pt-12 pb-6 px-6">
+>>>>>>> 28e678d3287376cb4ec8a59bd3e69fa194ddd056
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
         {/* Company Info */}
         <div>
@@ -101,7 +105,7 @@ const Footer = () => {
       </div>
 
       {/* Bottom Note */}
-      <div className="text-center text-sm mt-10 border-t border-neutral-700 pt-4">
+      <div className="text-center text-sm mt-10 border-t border-white/5 pt-4">
         © {new Date().getFullYear()} PhotoPark. All rights reserved.
       </div>
     </footer>
