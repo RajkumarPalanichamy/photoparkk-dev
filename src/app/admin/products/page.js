@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, Suspense } from "react";
-import ProductManager from "@/components/admin/ProductManager";
+import ProductManager from "@/Components/admin/ProductManager";
 import { Package, Loader2 } from "lucide-react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 

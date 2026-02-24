@@ -217,53 +217,6 @@ const GenericOrder = ({ type, shape }) => {
                                         </div>
                                     </div>
 
-                                {/* Size Selector */}
-                                <div>
-                                    <label className="block text-lg font-semibold text-secondary mb-3 flex items-center gap-2">
-                                        <Ruler className="w-5 h-5 text-primary" />
-                                        Select Size
-                                    </label>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                        {productConfig.sizes.map((sizeObj, i) => (
-                                            <button
-                                                key={i}
-                                                onClick={() => setSelectedSize(sizeObj)}
-                                                className={`px-4 py-3 rounded-xl border-2 text-sm font-medium transition-all duration-200 ${selectedSize?.label === sizeObj.label
-                                                    ? "bg-primary text-white border-primary shadow-lg scale-105"
-                                                    : "bg-white text-secondary border-neutral-300 hover:border-primary hover:shadow-md"
-                                                    }`}
-                                            >
-                                                <div className="font-bold">{sizeObj.label}</div>
-                                                <div className="text-xs mt-1 opacity-80">
-                                                    ₹{sizeObj.price}
-                                                </div>
-                                            </button>
-                                        ))}
-                                    </div>
-
-                                {/* Thickness Selector */}
-                                {productConfig.thickness && Array.isArray(productConfig.thickness) && productConfig.thickness.length > 0 && (
-                                    <div>
-                                        <label className="block text-lg font-semibold text-secondary mb-3 flex items-center gap-2">
-                                            <Box className="w-5 h-5 text-primary" />
-                                            Select Thickness
-                                        </label>
-                                        <div className="grid grid-cols-3 gap-3">
-                                            {productConfig.thickness.map((thick, i) => (
-                                                <button
-                                                    key={i}
-                                                    onClick={() => setSelectedThickness(thick)}
-                                                    className={`px-4 py-3 rounded-xl border-2 text-sm font-medium transition-all duration-200 ${selectedThickness === thick
-                                                        ? "bg-primary text-white border-primary shadow-lg scale-105"
-                                                        : "bg-white text-secondary border-neutral-300 hover:border-primary hover:shadow-md"
-                                                        }`}
-                                                >
-                                                    {thick}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-
                                     <div className="flex items-start gap-3 p-4 bg-neutral-50 rounded-xl border border-neutral-100">
                                         <div className="p-2 bg-white rounded-lg shadow-sm text-primary"><Crop className="w-5 h-5" /></div>
                                         <div>
