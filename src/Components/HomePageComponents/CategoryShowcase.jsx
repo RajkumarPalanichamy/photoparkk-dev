@@ -42,11 +42,11 @@ const CategoryShowcase = ({
     };
 
     const currentContent = contentMap[type] || contentMap.acrylic;
-    const isReversed = type === 'canvas';
+    const isReversed = type === 'canvas' || type === 'backlight';
 
     return (
         <section className="py-24 md:py-32 bg-white overflow-hidden font-sans selection:bg-blue-600/10 selection:text-blue-600">
-            <div className="container mx-auto px-4 md:px-6">
+            <div className="max-w-[1400px] mx-auto px-4 md:px-6">
                 <div className={`flex flex-col ${isReversed ? 'md:flex-row-reverse' : 'md:flex-row'} items-center gap-16 md:gap-24`}>
 
                     {/* Text Content Architecture */}
