@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///C:/Mine/FusionSpace/photoparkk-dev/photoparkk-next/src/app/shop/acrylic/%5Bshape%5D/page.js"],"sourcesContent":["\"use client\";\r\nimport { useEffect } from 'react';\r\nimport { useRouter, useParams } from 'next/navigation';\r\n\r\nexport default function ShapeRedirect() {\r\n    const router = useRouter();\r\n    const params = useParams();\r\n\r\n    useEffect(() => {\r\n        if (params?.shape) {\r\n            router.replace(`/shop/acrylic/${params.shape}/edit`);\r\n        }\r\n    }, [params, router]);\r\n\r\n    return null; // Or a loading spinner\r\n}\r\n"],"names":[],"mappings":";;;;AACA;AACA;AAFA;;;AAIe,SAAS;IACpB,MAAM,SAAS,IAAA,+IAAS;IACxB,MAAM,SAAS,IAAA,+IAAS;IAExB,IAAA,kNAAS,EAAC;QACN,IAAI,QAAQ,OAAO;YACf,OAAO,OAAO,CAAC,CAAC,cAAc,EAAE,OAAO,KAAK,CAAC,KAAK,CAAC;QACvD;IACJ,GAAG;QAAC;QAAQ;KAAO;IAEnB,OAAO,MAAM,uBAAuB;AACxC"}}]
+}

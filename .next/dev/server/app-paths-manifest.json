@@ -1,0 +1,7 @@
+{
+  "/admin/products/page": "app/admin/products/page.js",
+  "/api/cart/user/[userId]/route": "app/api/cart/user/[userId]/route.js",
+  "/api/frames/[type]/route": "app/api/frames/[type]/route.js",
+  "/api/upload-image/route": "app/api/upload-image/route.js",
+  "/shop/acrylic/[shape]/edit/page": "app/shop/acrylic/[shape]/edit/page.js"
+}

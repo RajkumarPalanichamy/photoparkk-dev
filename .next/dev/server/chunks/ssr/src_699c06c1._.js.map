@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 10, "column": 0}, "map": {"version":3,"sources":["file:///C:/Mine/FusionSpace/photoparkk-dev/photoparkk-next/src/app/shop/acrylic/%5Bshape%5D/edit/page.js"],"sourcesContent":["\"use client\";\r\nimport React from 'react';\r\nimport { useParams } from 'next/navigation';\r\nimport GenericCustomize from '@/Components/Shop/GenericCustomize'; // This is now the Editor\r\n\r\nexport default function EditorPage() {\r\n    const params = useParams();\r\n    // Default to 'portrait' if shape not found, though folder structure ensures valid shape usually\r\n    const shape = params.shape || 'portrait';\r\n\r\n    return <GenericCustomize type=\"acrylic\" shape={shape} />;\r\n}\r\n"],"names":[],"mappings":";;;;;AACA;AACA;AACA,2PAAmE,yBAAyB;AAH5F;;;;;AAKe,SAAS;IACpB,MAAM,SAAS,IAAA,+IAAS;IACxB,gGAAgG;IAChG,MAAM,QAAQ,OAAO,KAAK,IAAI;IAE9B,qBAAO,8OAAC,yJAAgB;QAAC,MAAK;QAAU,OAAO;;;;;;AACnD"}}]
+}

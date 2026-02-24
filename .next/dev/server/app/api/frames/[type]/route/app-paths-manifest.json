@@ -1,0 +1,3 @@
+{
+  "/api/frames/[type]/route": "app/api/frames/[type]/route.js"
+}
