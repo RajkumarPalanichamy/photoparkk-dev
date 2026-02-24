@@ -81,6 +81,16 @@ const Navbar = () => {
     };
   }, []);
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileMenuOpen]);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
@@ -122,196 +132,203 @@ const Navbar = () => {
   };
 
   return (
-    <nav
-      ref={navRef}
-      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${scrolled
-        ? "bg-white/95 backdrop-blur-md shadow-lg py-3 border-b border-neutral-200"
-        : "bg-white py-4"
-        }`}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex-shrink-0 group">
-            <div className="flex flex-col leading-tight">
-              <span className="text-2xl font-bold text-secondary tracking-tight">
-                PHOTO PARKK
-              </span>
-              <span className="text-xs font-medium text-neutral-500 tracking-wider uppercase mt-0.5">
-                Since 1996
-              </span>
-            </div>
-          </Link>
+    <>
+      <nav
+        ref={navRef}
+        className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${scrolled
+          ? "bg-white/95 backdrop-blur-md shadow-lg py-3 border-b border-neutral-200"
+          : "bg-white py-4"
+          }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <Link href="/" className="flex-shrink-0 group">
+              <div className="flex flex-col leading-tight">
+                <span className="text-2xl font-bold text-secondary tracking-tight">
+                  PHOTO PARKK
+                </span>
+                <span className="text-xs font-medium text-neutral-500 tracking-wider uppercase mt-0.5">
+                  Since 1996
+                </span>
+              </div>
+            </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-1">
-            <StyledNavLink href="/">Home</StyledNavLink>
+            {/* Desktop Navigation */}
+            <div className="hidden lg:flex items-center space-x-1">
+              <StyledNavLink href="/">Home</StyledNavLink>
 
-            {/* Shop Dropdown */}
-            <div className="relative group">
-              <button className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-neutral-600 hover:text-secondary transition-colors duration-200">
-                Shop
-                <ChevronDown
-                  size={14}
-                  className="transition-transform group-hover:rotate-180"
-                />
-              </button>
-              <div className="absolute top-full left-0 mt-2 w-56 bg-white/95 backdrop-blur-md rounded-xl shadow-xl border border-neutral-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-                <div className="py-2">
-                  <Link
-                    href="/products"
-                    className="block px-4 py-3 text-sm text-neutral-700 hover:bg-primary-light hover:text-primary transition-all duration-200 border-l-2 border-transparent hover:border-primary"
-                  >
-                    <div className="font-medium">Our Collection</div>
-                    <div className="text-xs text-neutral-500 mt-0.5">
-                      Explore all customizations
-                    </div>
-                  </Link>
-                  <Link
-                    href="/shop/acrylic"
-                    className="block px-4 py-3 text-sm text-neutral-700 hover:bg-primary-light hover:text-primary transition-all duration-200 border-l-2 border-transparent hover:border-primary"
-                  >
-                    <div className="font-medium">Acrylic Prints</div>
-                    <div className="text-xs text-neutral-500 mt-0.5">
-                      Premium acrylic displays
-                    </div>
-                  </Link>
-                  <Link
-                    href="/shop/canvas"
-                    className="block px-4 py-3 text-sm text-neutral-700 hover:bg-primary-light hover:text-primary transition-all duration-200 border-l-2 border-transparent hover:border-primary"
-                  >
-                    <div className="font-medium">Canvas Prints</div>
-                    <div className="text-xs text-neutral-500 mt-0.5">
-                      Gallery-quality canvas
-                    </div>
-                  </Link>
-                  <Link
-                    href="/shop/backlight"
-                    className="block px-4 py-3 text-sm text-neutral-700 hover:bg-primary-light hover:text-primary transition-all duration-200 border-l-2 border-transparent hover:border-primary"
-                  >
-                    <div className="font-medium">Backlight Customizer</div>
-                    <div className="text-xs text-neutral-500 mt-0.5">
-                      Illuminated displays
-                    </div>
-                  </Link>
+              {/* Shop Dropdown */}
+              <div className="relative group">
+                <button className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-neutral-600 hover:text-secondary transition-colors duration-200">
+                  Shop
+                  <ChevronDown
+                    size={14}
+                    className="transition-transform group-hover:rotate-180"
+                  />
+                </button>
+                <div className="absolute top-full left-0 mt-2 w-56 bg-white/95 backdrop-blur-md rounded-xl shadow-xl border border-neutral-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                  <div className="py-2">
+                    <Link
+                      href="/products"
+                      className="block px-4 py-3 text-sm text-neutral-700 hover:bg-primary-light hover:text-primary transition-all duration-200 border-l-2 border-transparent hover:border-primary"
+                    >
+                      <div className="font-medium">Our Collection</div>
+                      <div className="text-xs text-neutral-500 mt-0.5">
+                        Explore all customizations
+                      </div>
+                    </Link>
+                    <Link
+                      href="/shop/acrylic"
+                      className="block px-4 py-3 text-sm text-neutral-700 hover:bg-primary-light hover:text-primary transition-all duration-200 border-l-2 border-transparent hover:border-primary"
+                    >
+                      <div className="font-medium">Acrylic Prints</div>
+                      <div className="text-xs text-neutral-500 mt-0.5">
+                        Premium acrylic displays
+                      </div>
+                    </Link>
+                    <Link
+                      href="/shop/canvas"
+                      className="block px-4 py-3 text-sm text-neutral-700 hover:bg-primary-light hover:text-primary transition-all duration-200 border-l-2 border-transparent hover:border-primary"
+                    >
+                      <div className="font-medium">Canvas Prints</div>
+                      <div className="text-xs text-neutral-500 mt-0.5">
+                        Gallery-quality canvas
+                      </div>
+                    </Link>
+                    <Link
+                      href="/shop/backlight"
+                      className="block px-4 py-3 text-sm text-neutral-700 hover:bg-primary-light hover:text-primary transition-all duration-200 border-l-2 border-transparent hover:border-primary"
+                    >
+                      <div className="font-medium">Backlight Customizer</div>
+                      <div className="text-xs text-neutral-500 mt-0.5">
+                        Illuminated displays
+                      </div>
+                    </Link>
+                  </div>
                 </div>
               </div>
+
+              <StyledNavLink href="/customizer">Customizer</StyledNavLink>
+              <StyledNavLink href="/about">About</StyledNavLink>
+              <StyledNavLink href="/contact">Contact</StyledNavLink>
+              {isAdmin && (
+                <StyledNavLink
+                  href="/admin"
+                  className="text-primary hover:text-primary-hover"
+                >
+                  Admin Panel
+                </StyledNavLink>
+              )}
             </div>
 
-            <StyledNavLink href="/customizer">Customizer</StyledNavLink>
-            <StyledNavLink href="/about">About</StyledNavLink>
-            <StyledNavLink href="/contact">Contact</StyledNavLink>
-            {isAdmin && (
-              <StyledNavLink
-                href="/admin"
-                className="text-primary hover:text-primary-hover"
-              >
-                Admin Panel
-              </StyledNavLink>
-            )}
-          </div>
+            {/* Right Section */}
+            <div className="flex items-center gap-3">
+              {isAuthenticated ? (
+                <>
+                  <span className="hidden sm:block text-sm text-neutral-600 font-medium max-w-[120px] truncate">
+                    Hello, {userName}
+                  </span>
 
-          {/* Right Section */}
-          <div className="flex items-center gap-3">
-            {isAuthenticated ? (
-              <>
-                <span className="hidden sm:block text-sm text-neutral-600 font-medium max-w-[120px] truncate">
-                  Hello, {userName}
-                </span>
+                  <div className="relative" ref={profileRef}>
+                    <button
+                      onClick={() => setProfileDropdown(!profileDropdown)}
+                      className="p-2 rounded-lg bg-neutral-100 hover:bg-neutral-200 transition-colors duration-200 group"
+                    >
+                      <User
+                        size={18}
+                        className="text-neutral-600 group-hover:text-secondary"
+                      />
+                    </button>
 
-                <div className="relative" ref={profileRef}>
-                  <button
-                    onClick={() => setProfileDropdown(!profileDropdown)}
-                    className="p-2 rounded-lg bg-neutral-100 hover:bg-neutral-200 transition-colors duration-200 group"
+                    {profileDropdown && (
+                      <div className="absolute right-0 mt-2 w-56 bg-white/95 backdrop-blur-md rounded-xl shadow-xl border border-neutral-200 z-50 overflow-hidden">
+                        <div className="p-2">
+                          <div className="px-3 py-2 border-b border-neutral-200">
+                            <p className="text-sm font-medium text-secondary">
+                              Welcome back!
+                            </p>
+                            <p className="text-xs text-neutral-500 truncate">
+                              {userName}
+                            </p>
+                          </div>
+                          <Link
+                            href="/my-orders"
+                            onClick={() => setProfileDropdown(false)}
+                            className="flex items-center px-3 py-2 text-sm text-neutral-700 hover:bg-primary-light hover:text-primary rounded-lg transition-all duration-200"
+                          >
+                            My Orders
+                          </Link>
+                          {isAdmin && (
+                            <Link
+                              href="/admin"
+                              onClick={() => setProfileDropdown(false)}
+                              className="flex items-center px-3 py-2 text-sm text-primary hover:bg-primary-light rounded-lg transition-all duration-200"
+                            >
+                              Admin Panel
+                            </Link>
+                          )}
+                          <button
+                            onClick={handleLogout}
+                            className="flex items-center w-full px-3 py-2 text-sm text-error hover:bg-error-light rounded-lg transition-all duration-200 mt-1"
+                          >
+                            Sign Out
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <Link
+                    href="/cart"
+                    className="relative p-2 rounded-lg bg-neutral-100 hover:bg-neutral-200 transition-colors duration-200 group"
                   >
-                    <User
+                    <ShoppingCart
                       size={18}
                       className="text-neutral-600 group-hover:text-secondary"
                     />
-                  </button>
-
-                  {profileDropdown && (
-                    <div className="absolute right-0 mt-2 w-56 bg-white/95 backdrop-blur-md rounded-xl shadow-xl border border-neutral-200 z-50 overflow-hidden">
-                      <div className="p-2">
-                        <div className="px-3 py-2 border-b border-neutral-200">
-                          <p className="text-sm font-medium text-secondary">
-                            Welcome back!
-                          </p>
-                          <p className="text-xs text-neutral-500 truncate">
-                            {userName}
-                          </p>
-                        </div>
-                        <Link
-                          href="/my-orders"
-                          onClick={() => setProfileDropdown(false)}
-                          className="flex items-center px-3 py-2 text-sm text-neutral-700 hover:bg-primary-light hover:text-primary rounded-lg transition-all duration-200"
-                        >
-                          My Orders
-                        </Link>
-                        {isAdmin && (
-                          <Link
-                            href="/admin"
-                            onClick={() => setProfileDropdown(false)}
-                            className="flex items-center px-3 py-2 text-sm text-primary hover:bg-primary-light rounded-lg transition-all duration-200"
-                          >
-                            Admin Panel
-                          </Link>
-                        )}
-                        <button
-                          onClick={handleLogout}
-                          className="flex items-center w-full px-3 py-2 text-sm text-error hover:bg-error-light rounded-lg transition-all duration-200 mt-1"
-                        >
-                          Sign Out
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
+                    {cartCount > 0 && (
+                      <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center bg-primary text-white text-xs font-bold rounded-full shadow-sm">
+                        {cartCount}
+                      </span>
+                    )}
+                  </Link>
+                </>
+              ) : (
                 <Link
-                  href="/cart"
-                  className="relative p-2 rounded-lg bg-neutral-100 hover:bg-neutral-200 transition-colors duration-200 group"
+                  href="/login"
+                  className="px-4 py-2 bg-primary text-white font-semibold rounded-xl hover:bg-primary-hover hover:shadow-lg transform hover:scale-105 transition-all duration-200 text-sm"
                 >
-                  <ShoppingCart
-                    size={18}
-                    className="text-neutral-600 group-hover:text-secondary"
-                  />
-                  {cartCount > 0 && (
-                    <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center bg-primary text-white text-xs font-bold rounded-full shadow-sm">
-                      {cartCount}
-                    </span>
-                  )}
+                  Login / Sign Up
                 </Link>
-              </>
-            ) : (
-              <Link
-                href="/login"
-                className="px-4 py-2 bg-primary text-white font-semibold rounded-xl hover:bg-primary-hover hover:shadow-lg transform hover:scale-105 transition-all duration-200 text-sm"
-              >
-                Login / Sign Up
-              </Link>
-            )}
+              )}
 
-            <button
-              onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden p-2 rounded-lg bg-neutral-100 hover:bg-neutral-200 transition-colors duration-200"
-            >
-              <Menu size={20} className="text-neutral-600" />
-            </button>
+              <button
+                onClick={() => setMobileMenuOpen(true)}
+                className="lg:hidden p-2 rounded-lg bg-neutral-100 hover:bg-neutral-200 transition-colors duration-200"
+              >
+                <Menu size={20} className="text-neutral-600" />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
+        {/* backdrop and drawer are OUTSIDE nav to avoid stacking context issues */}
+      </nav>
+
+      {/* ── BACKDROP ── */}
       {mobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-black/80 lg:hidden"
+          style={{ zIndex: 9998 }}
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
 
+      {/* ── MOBILE DRAWER ── */}
       <div
-        className={`fixed top-0 right-0 h-full w-80 max-w-full bg-white/95 backdrop-blur-md shadow-2xl z-50 transform transition-transform duration-300 ease-in-out lg:hidden ${mobileMenuOpen ? "translate-x-0" : "translate-x-full"
-          }`}
+        className={`fixed top-0 right-0 h-full w-80 max-w-full bg-white shadow-2xl lg:hidden overflow-y-auto transform transition-transform duration-300 ease-in-out ${mobileMenuOpen ? "translate-x-0" : "translate-x-full"}`}
+        style={{ zIndex: 9999 }}
       >
         <div className="flex items-center justify-between p-6 border-b border-neutral-200">
           <div className="flex flex-col">
@@ -441,7 +458,7 @@ const Navbar = () => {
           </div>
         </div>
       </div>
-    </nav>
+    </>
   );
 };
 

@@ -1,24 +1,45 @@
-import React, { useState, useEffect, lazy, Suspense } from "react";
+'use client';
+import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Play, Pause, Volume2, VolumeX } from "lucide-react";
 
-// Lazy load the video component
-const VideoBackground = lazy(() => import("./VideoBackground"));
-
 export default function LandingPage() {
-  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
-  const [isVideoPlaying, setIsVideoPlaying] = useState(true);
+  const videoRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
 
-  // Lazy load video after component mounts
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsVideoLoaded(true);
-    }, 100);
-
-    return () => clearTimeout(timer);
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = true;
+    const playAttempt = video.play();
+    if (playAttempt !== undefined) {
+      playAttempt.catch(() => {
+        setTimeout(() => {
+          video.play().catch(() => { });
+        }, 500);
+      });
+    }
   }, []);
+
+  const togglePlay = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (isPlaying) {
+      video.pause();
+    } else {
+      video.play().catch(() => { });
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const toggleMute = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = !isMuted;
+    setIsMuted(!isMuted);
+  };
 
   return (
     <div className="relative">
@@ -43,9 +64,7 @@ export default function LandingPage() {
             <span className="bg-white/20 px-3 py-1 rounded-full text-sm font-bold border border-white/30">
               NEW
             </span>
-            <span>
-              Premium Photography Collections - Handcrafted Excellence
-            </span>
+            <span>Premium Photography Collections - Handcrafted Excellence</span>
             <span className="text-white/40">•</span>
             <span>Free shipping on orders above ₹999</span>
             <span className="text-white/40">•</span>
@@ -55,90 +74,93 @@ export default function LandingPage() {
       </motion.div>
 
       {/* Main Landing Section */}
-      <div className="relative w-full h-screen overflow-hidden">
-        {/* Loading Placeholder */}
-        {!isVideoLoaded && (
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-white mx-auto mb-4"></div>
-              <p className="text-white text-lg font-medium">Loading...</p>
-            </div>
-          </div>
-        )}
+      <div className="relative w-full h-[100svh] min-h-[600px] overflow-hidden bg-gray-900">
 
-        {/* Video Background */}
-        <Suspense
-          fallback={
-            <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black"></div>
-          }
+        {/* ── VIDEO BACKGROUND (z-0) ── */}
+        <video
+          ref={videoRef}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          className="absolute inset-0 w-full h-full object-cover z-0"
         >
-          {isVideoLoaded && (
-            <VideoBackground isPlaying={isVideoPlaying} isMuted={isMuted} />
-          )}
-        </Suspense>
+          <source src="/assets/photoparkk.mp4" type="video/mp4" />
+        </video>
 
-        {/* Video Controls */}
-        <div className="absolute top-4 right-4 z-20 flex gap-2">
+        {/* ── OVERLAYS (z-10) ── */}
+        <div className="absolute inset-0 bg-black/55 z-10 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-transparent to-black/50 z-10 pointer-events-none" />
+
+        {/* ── VIDEO CONTROLS (z-20) ── */}
+        <div className="absolute bottom-16 sm:bottom-6 right-4 z-20 flex gap-2">
           <button
-            onClick={() => setIsVideoPlaying(!isVideoPlaying)}
-            className="bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-all"
+            onClick={togglePlay}
+            className="bg-black/50 text-white p-1.5 sm:p-2 rounded-full hover:bg-black/75 transition-all"
           >
-            {isVideoPlaying ? <Pause size={20} /> : <Play size={20} />}
+            {isPlaying ? <Pause size={16} className="sm:w-5 sm:h-5" /> : <Play size={16} className="sm:w-5 sm:h-5" />}
           </button>
           <button
-            onClick={() => setIsMuted(!isMuted)}
-            className="bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-all"
+            onClick={toggleMute}
+            className="bg-black/50 text-white p-1.5 sm:p-2 rounded-full hover:bg-black/75 transition-all"
           >
-            {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+            {isMuted ? <VolumeX size={16} className="sm:w-5 sm:h-5" /> : <Volume2 size={16} className="sm:w-5 sm:h-5" />}
           </button>
         </div>
 
-        {/* Content Overlay - Darker for better text visibility */}
-        <div className="absolute inset-0 bg-black bg-opacity-60 z-10"></div>
-        {/* Additional gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-transparent to-black/50 z-10"></div>
+        {/* ── MAIN CONTENT (z-20) ── */}
+        <div className="relative z-20 h-full flex items-center sm:items-center pt-16 sm:pt-0 pb-10 sm:pb-0">
+          <div className="container mx-auto px-4 sm:px-6 flex justify-center sm:justify-end">
+            <div className="max-w-2xl w-full">
 
-        {/* Main Content */}
-        <div className="relative z-20 h-full flex items-center">
-          <div className="container mx-auto px-6">
-            <div className="max-w-2xl">
-              {/* Mobile Content */}
+              {/* Mobile */}
               <div className="block sm:hidden">
                 <motion.div
-                  initial={{ opacity: 0, x: -50 }}
-                  animate={{ opacity: 1, x: 0 }}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.2 }}
-                  className="bg-black bg-opacity-80 backdrop-blur-sm border border-white/20 p-6 rounded-lg"
+                  className="bg-black/75 backdrop-blur-sm border border-white/20 p-6 rounded-xl text-center"
                 >
-                  <h1 className="text-3xl font-bold text-white mb-4">
+                  <h1 className="text-3xl font-bold text-white mb-3">
                     Premium{" "}
                     <span className="bg-blue-600 px-2 py-1 rounded text-2xl shadow-lg">
                       Collections
                     </span>
                   </h1>
                   <p className="text-neutral-300 mb-6 text-sm">
-                    Discover our exclusive collection of handcrafted premium
-                    frames
+                    Handcrafted premium frames for your memories
                   </p>
-                  <Link href="/Offers">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg"
-                    >
-                      SHOP NOW
-                    </motion.button>
-                  </Link>
+                  <div className="flex justify-center gap-3">
+                    <Link href="/Offers">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg"
+                      >
+                        SHOP NOW
+                      </motion.button>
+                    </Link>
+                    <Link href="/shop/acrylic">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="border border-white/50 text-white px-6 py-3 rounded-lg font-semibold hover:bg-white/10 transition-colors"
+                      >
+                        VIEW ALL
+                      </motion.button>
+                    </Link>
+                  </div>
                 </motion.div>
               </div>
 
-              {/* Desktop Content */}
+              {/* Desktop */}
               <div className="hidden sm:block">
                 <motion.div
-                  initial={{ opacity: 0, x: -100 }}
+                  initial={{ opacity: 0, x: 100 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 1, delay: 0.3 }}
-                  className="bg-black bg-opacity-75 backdrop-blur-sm border border-white/20 p-10 rounded-xl max-w-lg"
+                  className="bg-black/75 backdrop-blur-sm border border-white/20 p-10 rounded-xl max-w-lg text-right ml-auto"
                 >
                   <h1 className="text-5xl font-bold text-white mb-6 leading-tight">
                     Premium{" "}
@@ -150,7 +172,7 @@ export default function LandingPage() {
                     Discover our exclusive collection of handcrafted premium
                     frames and photography art
                   </p>
-                  <div className="flex gap-4">
+                  <div className="flex gap-4 justify-end">
                     <Link href="/Offers">
                       <motion.button
                         whileHover={{ scale: 1.05 }}
@@ -172,13 +194,14 @@ export default function LandingPage() {
                   </div>
                 </motion.div>
               </div>
+
             </div>
           </div>
         </div>
 
-        {/* Scroll Indicator */}
+        {/* Scroll Indicator — hidden on mobile, shown on sm+ */}
         <motion.div
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20"
+          className="hidden sm:flex absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20"
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 2, repeat: Infinity }}
         >

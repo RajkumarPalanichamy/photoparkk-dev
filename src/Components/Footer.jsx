@@ -11,7 +11,7 @@ import { CONTACT_DISPLAY_NUMBER, CONTACT_WHATSAPP_LINK } from "@/constants/conta
 
 const Footer = () => {
   return (
-    <footer className="bg-secondary text-neutral-300 pt-12 pb-6 px-6 mt-15">
+    <footer className="bg-secondary text-neutral-300 pt-12 pb-6 px-6">
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
         {/* Company Info */}
         <div>

@@ -45,7 +45,7 @@ const BacklightShop = () => {
     }, []);
 
     return (
-        <div className="min-h-screen bg-[#F0F4F8] font-sans selection:bg-blue-600/10 selection:text-blue-600">
+        <div className="bg-[#F0F4F8] font-sans selection:bg-blue-600/10 selection:text-blue-600">
             {/* ═══ CINEMATIC HERO SECTION ═══ */}
             <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-slate-900 pt-[100px]">
                 {/* Immersive Background */}
@@ -160,19 +160,30 @@ const BacklightShop = () => {
             </section>
 
             {/* ═══ THE LIGHTING PROMISE ═══ */}
-            <div className="bg-white py-24 px-6 overflow-hidden relative border-t border-blue-50">
+            <div className="relative bg-slate-900 pt-24 pb-28 px-6 overflow-hidden">
+                <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-blue-500/8 rounded-full blur-2xl pointer-events-none" />
                 <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-16 relative z-10">
-                    <div className="space-y-4">
-                        <h3 className="text-[11px] font-black text-blue-600 uppercase tracking-[0.4em]">The Photoparkk Vow</h3>
-                        <p className="text-slate-950 text-4xl font-black tracking-tighter leading-none">Superior Illumination <br /> Standards</p>
+                    <div className="space-y-5 lg:max-w-xs">
+                        <p className="text-[11px] font-black text-blue-400 uppercase tracking-[0.4em]">The Photoparkk Vow</p>
+                        <h2 className="text-5xl font-black text-white leading-[0.95] tracking-tighter">
+                            Superior<br />Illumination<br />
+                            <span className="italic text-blue-500 font-extrabold">Standards</span>
+                        </h2>
+                        <p className="text-slate-400 text-sm leading-relaxed">
+                            Edge-lit LED technology engineered for 50,000 hours of cinematic brilliance.
+                        </p>
                     </div>
-                    <div className="grid grid-cols-2 gap-8 w-full lg:w-auto">
+                    <div className="grid grid-cols-2 gap-4 w-full lg:flex-1 lg:max-w-xl">
                         {guarantees.map((g, i) => (
-                            <div key={i} className="flex items-center gap-5 text-slate-900 group p-6 bg-[#F0F4F8] rounded-2xl border border-blue-100 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300">
-                                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-blue-600 shadow-sm group-hover:bg-blue-600 group-hover:text-white transition-all">
+                            <div key={i} className="flex items-center gap-4 p-5 bg-slate-800/60 border border-slate-700/60 rounded-2xl backdrop-blur-sm hover:border-blue-500/40 hover:bg-slate-800 transition-all duration-300 group">
+                                <div className="w-11 h-11 shrink-0 bg-blue-600/20 border border-blue-500/30 rounded-xl flex items-center justify-center text-blue-400 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all duration-300">
                                     {g.icon}
                                 </div>
-                                <span className="text-[10px] font-black uppercase tracking-widest">{g.text}</span>
+                                <div>
+                                    <p className="text-[9px] font-black text-blue-500 uppercase tracking-[0.2em] mb-1">Premium Standard</p>
+                                    <p className="text-[11px] font-black text-white uppercase tracking-widest leading-snug">{g.text}</p>
+                                </div>
                             </div>
                         ))}
                     </div>

@@ -42,12 +42,12 @@ const CategoryShowcase = ({
     };
 
     const currentContent = contentMap[type] || contentMap.acrylic;
-    const isReversed = type === 'canvas';
+    const isReversed = type === 'canvas' || type === 'backlight';
 
     return (
-        <section className="py-24 md:py-32 bg-white overflow-hidden font-sans selection:bg-blue-600/10 selection:text-blue-600">
+        <section className="py-12 md:py-24 lg:py-32 bg-white overflow-hidden font-sans selection:bg-blue-600/10 selection:text-blue-600">
             <div className="container mx-auto px-4 md:px-6">
-                <div className={`flex flex-col ${isReversed ? 'md:flex-row-reverse' : 'md:flex-row'} items-center gap-16 md:gap-24`}>
+                <div className={`flex flex-col ${isReversed ? 'md:flex-row-reverse' : 'md:flex-row'} items-center gap-10 md:gap-16 lg:gap-24`}>
 
                     {/* Text Content Architecture */}
                     <motion.div
@@ -70,7 +70,7 @@ const CategoryShowcase = ({
                             </div>
                         </div>
 
-                        <h2 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 leading-[0.95] tracking-tighter">
+                        <h2 className="text-3xl md:text-5xl lg:text-7xl font-extrabold text-slate-900 leading-[0.95] tracking-tighter">
                             {title.split(' ').map((word, i) => (
                                 <span key={i} className="block">{word}</span>
                             ))}
@@ -83,7 +83,7 @@ const CategoryShowcase = ({
                         <div className="pt-6 flex justify-center md:justify-start">
                             <Link href={currentContent.link} className="group relative inline-flex items-center justify-center">
                                 <div className="absolute inset-0 bg-blue-600 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
-                                <div className="relative inline-flex items-center gap-3 px-10 py-5 rounded-full bg-slate-900 text-white font-black text-xs uppercase tracking-[0.3em] transition-all hover:bg-blue-600 hover:shadow-2xl hover:shadow-blue-600/40 hover:-translate-y-1">
+                                <div className="relative inline-flex items-center gap-3 px-7 py-4 md:px-10 md:py-5 rounded-full bg-slate-900 text-white font-black text-xs uppercase tracking-[0.3em] transition-all hover:bg-blue-600 hover:shadow-2xl hover:shadow-blue-600/40 hover:-translate-y-1">
                                     Configure Now
                                     <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                                 </div>
@@ -99,7 +99,7 @@ const CategoryShowcase = ({
                         transition={{ duration: 1, ease: "easeOut" }}
                         className="flex-1 w-full"
                     >
-                        <div className="relative aspect-[5/4] rounded-[3.5rem] overflow-hidden shadow-[0_50px_100px_rgba(0,0,0,0.08)] group border-8 border-white">
+                        <div className="relative aspect-[5/4] rounded-[2rem] md:rounded-[3.5rem] overflow-hidden shadow-[0_50px_100px_rgba(0,0,0,0.08)] group border-4 md:border-8 border-white">
                             <Image
                                 src={currentContent.image}
                                 alt={title}

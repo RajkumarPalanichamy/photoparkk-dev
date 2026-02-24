@@ -1,17 +1,19 @@
 import React, { useRef, useEffect } from "react";
 
-const VideoBackground = ({ isPlaying, isMuted }) => {
+const VideoBackground = ({ isPlaying = true, isMuted = true }) => {
   const videoRef = useRef(null);
 
   useEffect(() => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.play().catch(error => {
-          console.log("Video autoplay failed:", error);
-        });
-      } else {
-        videoRef.current.pause();
-      }
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (isPlaying) {
+      video.play().catch(error => {
+        console.warn("Autoplay was prevented, retrying in 1s:", error);
+        setTimeout(() => video.play().catch(() => { }), 1000);
+      });
+    } else {
+      video.pause();
     }
   }, [isPlaying]);
 
@@ -22,17 +24,20 @@ const VideoBackground = ({ isPlaying, isMuted }) => {
   }, [isMuted]);
 
   return (
-    <video
-      ref={videoRef}
-      autoPlay
-      loop
-      muted={isMuted}
-      playsInline
-      className="absolute top-0 left-0 w-full h-full object-cover"
-    >
-      <source src='/assets/photoparkk.mp4' type="video/mp4" />
-      Your browser does not support the video tag.
-    </video>
+    <div className="absolute inset-0 overflow-hidden">
+      <video
+        ref={videoRef}
+        autoPlay
+        loop
+        muted={isMuted}
+        playsInline
+        preload="auto"
+        className="absolute top-0 left-0 w-full h-full object-cover"
+      >
+        <source src='/assets/photoparkk.mp4' type="video/mp4" />
+        <img src="/assets/photoparkk.gif" alt="Fallback Background" className="w-full h-full object-cover" />
+      </video>
+    </div>
   );
 };
 
