@@ -149,33 +149,6 @@ export default function CanvasShop() {
                 )}
             </section>
 
-<<<<<<< HEAD
-            {/* ═══ EXECUTIVE GUARANTEE ═══ */}
-            <div className="relative bg-slate-900 pt-24 pb-28 px-6 overflow-hidden">
-                <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
-                <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-blue-500/8 rounded-full blur-2xl pointer-events-none" />
-                <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-16 relative z-10">
-                    <div className="space-y-5 lg:max-w-xs">
-                        <p className="text-[11px] font-black text-blue-400 uppercase tracking-[0.4em]">Professional Standard</p>
-                        <h2 className="text-5xl font-black text-white leading-[0.95] tracking-tighter">
-                            Built For<br />Generations<br />
-                            <span className="italic text-blue-500 font-extrabold">Guaranteed</span>
-                        </h2>
-                        <p className="text-slate-400 text-sm leading-relaxed">
-                            Museum-grade cotton canvas hand-stretched over kiln-dried solid wood.
-                        </p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 w-full lg:flex-1 lg:max-w-xl">
-                        {guarantees.map((g, i) => (
-                            <div key={i} className="flex items-center gap-4 p-5 bg-slate-800/60 border border-slate-700/60 rounded-2xl backdrop-blur-sm hover:border-blue-500/40 hover:bg-slate-800 transition-all duration-300 group">
-                                <div className="w-11 h-11 shrink-0 bg-blue-600/20 border border-blue-500/30 rounded-xl flex items-center justify-center text-blue-400 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all duration-300">
-                                    {g.icon}
-                                </div>
-                                <div>
-                                    <p className="text-[9px] font-black text-blue-500 uppercase tracking-[0.2em] mb-1">Premium Standard</p>
-                                    <p className="text-[11px] font-black text-white uppercase tracking-widest leading-snug">{g.text}</p>
-                                </div>
-=======
             {/* ═══ EXECUTIVE GRADE ASSURANCE ═══ */}
             <section className="bg-slate-950 py-32 px-6 overflow-hidden relative">
                 {/* Architectural Background Elements */}
@@ -209,7 +182,6 @@ export default function CanvasShop() {
                                     <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest block font-mono">Premium Standard</span>
                                     <span className="text-sm font-black text-white uppercase tracking-widest leading-tight">{g.text}</span>
                                 </div>
->>>>>>> 28e678d3287376cb4ec8a59bd3e69fa194ddd056
                             </div>
                         ))}
                     </div>

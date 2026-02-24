@@ -6,17 +6,10 @@ import { ArrowRight, Check, Sparkles, Layers, ShieldCheck, Clock, Box } from "lu
 import axiosInstance from '@/utils/axiosInstance';
 
 const guarantees = [
-<<<<<<< HEAD
-    { icon: <ShieldCheck className="w-5 h-5" />, text: "Crystal-clear UV-grade acrylic" },
-    { icon: <Sparkles className="w-5 h-5" />, text: "Vibrant HD print quality" },
-    { icon: <Box className="w-5 h-5" />, text: "Ready to hang hardware" },
-    { icon: <Clock className="w-5 h-5" />, text: "Ships in 4–6 business days" },
-=======
     { icon: <ShieldCheck className="w-4 h-4" />, text: "3mm Optical-Grade Acrylic" },
     { icon: <Sparkles className="w-4 h-4" />, text: "Diamond-Polished Edges" },
     { icon: <Box className="w-4 h-4" />, text: "Hidden Mounting System" },
     { icon: <Clock className="w-4 h-4" />, text: "Ships in 4–6 business days" },
->>>>>>> 28e678d3287376cb4ec8a59bd3e69fa194ddd056
 ];
 
 export default function AcrylicShop() {
@@ -161,40 +154,6 @@ export default function AcrylicShop() {
             </section>
 
             {/* ═══ LUXURY GUARANTEE ═══ */}
-<<<<<<< HEAD
-            <div className="relative bg-slate-900 pt-24 pb-28 px-6 overflow-hidden">
-                {/* Background glow effects */}
-                <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
-                <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-blue-500/8 rounded-full blur-2xl pointer-events-none" />
-
-                <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-16 relative z-10">
-                    {/* Left — Heading */}
-                    <div className="space-y-5 lg:max-w-xs">
-                        <p className="text-[11px] font-black text-blue-400 uppercase tracking-[0.4em]">The Photoparkk Vow</p>
-                        <h2 className="text-5xl font-black text-white leading-[0.95] tracking-tighter">
-                            Executive<br />Grade<br />
-                            <span className="italic text-blue-500 font-extrabold">Assurance</span>
-                        </h2>
-                        <p className="text-slate-400 text-sm leading-relaxed">
-                            Museum-grade precision in every silhouette. Our commitment to architectural clarity and optical brilliance.
-                        </p>
-                    </div>
-
-                    {/* Right — Cards */}
-                    <div className="grid grid-cols-2 gap-4 w-full lg:flex-1 lg:max-w-xl">
-                        {guarantees.map((g, i) => (
-                            <div
-                                key={i}
-                                className="flex items-center gap-4 p-5 bg-slate-800/60 border border-slate-700/60 rounded-2xl backdrop-blur-sm hover:border-blue-500/40 hover:bg-slate-800 transition-all duration-300 group"
-                            >
-                                <div className="w-11 h-11 shrink-0 bg-blue-600/20 border border-blue-500/30 rounded-xl flex items-center justify-center text-blue-400 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all duration-300">
-                                    {g.icon}
-                                </div>
-                                <div>
-                                    <p className="text-[9px] font-black text-blue-500 uppercase tracking-[0.2em] mb-1">Premium Standard</p>
-                                    <p className="text-[11px] font-black text-white uppercase tracking-widest leading-snug">{g.text}</p>
-                                </div>
-=======
             <section className="bg-slate-950 py-32 px-6 overflow-hidden relative">
                 {/* Architectural Background Elements */}
                 <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
@@ -227,7 +186,6 @@ export default function AcrylicShop() {
                                     <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest block font-mono">Premium Standard</span>
                                     <span className="text-sm font-black text-white uppercase tracking-widest">{g.text}</span>
                                 </div>
->>>>>>> 28e678d3287376cb4ec8a59bd3e69fa194ddd056
                             </div>
                         ))}
                     </div>
