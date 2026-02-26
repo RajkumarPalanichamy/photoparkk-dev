@@ -250,13 +250,13 @@ function ShapeImageClip({ shape, hovered }) {
 
     const getShapeStyles = () => {
         switch (name) {
-            case "Portrait": return { width: "110px", height: "150px", borderRadius: "8px" };
-            case "Landscape": return { width: "160px", height: "120px", borderRadius: "8px" };
-            case "Square": return { width: "135px", height: "135px", borderRadius: "8px" };
-            case "Round": return { width: "140px", height: "140px", borderRadius: "50%" };
-            case "Love Heart": return { width: "140px", height: "140px" };
-            case "Hexagon": return { width: "140px", height: "140px" };
-            default: return { width: "130px", height: "130px", borderRadius: "8px" };
+            case "Portrait": return { width: "210px", height: "280px", borderRadius: "8px" };
+            case "Landscape": return { width: "280px", height: "210px", borderRadius: "8px" };
+            case "Square": return { width: "240px", height: "240px", borderRadius: "8px" };
+            case "Round": return { width: "240px", height: "240px", borderRadius: "50%" };
+            case "Love Heart": return { width: "240px", height: "240px" };
+            case "Hexagon": return { width: "240px", height: "240px" };
+            default: return { width: "220px", height: "220px", borderRadius: "8px" };
         }
     };
 
@@ -270,7 +270,7 @@ function ShapeImageClip({ shape, hovered }) {
 
     if (name === "Love Heart") {
         return (
-            <div style={{ position: "relative", width: "140px", height: "140px" }}>
+            <div style={{ position: "relative", width: containerStyle.width, height: containerStyle.height }}>
                 <svg width="0" height="0" style={{ position: "absolute" }}>
                     <defs>
                         <clipPath id="heartClip" clipPathUnits="objectBoundingBox">

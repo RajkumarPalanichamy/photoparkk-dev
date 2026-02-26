@@ -230,9 +230,9 @@ function ShapeCard({ data, onClick }) {
                     <img
                         src={img}
                         alt={name}
-                        className={`relative z-20 object-cover shadow-[0_30px_60px_rgba(0,0,0,0.15)] border-2 border-blue-100 rounded-lg transition-all duration-1000 ${shape === 'portrait' ? 'w-[140px] h-[190px]' :
-                            shape === 'landscape' ? 'w-[200px] h-[150px]' :
-                                'w-[170px] h-[170px]'
+                        className={`relative z-20 object-cover shadow-[0_30px_60px_rgba(0,0,0,0.15)] border-2 border-blue-100 rounded-lg transition-all duration-1000 ${shape === 'portrait' ? 'w-[210px] h-[280px]' :
+                            shape === 'landscape' ? 'w-[280px] h-[210px]' :
+                                'w-[240px] h-[240px]'
                             }`}
                     />
 
