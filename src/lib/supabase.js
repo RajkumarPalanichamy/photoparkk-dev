@@ -11,5 +11,10 @@ if (!supabaseUrl || !supabaseKey) {
 // We provide fallbacks to avoid the "supabaseUrl is required" fatal crash during dev startup
 export const supabase = createClient(
     supabaseUrl || 'https://placeholder.supabase.co',
-    supabaseKey || 'placeholder-key'
+    supabaseKey || 'placeholder-key',
+    {
+        db: {
+            schema: 'photoparkk'
+        }
+    }
 );

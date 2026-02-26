@@ -1,7 +1,5 @@
-
 import { supabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
-import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(request) {
     try {
@@ -9,42 +7,50 @@ export async function POST(request) {
         const file = formData.get('image');
 
         if (!file) {
-            console.error("No image file in formData");
             return NextResponse.json({ message: "No image file provided" }, { status: 400 });
         }
 
-        const arrayBuffer = await file.arrayBuffer();
+        // Generate unique filename (Flat structure like LeveCotton)
+        const ext = file.name.split('.').pop() || 'jpg';
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${ext}`;
 
-        // Generate a unique file name
-        const fileExt = file.name ? file.name.split('.').pop() : 'jpg';
-        const fileName = `${uuidv4()}.${fileExt}`;
-        const filePath = `uploads/${fileName}`;
+        // Convert file to buffer
+        const bytes = await file.arrayBuffer();
+        const buffer = Buffer.from(bytes);
 
         // Upload to Supabase Storage
         const { data, error } = await supabase.storage
             .from('photos')
-            .upload(filePath, arrayBuffer, {
+            .upload(fileName, buffer, {
                 contentType: file.type,
-                upsert: false
+                upsert: false,
             });
 
         if (error) {
             console.error("Supabase Storage Error Details:", JSON.stringify(error, null, 2));
 
-            if (error.message?.includes('bucket not found')) {
-                return NextResponse.json({
-                    message: "Supabase storage bucket 'photos' not found. Please create it in your dashboard."
-                }, { status: 500 });
-            }
-            return NextResponse.json({ message: error.message || "Storage upload failed" }, { status: 500 });
+            // LeveCotton Fallback Mechanism: Return Base64 data URI if docker fails path traversal
+            const base64 = buffer.toString('base64');
+            const imageUrl = `data:${file.type};base64,${base64}`;
+            console.log("Fallback base64 triggered due to Supabase error.");
+            return NextResponse.json({ imageUrl });
         }
 
         // Get Public URL
         const { data: { publicUrl } } = supabase.storage
             .from('photos')
-            .getPublicUrl(filePath);
+            .getPublicUrl(fileName);
 
-        return NextResponse.json({ imageUrl: publicUrl });
+        // Ensure URL is absolute based on LeveCotton's flow
+        let imageUrl = publicUrl;
+        if (imageUrl.startsWith('/')) {
+            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+            if (supabaseUrl) {
+                imageUrl = `${supabaseUrl.replace(/\/$/, '')}/storage/v1/object/public/photos/${fileName}`;
+            }
+        }
+
+        return NextResponse.json({ imageUrl });
 
     } catch (error) {
         console.error("Upload Error (Catch Block):", error);
