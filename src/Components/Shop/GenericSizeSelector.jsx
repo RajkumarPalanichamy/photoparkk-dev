@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Sparkles, CheckCircle2, Ruler, Layers, Scissors, ShoppingCart, Loader2, ArrowLeft, Package, Truck, Lock, Frame, SlidersHorizontal } from "lucide-react";
+import { Sparkles, CheckCircle2, Ruler, Layers, Scissors, ShoppingCart, Loader2, ArrowLeft, ArrowRight, Package, Truck, Lock, Frame, SlidersHorizontal } from "lucide-react";
 import { HexColorPicker } from "react-colorful";
 import { toast } from "react-toastify";
 import * as htmlToImage from 'html-to-image';
@@ -496,11 +496,11 @@ const GenericSizeSelector = ({ type, shape }) => {
                             <div
                                 className="relative z-10 flex items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)]"
                                 style={{
-                                    // Dynamic scaling: assumes visible wall height is approx 90 inches
-                                    height: selectedSize ? `${(selectedSize.height / 90) * 100}%` : '30%',
+                                    // Dynamic scaling: adjusting denominator for better visibility
+                                    height: selectedSize ? `${(selectedSize.height / 45) * 100}%` : '40%',
                                     // Use aspect ratio to determine width automatically
                                     aspectRatio: selectedSize ? `${selectedSize.width} / ${selectedSize.height}` : 'auto',
-                                    maxHeight: '80%', // Prevent overflowing the container
+                                    maxHeight: '85%', // Prevent overflowing the container
                                 }}
                             >
                                 {/* Dimension Labels - Repositioned for stability */}
