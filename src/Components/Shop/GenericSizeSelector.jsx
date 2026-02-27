@@ -426,16 +426,7 @@ const GenericSizeSelector = ({ type, shape }) => {
 
     return (
         <div className="bg-white min-h-screen pt-[100px] pb-12 font-sans selection:bg-blue-600/10 selection:text-blue-600 text-secondary">
-            <svg width="0" height="0" className="absolute pointer-events-none">
-                <defs>
-                    <clipPath id="love-clip-preview" clipPathUnits="objectBoundingBox">
-                        <path d="M0.5,0.887 C0.111,0.675,0.015,0.473,0.015,0.306 C0.015,0.165,0.126,0.05,0.267,0.05 C0.347,0.05,0.423,0.087,0.472,0.148 L0.5,0.183 L0.528,0.148 C0.577,0.087,0.653,0.05,0.733,0.05 C0.874,0.05,0.985,0.165,0.985,0.306 C0.985,0.473,0.889,0.675,0.5,0.887 Z" />
-                    </clipPath>
-                    <clipPath id="hexagon-clip-preview" clipPathUnits="objectBoundingBox">
-                        <polygon points="0.5 0, 1 0.25, 1 0.75, 0.5 1, 0 0.75, 0 0.25" />
-                    </clipPath>
-                </defs>
-            </svg>
+
             <div className="max-w-[1400px] mx-auto px-4 lg:px-8">
 
                 {/* Header */}
@@ -477,6 +468,16 @@ const GenericSizeSelector = ({ type, shape }) => {
                                 boxShadow: 'inset 0 2px 4px 0 rgba(0,0,0,0.05)'
                             }}
                         >
+                            <svg width="0" height="0" className="absolute pointer-events-none" style={{ position: 'absolute', width: 0, height: 0 }}>
+                                <defs>
+                                    <clipPath id="love-clip-preview" clipPathUnits="objectBoundingBox">
+                                        <path d="M0.5,0.887 C0.111,0.675,0.015,0.473,0.015,0.306 C0.015,0.165,0.126,0.05,0.267,0.05 C0.347,0.05,0.423,0.087,0.472,0.148 L0.5,0.183 L0.528,0.148 C0.577,0.087,0.653,0.05,0.733,0.05 C0.874,0.05,0.985,0.165,0.985,0.306 C0.985,0.473,0.889,0.675,0.5,0.887 Z" />
+                                    </clipPath>
+                                    <clipPath id="hexagon-clip-preview" clipPathUnits="objectBoundingBox">
+                                        <polygon points="0.5 0, 1 0.25, 1 0.75, 0.5 1, 0 0.75, 0 0.25" />
+                                    </clipPath>
+                                </defs>
+                            </svg>
 
                             {/* Wall Gradient / Image */}
                             <img
