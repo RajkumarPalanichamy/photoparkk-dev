@@ -16,6 +16,7 @@ import {
     Scissors
 } from "lucide-react";
 import axiosInstance from "../../utils/axiosInstance";
+import { useCart } from "@/context/CartContext";
 import { toast } from "react-toastify";
 
 // Combined Configuration for all types and shapes
@@ -39,6 +40,7 @@ const GenericOrder = ({ type, shape }) => {
     const [orderData, setOrderData] = useState(null);
     const [quantity, setQuantity] = useState(1);
     const [userId, setUserId] = useState(null);
+    const { addToCart } = useCart();
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -97,39 +99,27 @@ const GenericOrder = ({ type, shape }) => {
             return;
         }
 
-        if (!userId) {
-            toast.error("Please log in to add items to cart.");
-            router.push("/login");
-            return;
-        }
 
         setLoading(true);
         try {
             const config = orderData.configuration;
 
-            const cartData = {
-                userId,
-                productType: `${type.charAt(0).toUpperCase() + type.slice(1)}Customized`,
+            const productTypeMap = { acrylic: 'AcrylicCustomizedata', canvas: 'Canvascustomizedata', backlight: 'Backlightcustomizedata' };
+            const productType = productTypeMap[type?.toLowerCase()] || `${type.charAt(0).toUpperCase() + type.slice(1)}Customizedata`;
+            const cartPayload = {
+                productId: config?.productId ?? null,
+                productType,
                 title: `${type.charAt(0).toUpperCase() + type.slice(1)} ${shape.charAt(0).toUpperCase() + shape.slice(1)} Frame`,
                 image: orderData.photoData?.url,
-                size: config.size.label,
-                thickness: type === 'acrylic' ? config.thickness.value : undefined,
-                edge: config.edge?.value, // Pass edge type if supported
+                size: config.size?.label,
+                thickness: type === 'acrylic' ? config.thickness?.value : undefined,
                 price: config.price,
                 quantity,
                 totalAmount: config.price * quantity,
                 uploadedImageUrl: orderData.photoData?.url,
-                customizationDetails: { // Store technical details for production
-                    crop: config.crop,
-                    edge: config.edge,
-                    thickness: config.thickness,
-                    originalName: orderData.photoData?.name
-                }
             };
-
-            await axiosInstance.post("/cart", cartData);
-            toast.success("Item added to cart successfully!");
-            router.push("/cart");
+            const result = await addToCart(cartPayload);
+            if (result?.success) { toast.success("Item added to cart successfully!"); router.push("/cart"); } else { toast.error("Failed to add to cart."); }
         } catch (error) {
             console.error("Add to cart failed", error);
             toast.error("Failed to add to cart.");

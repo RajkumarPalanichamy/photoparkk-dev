@@ -6,6 +6,7 @@ import { HexColorPicker } from "react-colorful";
 import { toast } from "react-toastify";
 import * as htmlToImage from 'html-to-image';
 import axiosInstance from "../../utils/axiosInstance";
+import { useCart } from "@/context/CartContext";
 
 // Configuration Constants
 const SIZES = {
@@ -63,6 +64,7 @@ const GenericSizeSelector = ({ type, shape }) => {
     const [totalPrice, setTotalPrice] = useState(0);
     const [loading, setLoading] = useState(false);
     const [userId, setUserId] = useState(null);
+    const { addToCart } = useCart();
     const [backlightColor, setBacklightColor] = useState("#ffffff");
     const [backlightIntensity, setBacklightIntensity] = useState(1.0);
 
@@ -254,11 +256,6 @@ const GenericSizeSelector = ({ type, shape }) => {
     const handleAddToCart = async () => {
         if (!selectedSize || !editorData) return;
 
-        if (!userId) {
-            toast.error("Please log in to add items to cart.");
-            return;
-        }
-
         setLoading(true);
         try {
             // Prepare Cart Data
@@ -310,36 +307,20 @@ const GenericSizeSelector = ({ type, shape }) => {
                 }
             }
 
-            const cartData = {
-                userId,
+            const cartPayload = {
                 productId: frameConfig.id,
                 productType: dbProductType,
                 title: `${typeTitle} ${shapeTitle} Frame`,
                 image: finalImageUrl,
                 size: selectedSize.label,
-                thickness: selectedThickness.value,
-                edge: selectedEdge.value,
-                frameType,
-                frameColor: frameType === 'custom' ? selectedColor : null,
-                price: totalPrice / quantity, // Unit price
+                thickness: selectedThickness?.value,
+                price: totalPrice / quantity,
                 quantity,
                 totalAmount: totalPrice,
                 uploadedImageUrl: photoData?.url,
-                customizationDetails: {
-                    crop: prevConfig?.crop,
-                    thickness: selectedThickness,
-                    edge: selectedEdge,
-                    frameType,
-                    frameColor: selectedColor,
-                    backlightColor: type === 'backlight' ? backlightColor : null,
-                    backlightIntensity: type === 'backlight' ? backlightIntensity : null,
-                    originalName: photoData?.name
-                }
             };
-
-            await axiosInstance.post("/cart", cartData);
-            toast.success("Added to Cart Successfully!");
-            router.push("/cart");
+            const result = await addToCart(cartPayload);
+            if (result?.success) { toast.success("Added to Cart Successfully!"); router.push("/cart"); } else { toast.error("Failed to add to cart."); }
 
         } catch (error) {
             console.error("Add to cart failed", error);

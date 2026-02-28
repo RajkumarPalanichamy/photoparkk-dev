@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { User, ShoppingCart, Menu, X, ChevronDown } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import axiosInstance from "@/utils/axiosInstance";
+import LoginModal from "./LoginModal";
 
 // Helper component for stylized links with active state
 const StyledNavLink = ({ href, children, className }) => {
@@ -34,6 +35,7 @@ const Navbar = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [userName, setUserName] = useState("");
   const [scrolled, setScrolled] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   const router = useRouter();
   const navRef = useRef(null);
@@ -75,9 +77,25 @@ const Navbar = () => {
     };
 
     window.addEventListener("scroll", handleScroll);
+
+    const handleOpenLogin = () => setIsLoginModalOpen(true);
+    window.addEventListener("open-login", handleOpenLogin);
+
+    // ── 5 SECOND FLOATING LOGIN TIMER (Home Page only) ──
+    const timer = setTimeout(() => {
+      const user = localStorage.getItem("user");
+      const token = localStorage.getItem("accessToken");
+      // Only show if not logged in and on home page
+      if (!user && !token && window.location.pathname === "/") {
+        setIsLoginModalOpen(true);
+      }
+    }, 5000);
+
     return () => {
       window.removeEventListener("storage", loadAuthFromLocalStorage);
       window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("open-login", handleOpenLogin);
+      clearTimeout(timer);
     };
   }, []);
 
@@ -458,6 +476,11 @@ const Navbar = () => {
           </div>
         </div>
       </div>
+
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+      />
     </>
   );
 };

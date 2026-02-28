@@ -2,7 +2,8 @@
 import React, { useRef, useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import Cropper from "react-easy-crop";
+import { Cropper } from "react-cropper";
+import "cropperjs/dist/cropper.css";
 import { Upload, X, RotateCw, ZoomIn, ArrowRight, AlertTriangle, Sparkles } from "lucide-react";
 import LoadingBar from "../LoadingBar";
 import { toast } from "react-toastify";
@@ -22,8 +23,9 @@ const GenericCustomize = ({ type, shape }) => {
     const [crop, setCrop] = useState({ x: 0, y: 0 });
     const [zoom, setZoom] = useState(1);
     const [rotation, setRotation] = useState(0);
-    const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
     const [lowResWarning, setLowResWarning] = useState(false);
+
+    const cropperRef = useRef(null);
 
     const fileInputRef = useRef(null);
     const router = useRouter();
@@ -107,19 +109,38 @@ const GenericCustomize = ({ type, shape }) => {
     const handleDragLeave = (e) => { e.preventDefault(); setIsDragging(false); };
     const handleDrop = (e) => { e.preventDefault(); setIsDragging(false); if (e.dataTransfer.files?.[0]) handleFileUpload(e.dataTransfer.files[0]); };
     const handleReplaceClick = () => fileInputRef.current.click();
-    const handlePreviewClick = () => { setPhotoData(null); setCrop({ x: 0, y: 0 }); setZoom(1); setRotation(0); };
-    const onCropComplete = useCallback((_, croppedAreaPixels) => setCroppedAreaPixels(croppedAreaPixels), []);
+    const handlePreviewClick = () => { setPhotoData(null); setZoom(1); setRotation(0); };
 
     const handleContinue = () => {
         if (!photoData) { toast.error("Please upload an image first."); return; }
+
         let existingDetails = {};
         if (typeof window !== "undefined") {
             const stored = sessionStorage.getItem(`${type}_custom_data`);
             if (stored) existingDetails = JSON.parse(stored);
         }
+
+        const cropper = cropperRef.current?.cropper;
+        let cropDataToSave = null;
+        if (cropper) {
+            // Get crop data bounded to image
+            const cropData = cropper.getData(true);
+            cropDataToSave = {
+                crop: { x: cropData.x, y: cropData.y },
+                zoom: 1, // Store as 1 since CropperJS extracts the actual source region natively
+                rotation: cropData.rotate || 0,
+                croppedAreaPixels: {
+                    x: cropData.x,
+                    y: cropData.y,
+                    width: cropData.width,
+                    height: cropData.height
+                }
+            };
+        }
+
         const orderData = {
             ...existingDetails, type, shape, photoData,
-            configuration: { ...(existingDetails.configuration || {}), crop: { crop, zoom, rotation, croppedAreaPixels } }
+            configuration: { ...(existingDetails.configuration || {}), crop: cropDataToSave }
         };
         sessionStorage.setItem(`${type}_custom_data`, JSON.stringify(orderData));
         router.push(`/shop/${type}/${shape.toLowerCase()}/size`);
@@ -531,27 +552,20 @@ const GenericCustomize = ({ type, shape }) => {
                                 </div>
                             ) : (
                                 <>
-                                    <div className="gc-crop-wrap">
+                                    <div className="gc-crop-wrap" style={{ display: 'flex', flexDirection: 'column' }}>
+                                        {/* Free-style cropper matching Canva! Grabbable corners, dynamic resizing. */}
                                         <Cropper
-                                            image={photoData.url}
-                                            crop={crop}
-                                            zoom={zoom}
-                                            rotation={rotation}
-                                            aspect={getAspectRatio()}
-                                            cropSize={{ width: CROP_SIZE, height: CROP_SIZE / getAspectRatio() }}
-                                            onCropChange={setCrop}
-                                            onCropComplete={onCropComplete}
-                                            onZoomChange={setZoom}
-                                            onRotationChange={setRotation}
-                                            showGrid={false}
-                                            style={{
-                                                containerStyle: { background: "#1a1a2e" },
-                                                cropAreaStyle: {
-                                                    border: "2px solid #0071e3",
-                                                    boxShadow: "0 0 0 9999px rgba(0,0,0,0.55)",
-                                                    borderRadius: shape === "round" ? "50%" : "4px",
-                                                },
-                                            }}
+                                            src={photoData.url}
+                                            style={{ height: '420px', width: '100%', background: '#1a1a2e' }}
+                                            aspectRatio={NaN} // Important: NaN enables full free-style cropping
+                                            guides={true}
+                                            ref={cropperRef}
+                                            viewMode={1}
+                                            dragMode="crop"
+                                            background={false}
+                                            responsive={true}
+                                            autoCropArea={0.8}
+                                            checkOrientation={false}
                                         />
 
                                         {lowResWarning && (
@@ -567,14 +581,26 @@ const GenericCustomize = ({ type, shape }) => {
                                         <div className="gc-ctrl-group">
                                             <ZoomIn size={14} color="#737373" />
                                             <span className="gc-ctrl-label">Zoom</span>
-                                            <input type="range" className="gc-slider" min={1} max={3} step={0.05} value={zoom} onChange={(e) => setZoom(Number(e.target.value))} />
+                                            <input type="range" className="gc-slider" min={0.5} max={3} step={0.05} value={zoom} onChange={(e) => {
+                                                const val = Number(e.target.value);
+                                                setZoom(val);
+                                                cropperRef.current?.cropper?.zoomTo(val);
+                                            }} />
                                         </div>
                                         <div className="gc-ctrl-group">
                                             <RotateCw size={14} color="#737373" />
                                             <span className="gc-ctrl-label">Rotate</span>
-                                            <input type="range" className="gc-slider" min={0} max={360} step={1} value={rotation} onChange={(e) => setRotation(Number(e.target.value))} />
+                                            <input type="range" className="gc-slider" min={0} max={360} step={1} value={rotation} onChange={(e) => {
+                                                const val = Number(e.target.value);
+                                                setRotation(val);
+                                                cropperRef.current?.cropper?.rotateTo(val);
+                                            }} />
                                         </div>
-                                        <button className="gc-reset-btn" onClick={() => { setZoom(1); setRotation(0); }}>Reset</button>
+                                        <button className="gc-reset-btn" onClick={() => {
+                                            cropperRef.current?.cropper?.reset();
+                                            setZoom(1);
+                                            setRotation(0);
+                                        }}>Reset</button>
                                     </div>
                                 </>
                             )}

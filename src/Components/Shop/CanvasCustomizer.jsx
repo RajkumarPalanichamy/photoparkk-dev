@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { toast } from "react-toastify";
 import axiosInstance from "../../utils/axiosInstance";
+import { useCart } from "@/context/CartContext";
 import * as htmlToImage from 'html-to-image';
 
 const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024;
@@ -72,6 +73,7 @@ const CanvasCustomizer = ({ shape }) => {
     const [totalPrice, setTotalPrice] = useState(0);
     const [loading, setLoading] = useState(false);
     const [userId, setUserId] = useState(null);
+    const { addToCart } = useCart();
     const [croppedImageUrl, setCroppedImageUrl] = useState(null);
 
     const shapeKey = ["portrait", "landscape", "square"].includes(shape) ? shape : "default";
@@ -172,7 +174,7 @@ const CanvasCustomizer = ({ shape }) => {
     const handleAddToCart = async () => {
         if (!photoData) { toast.error("Please upload a photo first."); return; }
         if (!selectedSize) { toast.error("Please select a size."); return; }
-        if (!userId) { toast.error("Please log in to add items to cart."); return; }
+        // Guest cart is supported; no login required to add to cart
         setLoading(true);
         try {
             let blob = await generateWallPreview();
@@ -186,15 +188,20 @@ const CanvasCustomizer = ({ shape }) => {
                     if (r.data?.imageUrl) finalUrl = r.data.imageUrl;
                 } catch (e) { }
             }
-            await axiosInstance.post("/cart", {
-                userId, productId: frameConfig?.id || "canvas-default", productType: 'Canvascustomizedata',
-                title: `Canvas ${shapeTitle} Frame`, image: finalUrl, size: selectedSize.label,
-                thickness: 'standard', edge: selectedWrap.value, frameType: 'none', frameColor: null,
-                price: totalPrice / quantity, quantity, totalAmount: totalPrice,
+            const cartPayload = {
+                productId: frameConfig?.id || "canvas-default",
+                productType: 'Canvascustomizedata',
+                title: `Canvas ${shapeTitle} Frame`,
+                image: finalUrl,
+                size: selectedSize.label,
+                thickness: 'standard',
+                price: totalPrice / quantity,
+                quantity,
+                totalAmount: totalPrice,
                 uploadedImageUrl: photoData?.url,
-                customizationDetails: { crop: { crop, zoom, rotation, croppedAreaPixels }, wrap: selectedWrap, originalName: photoData?.name }
-            });
-            toast.success("Added to Cart!"); router.push("/cart");
+            };
+            const result = await addToCart(cartPayload);
+            if (result?.success) { toast.success("Added to Cart!"); router.push("/cart"); } else { toast.error("Failed to add to cart."); }
         } catch (e) { console.error(e); toast.error("Failed to add to cart."); }
         finally { setLoading(false); }
     };

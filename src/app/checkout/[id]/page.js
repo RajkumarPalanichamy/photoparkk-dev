@@ -9,27 +9,56 @@ import {
     User,
     Mail,
     Phone,
-    MapPin,
     CreditCard,
     Truck,
     Package,
-    Shield,
     Loader2,
     ArrowLeft,
     Lock,
+    Send,
+    CheckCircle2,
 } from "lucide-react";
 import { toast } from "react-toastify";
 import axiosInstance from "@/utils/axiosInstance";
-import { createPaymentOrder, initializePayment } from "@/utils/paymentUtils"; // Ensure this import works or copy utils
+import { createPaymentOrder, initializePayment } from "@/utils/paymentUtils";
+import { useCart } from "@/context/CartContext";
+
+const CHECKOUT_RETURN_URL_KEY = "checkoutReturnUrl";
+const PLACEHOLDER_IMAGE = "https://via.placeholder.com/400?text=No+Image";
+
+function safeImageSrc(url) {
+    const u = url != null ? String(url).trim() : "";
+    if (!u) return PLACEHOLDER_IMAGE;
+    if (!/^https?:\/\/[^\s/]+/i.test(u)) return PLACEHOLDER_IMAGE;
+    return u;
+}
+
+function normalizeCartItem(row) {
+    if (!row) return null;
+    return {
+        ...row,
+        _id: row._id ?? row.id,
+        id: row.id ?? row._id,
+        totalAmount: row.totalAmount ?? row.total_amount,
+        productType: row.productType ?? row.product_type,
+        uploadedImageUrl: row.uploadedImageUrl ?? row.uploaded_image_url,
+    };
+}
 
 const CommonCheckout = () => {
     const { id: cartItemId } = useParams();
     const router = useRouter();
+    const { cartItems: contextCartItems, isGuest } = useCart();
 
     const [cartItem, setCartItem] = useState(null);
     const [loading, setLoading] = useState(true);
     const [paymentLoading, setPaymentLoading] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState("ONLINE");
+
+    const [guestEmail, setGuestEmail] = useState("");
+    const [guestName, setGuestName] = useState("");
+    const [signupLoading, setSignupLoading] = useState(false);
+    const [signupSuccess, setSignupSuccess] = useState(false);
 
     const [form, setForm] = useState({
         name: "",
@@ -49,30 +78,32 @@ const CommonCheckout = () => {
     const SHIPPING_CHARGE = 100;
 
     useEffect(() => {
-        // Helper to fetch cart item by ID directly (reuse Cart Item API or similar)
-        // Wait, I implemented /api/cart/user/[userId] but not /api/cart/[itemId] for GET?
-        // I implemented DELETE/PUT for [itemId].
-        // I NEED GET /api/cart/[itemId].
-        // Let me implement GET in /api/cart/[itemId]/route.js afterwards
-        // Or I can filter from cart list? inefficient.
-        // I'll assume GET /api/cart/[itemId] exists or I will add it now.
-
-        // For now let's assume I will add GET handler to [itemId] route.
-        const fetchCartItem = async () => {
-            try {
-                const { data } = await axiosInstance.get(`/cart/${cartItemId}`);
-                // If data is array (from my other route?), check.
-                // My GET [itemId] route should return single item.
-                setCartItem(data);
-            } catch (error) {
-                console.error("Error fetching cart item:", error);
-                toast.error("Failed to load cart item");
-            } finally {
-                setLoading(false);
-            }
-        };
-        if (cartItemId) fetchCartItem();
-    }, [cartItemId]);
+        if (!cartItemId) {
+            setLoading(false);
+            return;
+        }
+        const user = typeof window !== "undefined" ? localStorage.getItem("user") : null;
+        if (user) {
+            const fetchCartItem = async () => {
+                try {
+                    const { data } = await axiosInstance.get(`/cart/${cartItemId}`);
+                    setCartItem(normalizeCartItem(data));
+                } catch (error) {
+                    console.error("Error fetching cart item:", error);
+                    toast.error("Failed to load cart item");
+                    setCartItem(null);
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchCartItem();
+        } else {
+            const list = Array.isArray(contextCartItems) ? contextCartItems : [];
+            const found = list.find((i) => (i._id || i.id) === cartItemId);
+            setCartItem(found ? normalizeCartItem(found) : null);
+            setLoading(false);
+        }
+    }, [cartItemId, contextCartItems]);
 
     useEffect(() => {
         const allStates = State.getStatesOfCountry("IN") || [];
@@ -91,6 +122,81 @@ const CommonCheckout = () => {
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setForm((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleCheckoutSignup = async (e) => {
+        e.preventDefault();
+        const email = (guestEmail || "").trim().toLowerCase();
+        const name = (guestName || "").trim();
+        if (!email) {
+            toast.error("Please enter your email address");
+            return;
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            toast.error("Please enter a valid email address");
+            return;
+        }
+        setSignupLoading(true);
+        try {
+            const res = await fetch("/api/auth/checkout-signup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, name: name || undefined }),
+            });
+            let data = {};
+            try {
+                data = await res.json();
+            } catch (_) {
+                data = { message: "Invalid response from server" };
+            }
+            if (!res.ok) {
+                toast.error(data.message || "Something went wrong. Please try again.");
+                return;
+            }
+            localStorage.setItem("user", JSON.stringify(data.user));
+            localStorage.setItem("accessToken", data.accessToken);
+            localStorage.setItem("refreshToken", data.refreshToken);
+
+            const guestCartRaw = typeof window !== "undefined" ? localStorage.getItem("guestCart") : null;
+            let guestCart = [];
+            try {
+                if (guestCartRaw) guestCart = JSON.parse(guestCartRaw);
+            } catch (_) {}
+
+            if (guestCart.length > 0) {
+                const mergeRes = await fetch("/api/cart/merge", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${data.accessToken}`,
+                    },
+                    body: JSON.stringify({ guestCart }),
+                });
+                if (mergeRes.ok) {
+                    localStorage.removeItem("guestCart");
+                    const mergeData = await mergeRes.json();
+                    const merged = mergeData.merged || [];
+                    setSignupSuccess(true);
+                    toast.success(data.message || "You're logged in.");
+                    if (merged.length > 0) {
+                        const nextUrl = `/checkout/${merged[0]._id || merged[0].id}`;
+                        setTimeout(() => { window.location.href = nextUrl; }, 600);
+                    } else {
+                        setTimeout(() => { window.location.href = "/cart"; }, 600);
+                    }
+                    return;
+                }
+            }
+            setSignupSuccess(true);
+            toast.success(data.message || "You're logged in.");
+            setTimeout(() => { window.location.href = "/cart"; }, 600);
+        } catch (err) {
+            console.error(err);
+            toast.error(err?.message || "Something went wrong. Please try again.");
+        } finally {
+            setSignupLoading(false);
+        }
     };
 
     const validateForm = () => {
@@ -220,6 +326,108 @@ const CommonCheckout = () => {
     const itemsTotal = Number(cartItem.totalAmount || cartItem.price * cartItem.quantity || 0);
     const totalAmount = itemsTotal + SHIPPING_CHARGE;
 
+    if (isGuest) {
+        return (
+            <div className="min-h-screen bg-neutral-50 py-8 px-4 pt-[100px]">
+                <div className="max-w-7xl mx-auto">
+                    <div className="mb-8">
+                        <Link href="/cart" className="inline-flex items-center gap-2 text-neutral-600 hover:text-primary mb-4 transition">
+                            <ArrowLeft className="w-4 h-4" />
+                            <span>Back to Cart</span>
+                        </Link>
+                        <div className="flex items-center gap-3">
+                            <div className="p-3 bg-primary rounded-xl shadow-lg">
+                                <ShoppingCart className="w-8 h-8 text-white" />
+                            </div>
+                            <div>
+                                <h1 className="text-4xl md:text-5xl font-bold text-secondary">Checkout</h1>
+                                <p className="text-neutral-600 mt-1">Enter your email to create an account and continue. We'll email you a password and log you in.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div className="lg:col-span-2">
+                            <div className="bg-white rounded-2xl shadow-xl border border-neutral-200 overflow-hidden">
+                                <div className="bg-primary px-6 py-4">
+                                    <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                                        <Mail className="w-6 h-6" />
+                                        Continue with Email
+                                    </h2>
+                                </div>
+                                <div className="p-6">
+                                    {signupSuccess ? (
+                                        <div className="text-center py-4">
+                                            <CheckCircle2 className="w-14 h-14 text-green-500 mx-auto mb-4" />
+                                            <p className="text-lg font-medium text-secondary mb-2">Account created. You're logged in.</p>
+                                            <p className="text-neutral-600 text-sm">We've sent your password to your email. Redirecting to checkout…</p>
+                                        </div>
+                                    ) : (
+                                        <form onSubmit={handleCheckoutSignup} className="space-y-4">
+                                            <div>
+                                                <label className="block text-sm font-semibold text-neutral-700 mb-1">Your name (optional)</label>
+                                                <input
+                                                    type="text"
+                                                    value={guestName}
+                                                    onChange={(e) => setGuestName(e.target.value)}
+                                                    placeholder="e.g. John"
+                                                    className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 ring-primary outline-none"
+                                                    disabled={signupLoading}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-semibold text-neutral-700 mb-1">Email address *</label>
+                                                <input
+                                                    type="email"
+                                                    value={guestEmail}
+                                                    onChange={(e) => setGuestEmail(e.target.value)}
+                                                    placeholder="you@example.com"
+                                                    className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 ring-primary outline-none"
+                                                    disabled={signupLoading}
+                                                    autoComplete="email"
+                                                />
+                                            </div>
+                                            <button
+                                                type="submit"
+                                                disabled={signupLoading}
+                                                className="w-full py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-hover transition-all flex justify-center items-center gap-2 disabled:opacity-70"
+                                            >
+                                                {signupLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                                                {signupLoading ? "Creating account…" : "Create account & continue"}
+                                            </button>
+                                        </form>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="lg:col-span-1">
+                            <div className="bg-white rounded-2xl shadow-xl border border-neutral-200 overflow-hidden sticky top-[120px]">
+                                <div className="bg-primary px-6 py-4">
+                                    <h3 className="text-xl font-bold text-white flex items-center gap-2"><Package className="w-6 h-6" /> Order Summary</h3>
+                                </div>
+                                <div className="p-6 space-y-4">
+                                    <img src={safeImageSrc(cartItem?.image)} alt="" className="w-full h-48 object-contain bg-neutral-50 rounded-lg" />
+                                    <h4 className="text-lg font-bold">{cartItem.title}</h4>
+                                    <div className="flex justify-between text-sm">
+                                        <span>Items Total</span>
+                                        <span className="font-bold">₹{itemsTotal}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span>Shipping</span>
+                                        <span className="font-bold">₹{SHIPPING_CHARGE}</span>
+                                    </div>
+                                    <div className="flex justify-between text-xl font-bold border-t pt-4">
+                                        <span>Grand Total</span>
+                                        <span className="text-primary">₹{totalAmount}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-neutral-50 py-8 px-4 pt-[100px]">
             <div className="max-w-7xl mx-auto">
@@ -321,7 +529,7 @@ const CommonCheckout = () => {
                                 <h3 className="text-xl font-bold text-white flex items-center gap-2"><Package /> Order Summary</h3>
                             </div>
                             <div className="p-6 space-y-4">
-                                <img src={cartItem.image || "https://via.placeholder.com/400?text=No+Image"} className="w-full h-48 object-contain bg-neutral-50 rounded-lg" />
+                                <img src={safeImageSrc(cartItem?.image)} alt="" className="w-full h-48 object-contain bg-neutral-50 rounded-lg" />
                                 <h4 className="text-lg font-bold">{cartItem.title}</h4>
                                 <div className="flex justify-between text-sm">
                                     <span>Items Total</span>

@@ -20,6 +20,13 @@ import {
 } from "lucide-react";
 import { toast } from "react-toastify";
 
+const CART_PLACEHOLDER = "https://via.placeholder.com/200?text=No+Image";
+function validImageSrc(url) {
+    const u = url != null ? String(url).trim() : "";
+    if (!u || !/^https?:\/\/[^\s/]+/i.test(u)) return CART_PLACEHOLDER;
+    return u;
+}
+
 const Cart = () => {
     const router = useRouter();
     const {
@@ -32,21 +39,7 @@ const Cart = () => {
     } = useCart();
 
     useEffect(() => {
-        // Only run on client
         if (typeof window !== 'undefined') {
-            const user = localStorage.getItem("user");
-            if (!user) {
-                router.push("/login");
-                return;
-            }
-
-            try {
-                JSON.parse(user);
-            } catch {
-                router.push("/login");
-                return;
-            }
-
             fetchCartData();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -84,8 +77,8 @@ const Cart = () => {
             _id: item._id || item.id,
             productId: item.productId,
             name: item.title || product?.title || "Custom Product",
-            image: item.image || item.uploadedImageUrl || product?.image || "",
-            originalImage: item.uploadedImageUrl || "", // Explicitly capture original
+            image: validImageSrc(item.image || item.uploadedImageUrl || product?.image),
+            originalImage: (() => { const v = validImageSrc(item.uploadedImageUrl); return v !== CART_PLACEHOLDER ? v : null; })(),
             size: item.size || "N/A",
             thickness: item.thickness || "N/A",
             price: unitPrice,
@@ -195,7 +188,7 @@ const Cart = () => {
                                                 <div className="relative group/image">
                                                     <span className="absolute top-1 left-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover/image:opacity-100 transition-opacity">Preview</span>
                                                     <img
-                                                        src={item.image}
+                                                        src={item.image || CART_PLACEHOLDER}
                                                         alt={item.name}
                                                         className="w-28 h-28 sm:w-32 sm:h-32 object-contain rounded-xl shadow-md bg-white"
                                                         onError={(e) => {
@@ -210,7 +203,7 @@ const Cart = () => {
                                                         <p className="text-[10px] text-neutral-500 mb-1 text-center">Original</p>
                                                         <div className="w-16 h-16 mx-auto relative rounded-lg overflow-hidden border border-neutral-200">
                                                             <img
-                                                                src={item.originalImage}
+                                                                src={item.originalImage || CART_PLACEHOLDER}
                                                                 alt="Original Upload"
                                                                 className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity"
                                                             />
