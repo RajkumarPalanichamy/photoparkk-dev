@@ -132,7 +132,7 @@ export default function LandingPage() {
                     Handcrafted premium frames for your memories
                   </p>
                   <div className="flex justify-center gap-3">
-                    <Link href="/Offers">
+                    <Link href="/products">
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
@@ -141,7 +141,7 @@ export default function LandingPage() {
                         SHOP NOW
                       </motion.button>
                     </Link>
-                    <Link href="/shop/acrylic">
+                    <Link href="/customizer">
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
