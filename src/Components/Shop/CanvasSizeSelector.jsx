@@ -249,136 +249,184 @@ const CanvasSizeSelector = ({ shape }) => {
             {/* ═══ MAIN CONTENT ═══ */}
             <div className="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 min-h-[calc(100vh-136px)]">
 
-                {/* ─── LEFT: Wall Preview ─── */}
-                <div className="lg:col-span-7 xl:col-span-8 flex items-center justify-center p-8 md:p-12 lg:p-16">
-                    <div
-                        ref={previewRef}
-                        className="relative w-full rounded-3xl overflow-hidden"
-                        style={{
-                            height: '600px',
-                            maxHeight: '75vh',
-                            background: '#f7f7f7',
-                            backgroundImage: `
-                                radial-gradient(circle at 20% 25%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 42%),
-                                radial-gradient(circle at 78% 72%, rgba(0,0,0,0.035) 0%, rgba(0,0,0,0) 38%)
-                            `,
-                            boxShadow: 'inset 0 1px 30px rgba(0,0,0,0.06)',
-                            border: '1px solid #e8e8e8'
-                        }}
-                    >
-                        {/* Wall texture */}
-                        <div className="absolute inset-0 pointer-events-none" style={{
-                            backgroundImage: `
-                                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.012) 2px, rgba(0,0,0,0.012) 3px),
-                                repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.008) 2px, rgba(0,0,0,0.008) 3px)
-                            `,
-                            opacity: 0.45,
-                        }}></div>
-                        {/* Wall light */}
-                        <div className="absolute inset-0 pointer-events-none" style={{
-                            background: 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 100%)',
-                        }}></div>
-
-                        {/* Live Preview Badge */}
-                        <div data-html2canvas-ignore="true"
-                            className="absolute top-5 left-5 z-30 bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] font-semibold text-neutral-500 uppercase tracking-widest border border-neutral-200/50 shadow-sm flex items-center gap-1.5"
+                {/* ─── LEFT: Easel Preview ─── */}
+                <div className="lg:col-span-7 xl:col-span-8 flex items-start justify-center p-6 md:p-8 lg:p-10 xl:p-12 relative">
+                    <div className="sticky top-24 w-full">
+                        <div
+                            ref={previewRef}
+                            className="relative w-full rounded-[24px] overflow-hidden flex items-center justify-center"
+                            style={{
+                                height: '580px',
+                                maxHeight: '74vh',
+                                background: '#dcdada',
+                                border: '1px solid rgba(0,0,0,0.06)',
+                            }}
                         >
-                            <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></div>
-                            Wall Preview
+                            {/* Realistic coarse wallpaper / plaster texture */}
+                            <div style={{
+                                position: 'absolute', inset: 0, pointerEvents: 'none',
+                                backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.12'/%3E%3C/svg%3E")`,
+                            }} />
+
+                            {/* Lighting gradient over the wall */}
+                            <div style={{
+                                position: 'absolute', inset: 0, pointerEvents: 'none',
+                                background: 'radial-gradient(circle at 30% 20%, rgba(255,255,255,0.4) 0%, transparent 70%)'
+                            }} />
+
+                            {/* Live Preview Badge */}
+                            <div data-html2canvas-ignore="true"
+                                className="absolute top-5 left-5 z-30 bg-white/50 backdrop-blur-md px-4 py-2 rounded-full text-[11px] font-bold text-neutral-700 shadow-sm flex items-center gap-2 border border-black/5"
+                            >
+                                <Sparkles className="w-3.5 h-3.5 text-primary" /> Live Preview
+                            </div>
+
+                            {/* Dynamic Size Header Title */}
+                            {selectedSize && (
+                                <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 w-3/4 justify-center">
+                                    <div className="h-px bg-neutral-800/80 w-full relative">
+                                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-neutral-800/80"></div>
+                                    </div>
+                                    <span className="text-sm font-black text-neutral-800/90 whitespace-nowrap tracking-wider">
+                                        {selectedSize.width}×{selectedSize.height} Canvas Frame
+                                    </span>
+                                    <div className="h-px bg-neutral-800/80 w-full relative">
+                                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-neutral-800/80"></div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Edit button */}
+                            <button data-html2canvas-ignore="true"
+                                className="absolute top-5 right-5 z-30 flex items-center gap-1.5 px-3 py-1.5 bg-white/90 backdrop-blur border border-neutral-200/60 rounded-lg text-[11px] font-bold text-neutral-600 cursor-pointer transition-all shadow-sm hover:border-primary hover:text-primary"
+                                onClick={() => router.back()}>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                                Edit Photo
+                            </button>
+
+                            {/* ── Wall Mounted 3D Canvas Scene ── */}
+                            <div className="relative flex items-center justify-center w-full h-full p-8 md:p-12 lg:p-16">
+
+                                {/* Inner wrapper for 3D context */}
+                                <div className="relative flex items-center justify-center z-10" style={{ width: '80%', maxWidth: '520px' }}>
+
+                                    {/* ── True 3D Canvas ── */}
+                                    {(() => {
+                                        // Increased the thickness drastically to make it look like a very bold 3D shape
+                                        const depth = selectedThickness?.value === 'gallery' ? 42 : 24;
+                                        const edgeLeftBg = selectedEdge?.value === 'wrap' || selectedEdge?.value === 'mirror'
+                                            ? `url(${imgSrc}) left center / cover no-repeat`
+                                            : 'linear-gradient(to left, #e0dcd5, #cac4bc)';
+                                        const edgeBottomBg = selectedEdge?.value === 'wrap' || selectedEdge?.value === 'mirror'
+                                            ? `url(${imgSrc}) bottom center / cover no-repeat`
+                                            : 'linear-gradient(to bottom, #d4cfc7, #bcbed)';
+
+                                        // Calculate relative scale to make bigger canvases look physically bigger
+                                        const maxWidth = Math.max(...availableSizes.map(s => s.width || 10));
+                                        const scaleFactor = selectedSize ? (0.75 + 0.25 * (selectedSize.width / maxWidth)) : 1;
+
+                                        // Adding key triggers a small unmount/remount CSS animation when size changes, proving the update happened.
+                                        return (
+                                            <div
+                                                key={selectedSize?.label} // <--- fixes the "not working" visual feedback
+                                                className="relative hover:scale-[1.02] transition-transform duration-700 ease-out animate-in fade-in zoom-in-95"
+                                                style={{
+                                                    width: '100%',
+                                                    aspectRatio: selectedSize ? `${selectedSize.width} / ${selectedSize.height}` : '4/3',
+                                                    maxHeight: '380px',
+                                                    margin: 'auto',
+                                                    transformStyle: 'preserve-3d',
+                                                    // Scaled dynamically, reduced rotation to prevent clipping bounds
+                                                    transform: `perspective(1200px) rotateY(18deg) rotateX(6deg) scale(${scaleFactor}) translateY(10px)`,
+                                                    zIndex: 10,
+                                                    // Sharp, directional wall drop-shadow mimicking the reference
+                                                    filter: 'drop-shadow(-25px 25px 15px rgba(0,0,0,0.4)) drop-shadow(-8px 10px 8px rgba(0,0,0,0.25))',
+                                                }}
+                                            >
+                                                {/* ── Front Face ── */}
+                                                <div className="absolute inset-0 overflow-hidden bg-white" style={{ borderRadius: '2px', zIndex: 2, backfaceVisibility: 'hidden' }}>
+                                                    {/* Optional White Margin if White Border is selected */}
+                                                    {selectedEdge?.value === 'white' && (
+                                                        <div style={{ position: 'absolute', inset: 0, border: '16px solid #ffffff', zIndex: 4, boxSizing: 'border-box', pointerEvents: 'none' }} />
+                                                    )}
+
+                                                    {/* The loaded photo */}
+                                                    <img src={imgSrc} alt="Your Canvas" className="w-full h-full object-cover block" />
+
+                                                    {/* Authentic linen weave texture overlay */}
+                                                    <div style={{
+                                                        position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 3, mixBlendMode: 'multiply', opacity: 0.6,
+                                                        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='weave'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23weave)'/%3E%3C/svg%3E")`,
+                                                    }} />
+
+                                                    {/* Elegant studio gloss sheen mimicking daylight from top right */}
+                                                    <div style={{
+                                                        position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 5,
+                                                        background: 'linear-gradient(215deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.02) 45%, transparent 60%)',
+                                                    }} />
+                                                </div>
+
+                                                {/* ── Left Side Face (Edge) ── */}
+                                                <div style={{
+                                                    position: 'absolute',
+                                                    top: 0, left: 0,
+                                                    width: `${depth}px`, height: '100%',
+                                                    transform: `rotateY(-90deg) translateZ(0px)`,
+                                                    transformOrigin: 'left center',
+                                                    background: edgeLeftBg,
+                                                    zIndex: 1,
+                                                    overflow: 'hidden',
+                                                }}>
+                                                    {/* Depth shading */}
+                                                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(0,0,0,0.4), rgba(0,0,0,0.15))' }} />
+                                                    {/* Canvas folds / texture lines on the side */}
+                                                    <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 4px, rgba(0,0,0,0.03) 4px, rgba(0,0,0,0.03) 5px)' }} />
+                                                </div>
+
+                                                {/* ── Bottom Side Face (Edge) ── */}
+                                                <div style={{
+                                                    position: 'absolute',
+                                                    bottom: 0, left: 0,
+                                                    width: '100%', height: `${depth}px`,
+                                                    transform: `rotateX(-90deg) translateZ(0px)`,
+                                                    transformOrigin: 'bottom center',
+                                                    background: edgeBottomBg,
+                                                    zIndex: 1,
+                                                    overflow: 'hidden',
+                                                }}>
+                                                    {/* Depth shading */}
+                                                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.65), rgba(0,0,0,0.3))' }} />
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
+                                </div>
+                            </div>
+
+                            {/* Size badge */}
+                            {selectedSize && (
+                                <div data-html2canvas-ignore="true" className="absolute bottom-5 left-1/2 -translate-x-1/2 z-30 bg-white/90 backdrop-blur px-4 py-1.5 rounded-full text-[11px] font-bold text-neutral-600 shadow-sm border border-neutral-200/50 flex items-center gap-1.5">
+                                    <Ruler className="w-3 h-3 text-primary" />
+                                    {selectedSize.width}" × {selectedSize.height}"
+                                    <span className="mx-1 text-neutral-300">·</span>
+                                    {selectedThickness?.label}
+                                </div>
+                            )}
                         </div>
 
-                        {/* Size badge */}
-                        {selectedSize && (
-                            <div data-html2canvas-ignore="true"
-                                className="absolute top-5 right-5 z-30 bg-primary/10 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] font-semibold text-primary uppercase tracking-wider border border-primary/15 shadow-sm flex items-center gap-1.5"
-                            >
-                                <Ruler className="w-3 h-3" /> {getSizeDisplay(selectedSize)}
+                        {/* Features List */}
+                        <div className="mt-5 grid grid-cols-3 gap-4">
+                            <div className="bg-white p-4 rounded-xl border border-neutral-100 flex flex-col items-center justify-center gap-2 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+                                <Package className="w-5 h-5 text-primary" />
+                                <span className="text-[11px] font-bold text-secondary uppercase tracking-wider text-center">Gallery Quality</span>
                             </div>
-                        )}
-
-                        {/* ═══ CENTERED CANVAS FRAME ═══ */}
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <div
-                                className="relative transition-all duration-700 ease-out"
-                                style={{
-                                    ...getFrameStyle(),
-                                    "--canvas-depth": selectedThickness?.value === "gallery" ? "11px" : "7px",
-                                }}
-                            >
-                                {/* Dimension labels */}
-                                {selectedSize && (
-                                    <div data-html2canvas-ignore="true">
-                                        <div className="absolute -bottom-9 left-0 w-full flex items-center gap-2">
-                                            <div className="h-[1px] flex-1 bg-neutral-400/30"></div>
-                                            <span className="text-[11px] font-semibold text-neutral-400 whitespace-nowrap font-mono">
-                                                {selectedSize.width}"
-                                            </span>
-                                            <div className="h-[1px] flex-1 bg-neutral-400/30"></div>
-                                        </div>
-                                        <div className="absolute top-0 -right-10 h-full flex flex-col items-center gap-2">
-                                            <div className="w-[1px] flex-1 bg-neutral-400/30"></div>
-                                            <span className="text-[11px] font-semibold text-neutral-400 whitespace-nowrap font-mono -rotate-90">
-                                                {selectedSize.height}"
-                                            </span>
-                                            <div className="w-[1px] flex-1 bg-neutral-400/30"></div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Edit button */}
-                                <button data-html2canvas-ignore="true"
-                                    className="absolute -top-10 right-0 z-15 flex items-center gap-1.5 px-3 py-1.5 bg-white border border-neutral-200 rounded-lg text-[11px] font-semibold text-neutral-500 cursor-pointer transition-all shadow-sm hover:border-primary hover:text-primary"
-                                    onClick={() => router.back()}>
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
-                                    Edit
-                                </button>
-
-                                {/* 3D Canvas Frame - Front Face */}
-                                <div className="relative w-full h-full overflow-hidden"
-                                    style={{
-                                        border: '1px solid rgba(0,0,0,0.18)',
-                                        boxShadow: '0 8px 18px rgba(0,0,0,0.2), 0 1px 6px rgba(0,0,0,0.1)',
-                                        transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                                    }}>
-                                    <img src={imgSrc} alt="Your Canvas" className="w-full h-full object-cover block" />
-                                </div>
-
-                                {/* Right side depth */}
-                                <div style={{
-                                    position: 'absolute', top: 0, right: 'calc(-1 * var(--canvas-depth))',
-                                    width: 'var(--canvas-depth)', bottom: 0,
-                                    background: 'linear-gradient(90deg, #2f2f2f 0%, #212121 65%, #151515 100%)',
-                                    borderRadius: '0 1px 1px 0', zIndex: 2,
-                                }}>
-                                    <div style={{
-                                        position: 'absolute', inset: 0,
-                                        background: 'linear-gradient(180deg, rgba(255,255,255,0.14) 0%, transparent 56%)',
-                                    }}></div>
-                                </div>
-
-                                {/* Bottom side depth */}
-                                <div style={{
-                                    position: 'absolute', left: 0, bottom: 'calc(-1 * var(--canvas-depth))',
-                                    height: 'calc(var(--canvas-depth) * 0.5)',
-                                    right: 'calc(-1 * var(--canvas-depth))',
-                                    background: 'linear-gradient(180deg, #2b2b2b 0%, #1b1b1b 70%, #121212 100%)',
-                                    borderRadius: '0 0 2px 2px', zIndex: 2,
-                                }}>
-                                    <div style={{
-                                        position: 'absolute', inset: 0,
-                                        background: 'linear-gradient(90deg, rgba(255,255,255,0.08) 0%, transparent 42%)',
-                                    }}></div>
-                                </div>
-
-                                {/* Frame shadow on wall */}
-                                <div style={{
-                                    position: 'absolute', left: '50%', transform: 'translateX(-50%)',
-                                    width: 'calc(100% + (var(--canvas-depth) * 1.8))',
-                                    height: 'clamp(12px, 7%, 22px)',
-                                    bottom: 'calc(-1 * var(--canvas-depth) - 10px)',
-                                    background: 'radial-gradient(ellipse, rgba(0,0,0,0.13) 0%, rgba(0,0,0,0.06) 38%, transparent 72%)',
-                                    filter: 'blur(6px)', zIndex: 1,
-                                }}></div>
+                            <div className="bg-white p-4 rounded-xl border border-neutral-100 flex flex-col items-center justify-center gap-2 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+                                <Truck className="w-5 h-5 text-primary" />
+                                <span className="text-[11px] font-bold text-secondary uppercase tracking-wider text-center">Fast Shipping</span>
+                            </div>
+                            <div className="bg-white p-4 rounded-xl border border-neutral-100 flex flex-col items-center justify-center gap-2 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+                                <Shield className="w-5 h-5 text-primary" />
+                                <span className="text-[11px] font-bold text-secondary uppercase tracking-wider text-center">Lifetime Warranty</span>
                             </div>
                         </div>
                     </div>

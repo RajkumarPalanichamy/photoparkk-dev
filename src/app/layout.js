@@ -18,7 +18,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${outfit.variable} font-sans antialiased text-secondary bg-white`}>
+      <body suppressHydrationWarning className={`${outfit.variable} font-sans antialiased text-secondary bg-white`}>
         <ClientProviders>
           <div className="flex flex-col min-h-screen">
             <Navbar />
