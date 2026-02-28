@@ -9,6 +9,7 @@ import {
 import { toast } from "react-toastify";
 import * as htmlToImage from 'html-to-image';
 import axiosInstance from "../../utils/axiosInstance";
+import { useCart } from "@/context/CartContext";
 
 // ─── Canvas Sizes ───
 const SIZES = {
@@ -60,6 +61,7 @@ const CanvasSizeSelector = ({ shape }) => {
     const [totalPrice, setTotalPrice] = useState(0);
     const [loading, setLoading] = useState(false);
     const [userId, setUserId] = useState(null);
+    const { addToCart } = useCart();
     const [croppedImageUrl, setCroppedImageUrl] = useState(null);
     const previewRef = useRef(null);
 
@@ -155,7 +157,7 @@ const CanvasSizeSelector = ({ shape }) => {
     // ─── Add to Cart ───
     const handleAddToCart = async () => {
         if (!selectedSize || !editorData) return;
-        if (!userId) { toast.error("Please log in to add items to cart."); return; }
+        // Guest cart is supported; no login required to add to cart
         setLoading(true);
         try {
             const { photoData } = editorData;
@@ -172,19 +174,20 @@ const CanvasSizeSelector = ({ shape }) => {
                     if (r.data?.imageUrl) finalUrl = r.data.imageUrl;
                 } catch (e) { }
             }
-            await axiosInstance.post("/cart", {
-                userId, productId: frameConfig.id, productType: 'Canvascustomizedata',
-                title: `Canvas ${shapeTitle} Frame`, image: finalUrl, size: selectedSize.label,
-                thickness: selectedThickness.value, edge: selectedEdge.value,
-                frameType: 'none', frameColor: null,
-                price: totalPrice / quantity, quantity, totalAmount: totalPrice,
+            const cartPayload = {
+                productId: frameConfig.id,
+                productType: 'Canvascustomizedata',
+                title: `Canvas ${shapeTitle} Frame`,
+                image: finalUrl,
+                size: selectedSize.label,
+                thickness: selectedThickness?.value,
+                price: totalPrice / quantity,
+                quantity,
+                totalAmount: totalPrice,
                 uploadedImageUrl: photoData?.url,
-                customizationDetails: {
-                    crop: editorData.configuration?.crop, thickness: selectedThickness,
-                    edge: selectedEdge, originalName: photoData?.name
-                }
-            });
-            toast.success("Added to Cart!"); router.push("/cart");
+            };
+            const result = await addToCart(cartPayload);
+            if (result?.success) { toast.success("Added to Cart!"); router.push("/cart"); } else { toast.error("Failed to add to cart."); }
         } catch (e) { console.error(e); toast.error("Failed to add to cart."); }
         finally { setLoading(false); }
     };
