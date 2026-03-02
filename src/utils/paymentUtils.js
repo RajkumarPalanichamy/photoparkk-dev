@@ -80,7 +80,7 @@ export const initializePayment = async (orderData, userDetails) => {
     const Razorpay = await loadRazorpayScript();
 
     const options = {
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_eh4eCol0GXNXUS",
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_live_SJxMPsOdRsjUSV",
       amount: orderData.amount,
       currency: orderData.currency || "INR",
       name: "PhotoPark",
