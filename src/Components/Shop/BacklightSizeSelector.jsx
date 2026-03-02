@@ -9,6 +9,7 @@ import {
 import { toast } from "react-toastify";
 import * as htmlToImage from 'html-to-image';
 import axiosInstance from "../../utils/axiosInstance";
+import { useCart } from "@/context/CartContext";
 
 // ─── Backlight Sizes ───
 const BL_SIZES = {
@@ -67,6 +68,7 @@ const BacklightSizeSelector = ({ shape }) => {
     const [totalPrice, setTotalPrice] = useState(0);
     const [loading, setLoading] = useState(false);
     const [userId, setUserId] = useState(null);
+    const { addToCart } = useCart();
     const [ledBrightness, setLedBrightness] = useState(0.9);
     const [croppedImageUrl, setCroppedImageUrl] = useState(null);
     const previewRef = useRef(null);
@@ -179,10 +181,9 @@ const BacklightSizeSelector = ({ shape }) => {
     // ─── Add to Cart ───
     const handleAddToCart = async () => {
         if (!selectedSize || !editorData) return;
-        if (!userId) { toast.error("Please log in to add items to cart."); return; }
         setLoading(true);
         try {
-            const { photoData, configuration: prevConfig } = editorData;
+            const { photoData } = editorData;
             if (!frameConfig?.id) { toast.error("Product configuration missing."); return; }
 
             let blobToUpload = await generateWallPreview();
@@ -198,23 +199,20 @@ const BacklightSizeSelector = ({ shape }) => {
                 } catch (e) { console.error("Upload failed", e); }
             }
 
-            await axiosInstance.post("/cart", {
-                userId, productId: frameConfig.id, productType: 'Backlightcustomizedata',
-                title: `LED Photo Frame - ${shapeTitle}`, image: finalImageUrl,
-                size: selectedSize.label, thickness: "LED", edge: "standard",
-                frameType: "backlight", frameColor: "#1a1a1a",
-                price: totalPrice / quantity, quantity, totalAmount: totalPrice,
+            const cartPayload = {
+                productId: frameConfig.id,
+                productType: 'Backlightcustomizedata',
+                title: `LED Photo Frame - ${shapeTitle}`,
+                image: finalImageUrl,
+                size: selectedSize.label,
+                thickness: "LED",
+                price: totalPrice / quantity,
+                quantity,
+                totalAmount: totalPrice,
                 uploadedImageUrl: photoData?.url,
-                customizationDetails: {
-                    crop: prevConfig?.crop,
-                    ledBrightness,
-                    lightMode: selectedLightMode.label,
-                    powerType: selectedPower.label,
-                    upgrades: upgrades.map(u => u.label),
-                    originalName: photoData?.name
-                }
-            });
-            toast.success("Added to Cart!"); router.push("/cart");
+            };
+            const result = await addToCart(cartPayload);
+            if (result?.success) { toast.success("Added to Cart!"); router.push("/cart"); } else { toast.error("Failed to add to cart."); }
         } catch (e) { console.error("Cart error", e); toast.error("Failed to add to cart."); }
         finally { setLoading(false); }
     };

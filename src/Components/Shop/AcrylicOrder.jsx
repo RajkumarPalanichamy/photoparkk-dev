@@ -13,6 +13,7 @@ import {
     Loader2,
 } from "lucide-react";
 import axiosInstance from "../../utils/axiosInstance";
+import { useCart } from "@/context/CartContext";
 import { toast } from "react-toastify";
 
 // Configuration for different shapes
@@ -92,6 +93,7 @@ const AcrylicOrder = ({ shape }) => {
     const [selectedThickness, setSelectedThickness] = useState("3mm");
     const [quantity, setQuantity] = useState(1);
     const [userId, setUserId] = useState(null);
+    const { addToCart } = useCart();
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -144,16 +146,10 @@ const AcrylicOrder = ({ shape }) => {
             return;
         }
 
-        if (!userId) {
-            toast.error("Please log in to add items to cart.");
-            router.push("/login"); // Or open login modal
-            return;
-        }
-
         setLoading(true);
         try {
-            const cartData = {
-                userId,
+            const cartPayload = {
+                productId: productConfig?.id ?? null,
                 productType: "AcrylicCustomizedata",
                 title: productConfig?.title || "Acrylic Frame",
                 image: photoData?.url,
@@ -163,12 +159,9 @@ const AcrylicOrder = ({ shape }) => {
                 quantity,
                 totalAmount: selectedSize.price * quantity,
                 uploadedImageUrl: photoData?.url,
-                // imageZoom/position omitted for simplicity in this migration
             };
-
-            await axiosInstance.post("/cart", cartData);
-            toast.success("Item added to cart successfully!");
-            router.push("/cart");
+            const result = await addToCart(cartPayload);
+            if (result?.success) { toast.success("Item added to cart successfully!"); router.push("/cart"); } else { toast.error("Failed to add to cart."); }
             // Clear session data? Maybe not, allow user to go back
         } catch (error) {
             console.error("Add to cart failed", error);
